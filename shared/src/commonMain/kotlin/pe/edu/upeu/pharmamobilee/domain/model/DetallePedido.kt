@@ -1,6 +1,6 @@
 package pe.edu.upeu.pharmamobilee.domain.model
 
-class DetallePedido (
+data class DetallePedido (
 
     val producto: Producto,
     val cantidad: Int

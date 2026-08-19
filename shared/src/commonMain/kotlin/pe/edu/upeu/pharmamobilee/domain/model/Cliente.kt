@@ -1,6 +1,6 @@
 package pe.edu.upeu.pharmamobilee.domain.model
 
-class Cliente(
+data class Cliente(
     val id: Long,
     val nombre:String,
     val correo:String,
