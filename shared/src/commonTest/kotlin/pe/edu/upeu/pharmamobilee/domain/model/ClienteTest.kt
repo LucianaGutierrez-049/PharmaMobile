@@ -3,22 +3,38 @@ package pe.edu.upeu.pharmamobilee.domain.model
 import kotlin.test.Test
 import kotlin.test.assertEquals
 
-class ClienteTest{
-
+class ClienteTest {
 
     @Test
-    fun probarCliente(){
+    fun probarCliente() {
 
         val cliente = Cliente(
-        id = 1L,
-        nombre = "Farmacia Nueva Vida",
-        correo = "ventas@central.pe",
-        telefono = "989789123"
+            id = 1L,
+            nombre = "Farmacia Nueva Vida",
+            correo = "ventas@central.pe",
+            telefono = "989789123"
         )
-          val resultado = cliente.obtenerTelefono()
+        val resultado = cliente.obtenerTelefono()
 
         assertEquals(
             "989789123",
+            resultado
+        )
+    }
+
+    @Test
+    fun `retorna No registrado cuando el telefono es null`() {
+
+        val cliente = Cliente(
+            id = 1L,
+            nombre = "Farmacia Nueva Vida",
+            correo = "ventas@central.pe",
+            telefono = null
+        )
+        val resultado = cliente.obtenerTelefono()
+
+        assertEquals(
+            "No registrado",
             resultado
         )
     }
