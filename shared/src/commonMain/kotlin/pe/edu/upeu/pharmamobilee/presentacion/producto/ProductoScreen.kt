@@ -20,55 +20,21 @@ import pe.edu.upeu.pharmamobilee.domain.model.Producto
 @Composable
 fun ProductoScreen() {
 
-    var nombre by remember {
-        mutableStateOf("")
-    }
+    // --- Paso 1 y 2: estados de entrada (siempre String para poder validar antes de convertir) ---
+    var nombre by remember { mutableStateOf("") }
+    var precio by remember { mutableStateOf("") }
+    var stock by remember { mutableStateOf("") }
 
-    var precio by remember {
-        mutableStateOf("")
-    }
+    // --- Paso 3: estado de retroalimentación (un único mensaje, éxito o error) ---
+    var mensaje by remember { mutableStateOf("") }
 
-    var stock by remember {
-        mutableStateOf("")
-    }
+    // --- Paso 4: bandera que indica si el usuario ya intentó registrar ---
+    // Evita mostrar errores en rojo antes de que el usuario pulse "Registrar".
+    var intentoRegistrar by remember { mutableStateOf(false) }
 
-    var nombreError by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var precioError by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var stockError by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    var mensajeExito by remember {
-        mutableStateOf<String?>(null)
-    }
-
-    fun validar(): Boolean {
-        nombreError = if (nombre.isBlank()) "El nombre es obligatorio" else null
-
-        val precioValor = precio.toDoubleOrNull()
-        precioError = when {
-            precio.isBlank() -> "Ingrese precio válido"
-            precioValor == null -> "Ingrese precio válido"
-            precioValor <= 0 -> "El precio debe ser mayor a 0"
-            else -> null
-        }
-
-        val stockValor = stock.toIntOrNull()
-        stockError = when {
-            stock.isBlank() -> "El stock es obligatorio"
-            stockValor == null -> "El stock debe ser un número entero"
-            stockValor < 0 -> "El stock no puede ser negativo"
-            else -> null
-        }
-
-        return nombreError == null && precioError == null && stockError == null
-    }
+    // --- Paso 5 y 6: conversión segura (nunca lanza excepción, retorna null si falla) ---
+    val precioValor = precio.toDoubleOrNull()
+    val stockValor = stock.toIntOrNull()
 
     Column(
         modifier = Modifier
@@ -83,67 +49,75 @@ fun ProductoScreen() {
         OutlinedTextField(
             value = nombre,
             onValueChange = { nombre = it },
-            label = {
-                Text("Nombre")
-            },
-            isError = nombreError != null,
-            supportingText = {
-                nombreError?.let { Text(it) }
-            },
+            label = { Text("Nombre") },
+            // Paso 9: solo se marca error si ya se intentó registrar
+            isError = intentoRegistrar && nombre.isBlank(),
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = precio,
             onValueChange = { precio = it },
-            label = {
-                Text("Precio")
-            },
-            isError = precioError != null,
-            supportingText = {
-                precioError?.let { Text(it) }
-            },
+            label = { Text("Precio") },
+            isError = intentoRegistrar && (precioValor == null || precioValor <= 0.0),
             modifier = Modifier.fillMaxWidth()
         )
 
         OutlinedTextField(
             value = stock,
             onValueChange = { stock = it },
-            label = {
-                Text("Stock")
-            },
-            isError = stockError != null,
-            supportingText = {
-                stockError?.let { Text(it) }
-            },
+            label = { Text("Stock") },
+            isError = intentoRegistrar && (stockValor == null || stockValor < 0),
             modifier = Modifier.fillMaxWidth()
         )
 
         Button(
             onClick = {
-                mensajeExito = null
+                intentoRegistrar = true
 
-                if (validar()) {
+                // Paso 7: secuencia estricta de validación con "when"
+                when {
+                    nombre.isBlank() ->
+                        mensaje = "El nombre es obligatorio."
 
-                    val producto = Producto(
-                        id = 0L,
-                        nombre = nombre,
-                        precio = precio.toDouble(),
-                        stock = stock.toInt()
-                    )
+                    precioValor == null ->
+                        mensaje = "Ingrese un precio numérico."
 
-                    mensajeExito =
-                        "Producto \"${producto.nombre}\" registrado correctamente"
+                    precioValor <= 0.0 ->
+                        mensaje = "El precio debe ser mayor que cero."
 
-                    nombre = ""
-                    precio = ""
-                    stock = ""
+                    stockValor == null ->
+                        mensaje = "Ingrese un stock entero."
+
+                    stockValor < 0 ->
+                        mensaje = "El stock no puede ser negativo."
+
+                    else -> {
+                        // Solo se construye Producto cuando TODAS las condiciones son válidas
+                        val producto = Producto(
+                            id = 0L,
+                            nombre = nombre,
+                            precio = precioValor,
+                            stock = stockValor
+                        )
+
+                        mensaje = "Producto \"${producto.nombre}\" registrado correctamente."
+
+                        // Paso 8: limpieza del formulario tras un registro exitoso
+                        nombre = ""
+                        precio = ""
+                        stock = ""
+                        intentoRegistrar = false
+                    }
                 }
             },
             modifier = Modifier.fillMaxWidth()
         ) {
             Text("Registrar")
+        }
 
-}
+        if (mensaje.isNotBlank()) {
+            Text(mensaje)
+        }
     }
 }
