@@ -37,6 +37,7 @@ import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 
 import pe.edu.upeu.pharmamobilee.navigation.Screen
+import pe.edu.upeu.pharmamobilee.presentacion.pedido.PedidoScreen
 import pe.edu.upeu.pharmamobilee.presentacion.cliente.ClienteScreen
 import pe.edu.upeu.pharmamobilee.presentacion.inicio.InicioScreen
 import pe.edu.upeu.pharmamobilee.presentacion.producto.ProductoScreen
@@ -259,7 +260,7 @@ fun App() {
                                 .padding(paddingValues)
                         ) {
 
-                            Text("Pantalla de pedidos en construcción")
+                            PedidoScreen()
                         }
                     }
                 }
