@@ -38,7 +38,7 @@ private val titulosTabs = listOf(
 @Composable
 fun InventarioTabs(
     productos: List<Producto>,
-    onEditarProducto: (Producto) -> Unit,
+    onEditarProducto: ((Producto) -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     var tabSeleccionada by remember {
@@ -92,7 +92,7 @@ fun InventarioTabs(
 @Composable
 private fun ListaProductos(
     productos: List<Producto>,
-    onEditarProducto: (Producto) -> Unit
+    onEditarProducto: ((Producto) -> Unit)?
 ) {
     if (productos.isEmpty()) {
         Text(
@@ -110,8 +110,8 @@ private fun ListaProductos(
         productos.forEach { producto ->
             ProductoInventarioCard(
                 producto = producto,
-                onEditar = {
-                    onEditarProducto(producto)
+                onEditar = onEditarProducto?.let {
+                    { it(producto) }
                 }
             )
         }
@@ -121,7 +121,7 @@ private fun ListaProductos(
 @Composable
 private fun ProductoInventarioCard(
     producto: Producto,
-    onEditar: () -> Unit
+    onEditar: (() -> Unit)?
 ) {
     Card(
         modifier = Modifier.fillMaxWidth(),
@@ -164,13 +164,15 @@ private fun ProductoInventarioCard(
                     color = MaterialTheme.colorScheme.primary
                 )
 
-                IconButton(
-                    onClick = onEditar
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar ${producto.nombre}"
-                    )
+                if (onEditar != null) {
+                    IconButton(
+                        onClick = onEditar
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar ${producto.nombre}"
+                        )
+                    }
                 }
             }
 
@@ -186,7 +188,7 @@ private fun ProductoInventarioCard(
                     style = MaterialTheme.typography.bodyMedium
                 )
 
-                if (producto.stock <= 5) {
+                if (producto.requiereReposicion) {
                     AssistChip(
                         onClick = {},
                         label = {
