@@ -1,0 +1,8 @@
+package pe.edu.upeu.pharmamobilee.domain.repository
+
+import pe.edu.upeu.pharmamobilee.domain.model.Producto
+
+interface ProductoRepository {
+    suspend fun registrar(producto: Producto): Producto
+    suspend fun listar(): List<Producto>
+}

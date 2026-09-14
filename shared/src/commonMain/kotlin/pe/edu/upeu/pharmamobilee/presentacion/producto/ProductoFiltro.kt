@@ -15,6 +15,6 @@ fun filtrarProductosInventario(
     return when (filtro) {
         ProductoFiltro.Activos -> productos.filter { it.activo }
         ProductoFiltro.Inactivos -> productos.filter { !it.activo }
-        ProductoFiltro.BajoStock -> productos.filter { it.stock <= 5 }
+        ProductoFiltro.BajoStock -> productos.filter { it.requiereReposicion }
     }
 }
