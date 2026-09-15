@@ -5,6 +5,8 @@ import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.foundation.text.KeyboardOptions
 
 @Composable
 fun ValidatedTextField(
@@ -12,6 +14,8 @@ fun ValidatedTextField(
     onValueChange: (String) -> Unit,
     label: String,
     error: String?,
+    leadingIcon: (@Composable () -> Unit)? = null,
+    keyboardType: KeyboardType = KeyboardType.Text,
     modifier: Modifier = Modifier.fillMaxWidth()
 ) {
     OutlinedTextField(
@@ -20,6 +24,9 @@ fun ValidatedTextField(
         label = {
             Text(label)
         },
+        leadingIcon = leadingIcon,
+        singleLine = true,
+        keyboardOptions = KeyboardOptions(keyboardType = keyboardType),
         isError = error != null,
         supportingText = {
             error?.let { Text(it) }
