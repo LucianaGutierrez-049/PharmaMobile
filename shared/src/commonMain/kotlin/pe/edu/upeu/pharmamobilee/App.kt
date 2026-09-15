@@ -9,14 +9,20 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.LocalPharmacy
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,10 +35,13 @@ import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -144,6 +153,8 @@ private fun PharmaMobilLayout(
                 PharmaMobilScaffold(
                     pantallaActual = pantallaActual,
                     onSeleccionarPantalla = onSeleccionarPantalla,
+                    darkTheme = darkTheme,
+                    onDarkThemeChange = onDarkThemeChange,
                     mostrarMenu = true,
                     onMenuClick = {
                         scope.launch {
@@ -194,6 +205,8 @@ private fun PharmaMobilLayout(
                     modifier = Modifier.weight(1f),
                     pantallaActual = pantallaActual,
                     onSeleccionarPantalla = onSeleccionarPantalla,
+                    darkTheme = darkTheme,
+                    onDarkThemeChange = onDarkThemeChange,
                     mostrarMenu = false,
                     onMenuClick = {}
                 )
@@ -216,6 +229,8 @@ private fun PharmaMobilLayout(
                 PharmaMobilScaffold(
                     pantallaActual = pantallaActual,
                     onSeleccionarPantalla = onSeleccionarPantalla,
+                    darkTheme = darkTheme,
+                    onDarkThemeChange = onDarkThemeChange,
                     mostrarMenu = false,
                     onMenuClick = {}
                 )
@@ -230,17 +245,28 @@ private fun PharmaMobilScaffold(
     modifier: Modifier = Modifier,
     pantallaActual: Screen,
     onSeleccionarPantalla: (Screen) -> Unit,
+    darkTheme: Boolean,
+    onDarkThemeChange: (Boolean) -> Unit,
     mostrarMenu: Boolean,
     onMenuClick: () -> Unit
 ) {
+    val productoViewModel = koinViewModel<ProductoViewModel>()
+    val productoUiState by productoViewModel.uiState.collectAsState()
+
     Scaffold(
         modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = tituloPantalla(pantallaActual)
-                    )
+                    Column {
+                        Text(text = tituloPantalla(pantallaActual), style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            text = "PharmaMobil",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 },
                 navigationIcon = {
                     if (mostrarMenu) {
@@ -253,7 +279,19 @@ private fun PharmaMobilScaffold(
                             )
                         }
                     }
-                }
+                },
+                actions = {
+                    IconButton(onClick = { onDarkThemeChange(!darkTheme) }) {
+                        Icon(
+                            imageVector = if (darkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (darkTheme) "Activar modo claro" else "Activar modo oscuro"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { paddingValues ->
@@ -265,6 +303,9 @@ private fun PharmaMobilScaffold(
             when (pantallaActual) {
                 Screen.Inicio -> {
                     InicioScreen(
+                        totalProductos = productoUiState.productos.size,
+                        productosActivos = productoUiState.productos.count { it.activo },
+                        productosBajoStock = productoUiState.productos.count { it.requiereReposicion },
                         onProductosClick = { onSeleccionarPantalla(Screen.Productos) },
                         onClientesClick = { onSeleccionarPantalla(Screen.Clientes) },
                         onPedidosClick = { onSeleccionarPantalla(Screen.Pedidos) }
@@ -272,7 +313,6 @@ private fun PharmaMobilScaffold(
                 }
 
                 Screen.Productos -> {
-                    val productoViewModel = koinViewModel<ProductoViewModel>()
                     ProductoScreen(
                         viewModel = productoViewModel
                     )
@@ -297,52 +337,64 @@ private fun DrawerContent(
     darkTheme: Boolean,
     onDarkThemeChange: (Boolean) -> Unit
 ) {
-    DrawerHeader()
+    Column(modifier = Modifier.fillMaxHeight()) {
+        DrawerHeader()
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-    opcionesNavegacion.forEach { opcion ->
-        NavigationDrawerItem(
-            label = {
-                Text(opcion.titulo)
-            },
-            selected = pantallaActual::class == opcion.screen::class,
-            onClick = {
-                onSeleccionarPantalla(opcion.screen)
-            },
-            icon = {
-                Icon(
-                    imageVector = opcion.icono,
-                    contentDescription = opcion.titulo
-                )
-            }
+        Text(
+            text = "NAVEGACIÓN",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 28.dp, top = 20.dp, bottom = 8.dp)
+        )
+
+        opcionesNavegacion.forEach { opcion ->
+            NavigationDrawerItem(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
+                label = { Text(opcion.titulo) },
+                selected = pantallaActual::class == opcion.screen::class,
+                onClick = { onSeleccionarPantalla(opcion.screen) },
+                icon = {
+                    Icon(imageVector = opcion.icono, contentDescription = opcion.titulo)
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        ThemeSwitch(
+            darkTheme = darkTheme,
+            onDarkThemeChange = onDarkThemeChange
         )
     }
-
-    Spacer(
-        modifier = Modifier.padding(8.dp)
-    )
-
-    ThemeSwitch(
-        darkTheme = darkTheme,
-        onDarkThemeChange = onDarkThemeChange
-    )
 }
 
 @Composable
 private fun DrawerHeader() {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp)
+            .padding(24.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "PharmaMobil",
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
+            Icon(
+                imageVector = Icons.Default.LocalPharmacy,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.padding(12.dp).size(28.dp)
+            )
+        }
 
-        Text(
-            text = "Gestión farmacéutica",
-            style = MaterialTheme.typography.bodyMedium
-        )
+        Column {
+            Text(text = "PharmaMobil", style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = "Gestión farmacéutica",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
