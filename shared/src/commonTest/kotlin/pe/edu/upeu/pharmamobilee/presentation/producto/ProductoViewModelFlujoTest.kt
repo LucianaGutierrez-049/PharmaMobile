@@ -9,6 +9,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
+import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.RegistrarProductoUseCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -46,8 +47,8 @@ class ProductoViewModelFlujoTest {
 
             advanceUntilIdle()
 
-            val fase = assertIs<ProductoFase.ConProductos>(viewModel.uiState.value.fase)
-            assertEquals(productos, fase.productos)
+            assertIs<ProductoFase.ConProductos>(viewModel.uiState.value.fase)
+            assertEquals(productos, viewModel.uiState.value.productos)
         } finally {
             Dispatchers.resetMain()
         }
@@ -92,28 +93,63 @@ class ProductoViewModelFlujoTest {
         }
     }
 
+    @Test
+    fun editarProductoActualizaElRegistroSinDuplicarlo() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val producto = Producto(id = 7L, nombre = "Alcohol", precio = 7.0, stock = 15)
+            val repositorio = ProductoRepositoryFalso(productos = listOf(producto))
+            val viewModel = crearViewModel(repositorio)
+            advanceUntilIdle()
+
+            viewModel.editarProducto(producto)
+            viewModel.actualizarPrecio("8.50")
+            viewModel.registrarProducto()
+            advanceUntilIdle()
+
+            assertEquals(0, repositorio.registros)
+            assertEquals(1, repositorio.actualizaciones)
+            assertEquals(8.50, viewModel.uiState.value.productos.single().precio)
+            assertEquals(null, viewModel.uiState.value.productoEnEdicionId)
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
     private fun crearViewModel(productoRepository: ProductoRepository): ProductoViewModel {
         return ProductoViewModel(
             registrarProductoUseCase = RegistrarProductoUseCase(productoRepository),
+            actualizarProductoUseCase = ActualizarProductoUseCase(productoRepository),
             productoRepository = productoRepository
         )
     }
 
     private class ProductoRepositoryFalso(
-        private val productos: List<Producto> = emptyList(),
+        productos: List<Producto> = emptyList(),
         private val errorAlListar: Throwable? = null
     ) : ProductoRepository {
+        private val productosGuardados = productos.toMutableList()
         var registros: Int = 0
+            private set
+        var actualizaciones: Int = 0
             private set
 
         override suspend fun registrar(producto: Producto): Producto {
             registros++
-            return producto.copy(id = 100L + registros)
+            return producto.copy(id = 100L + registros).also(productosGuardados::add)
+        }
+
+        override suspend fun actualizar(producto: Producto): Producto {
+            actualizaciones++
+            val indice = productosGuardados.indexOfFirst { it.id == producto.id }
+            check(indice >= 0)
+            productosGuardados[indice] = producto
+            return producto
         }
 
         override suspend fun listar(): List<Producto> {
             errorAlListar?.let { throw it }
-            return productos
+            return productosGuardados.toList()
         }
     }
 }

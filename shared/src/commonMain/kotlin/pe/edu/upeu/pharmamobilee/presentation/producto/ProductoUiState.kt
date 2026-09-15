@@ -11,12 +11,14 @@ data class ProductoUiState(
     val precioError: String? = null,
     val stockError: String? = null,
     val mensajeExito: String? = null,
+    val productoEnEdicionId: Long? = null,
+    val productos: List<Producto> = emptyList(),
     val fase: ProductoFase = ProductoFase.Cargando
 )
 
 sealed interface ProductoFase {
     data object Cargando : ProductoFase
     data object SinProductos : ProductoFase
-    data class ConProductos(val productos: List<Producto>) : ProductoFase
+    data object ConProductos : ProductoFase
     data class Error(val mensaje: String) : ProductoFase
 }

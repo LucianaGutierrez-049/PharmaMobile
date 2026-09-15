@@ -12,18 +12,10 @@ class RegistrarProductoUseCase(
         stock: String,
         activo: Boolean
     ): Result<Producto> {
-        val nombreError = validarNombre(nombre)
-        val precioError = validarPrecio(precio)
-        val stockError = validarStock(stock)
+        val errores = validarDatosProducto(nombre, precio, stock)
 
-        if (nombreError != null || precioError != null || stockError != null) {
-            return Result.failure(
-                ProductoRegistroException(
-                    nombreError = nombreError,
-                    precioError = precioError,
-                    stockError = stockError
-                )
-            )
+        if (errores.tieneErrores) {
+            return Result.failure(errores.toException())
         }
 
         val producto = Producto(
@@ -34,32 +26,47 @@ class RegistrarProductoUseCase(
             activo = activo
         )
 
-        return Result.success(productoRepository.registrar(producto))
+        return runCatching { productoRepository.registrar(producto) }
     }
+}
 
-    private fun validarNombre(nombre: String): String? {
-        return if (nombre.isBlank()) "El nombre es obligatorio" else null
-    }
+internal data class ProductoValidacion(
+    val nombreError: String?,
+    val precioError: String?,
+    val stockError: String?
+) {
+    val tieneErrores: Boolean
+        get() = nombreError != null || precioError != null || stockError != null
 
-    private fun validarPrecio(precio: String): String? {
-        val precioValor = precio.toDoubleOrNull()
-        return when {
+    fun toException() = ProductoRegistroException(
+        nombreError = nombreError,
+        precioError = precioError,
+        stockError = stockError
+    )
+}
+
+internal fun validarDatosProducto(
+    nombre: String,
+    precio: String,
+    stock: String
+): ProductoValidacion {
+    val precioValor = precio.toDoubleOrNull()
+    val stockValor = stock.toIntOrNull()
+    return ProductoValidacion(
+        nombreError = if (nombre.isBlank()) "El nombre es obligatorio" else null,
+        precioError = when {
             precio.isBlank() -> "El precio es obligatorio"
-            precioValor == null || !precioValor.isFinite() -> "El precio debe ser un numero valido"
+            precioValor == null || !precioValor.isFinite() -> "El precio debe ser un número válido"
             precioValor <= 0 -> "El precio debe ser mayor a 0"
             else -> null
-        }
-    }
-
-    private fun validarStock(stock: String): String? {
-        val stockValor = stock.toIntOrNull()
-        return when {
+        },
+        stockError = when {
             stock.isBlank() -> "El stock es obligatorio"
-            stockValor == null -> "El stock debe ser un numero entero"
+            stockValor == null -> "El stock debe ser un número entero"
             stockValor < 0 -> "El stock no puede ser negativo"
             else -> null
         }
-    }
+    )
 }
 
 class ProductoRegistroException(
