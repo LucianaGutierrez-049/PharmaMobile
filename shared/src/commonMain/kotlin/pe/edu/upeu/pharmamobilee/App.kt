@@ -50,7 +50,6 @@ import pe.edu.upeu.pharmamobilee.presentacion.pedido.PedidoScreen
 import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoScreen
 import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoViewModel
 import pe.edu.upeu.pharmamobilee.theme.PharmaMobilTheme
-import org.koin.compose.KoinContext
 import org.koin.compose.viewmodel.koinViewModel
 
 private enum class TipoNavegacion {
@@ -82,10 +81,9 @@ fun App() {
         mutableStateOf(false)
     }
 
-    KoinContext {
-        PharmaMobilTheme(
-            darkTheme = darkTheme
-        ) {
+    PharmaMobilTheme(
+        darkTheme = darkTheme
+    ) {
             BoxWithConstraints(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -107,7 +105,6 @@ fun App() {
                     tipoNavegacion = tipoNavegacion
                 )
             }
-        }
     }
 }
 
@@ -146,6 +143,7 @@ private fun PharmaMobilLayout(
             ) {
                 PharmaMobilScaffold(
                     pantallaActual = pantallaActual,
+                    onSeleccionarPantalla = onSeleccionarPantalla,
                     mostrarMenu = true,
                     onMenuClick = {
                         scope.launch {
@@ -193,7 +191,9 @@ private fun PharmaMobilLayout(
                 }
 
                 PharmaMobilScaffold(
+                    modifier = Modifier.weight(1f),
                     pantallaActual = pantallaActual,
+                    onSeleccionarPantalla = onSeleccionarPantalla,
                     mostrarMenu = false,
                     onMenuClick = {}
                 )
@@ -215,6 +215,7 @@ private fun PharmaMobilLayout(
             ) {
                 PharmaMobilScaffold(
                     pantallaActual = pantallaActual,
+                    onSeleccionarPantalla = onSeleccionarPantalla,
                     mostrarMenu = false,
                     onMenuClick = {}
                 )
@@ -226,11 +227,14 @@ private fun PharmaMobilLayout(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PharmaMobilScaffold(
+    modifier: Modifier = Modifier,
     pantallaActual: Screen,
+    onSeleccionarPantalla: (Screen) -> Unit,
     mostrarMenu: Boolean,
     onMenuClick: () -> Unit
 ) {
     Scaffold(
+        modifier = modifier,
         topBar = {
             TopAppBar(
                 title = {
@@ -260,7 +264,11 @@ private fun PharmaMobilScaffold(
         ) {
             when (pantallaActual) {
                 Screen.Inicio -> {
-                    InicioScreen()
+                    InicioScreen(
+                        onProductosClick = { onSeleccionarPantalla(Screen.Productos) },
+                        onClientesClick = { onSeleccionarPantalla(Screen.Clientes) },
+                        onPedidosClick = { onSeleccionarPantalla(Screen.Pedidos) }
+                    )
                 }
 
                 Screen.Productos -> {

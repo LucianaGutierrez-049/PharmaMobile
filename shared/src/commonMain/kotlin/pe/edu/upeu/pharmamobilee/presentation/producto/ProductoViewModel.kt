@@ -6,12 +6,15 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pe.edu.upeu.pharmamobilee.domain.model.Producto
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
+import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.ProductoRegistroException
 import pe.edu.upeu.pharmamobilee.domain.usecase.RegistrarProductoUseCase
 
 class ProductoViewModel(
     private val registrarProductoUseCase: RegistrarProductoUseCase,
+    private val actualizarProductoUseCase: ActualizarProductoUseCase,
     private val productoRepository: ProductoRepository
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProductoUiState())
@@ -64,11 +67,20 @@ class ProductoViewModel(
         viewModelScope.launch {
             limpiarErrores()
 
-            val resultado = registrarProductoUseCase(
-                nombre = uiState.value.nombre,
-                precio = uiState.value.precio,
-                stock = uiState.value.stock,
-                activo = uiState.value.activo
+            val estado = uiState.value
+            val resultado = estado.productoEnEdicionId?.let { id ->
+                actualizarProductoUseCase(
+                    id = id,
+                    nombre = estado.nombre,
+                    precio = estado.precio,
+                    stock = estado.stock,
+                    activo = estado.activo
+                )
+            } ?: registrarProductoUseCase(
+                nombre = estado.nombre,
+                precio = estado.precio,
+                stock = estado.stock,
+                activo = estado.activo
             )
 
             resultado
@@ -79,7 +91,12 @@ class ProductoViewModel(
                             precio = "",
                             stock = "",
                             activo = true,
-                            mensajeExito = "Producto \"${producto.nombre}\" registrado correctamente"
+                            productoEnEdicionId = null,
+                            mensajeExito = if (estado.productoEnEdicionId == null) {
+                                "Producto \"${producto.nombre}\" registrado correctamente"
+                            } else {
+                                "Producto \"${producto.nombre}\" actualizado correctamente"
+                            }
                         )
                     }
                     cargarProductos()
@@ -98,13 +115,44 @@ class ProductoViewModel(
                         _uiState.update {
                             it.copy(
                                 fase = ProductoFase.Error(
-                                    error.message ?: "No se pudo registrar el producto"
+                                    error.message ?: "No se pudo guardar el producto"
                                 ),
                                 mensajeExito = null
                             )
                         }
                     }
                 }
+        }
+    }
+
+    fun editarProducto(producto: Producto) {
+        _uiState.update {
+            it.copy(
+                nombre = producto.nombre,
+                precio = producto.precio.toString(),
+                stock = producto.stock.toString(),
+                activo = producto.activo,
+                nombreError = null,
+                precioError = null,
+                stockError = null,
+                mensajeExito = null,
+                productoEnEdicionId = producto.id
+            )
+        }
+    }
+
+    fun cancelarEdicion() {
+        _uiState.update {
+            it.copy(
+                nombre = "",
+                precio = "",
+                stock = "",
+                activo = true,
+                nombreError = null,
+                precioError = null,
+                stockError = null,
+                productoEnEdicionId = null
+            )
         }
     }
 
@@ -119,16 +167,18 @@ class ProductoViewModel(
             }.onSuccess { productos ->
                 _uiState.update {
                     it.copy(
+                        productos = productos,
                         fase = if (productos.isEmpty()) {
                             ProductoFase.SinProductos
                         } else {
-                            ProductoFase.ConProductos(productos)
+                            ProductoFase.ConProductos
                         }
                     )
                 }
             }.onFailure { error ->
                 _uiState.update {
                     it.copy(
+                        productos = emptyList(),
                         fase = ProductoFase.Error(
                             error.message ?: "No se pudo cargar el inventario"
                         )

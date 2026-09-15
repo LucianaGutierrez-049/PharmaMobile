@@ -1,6 +1,7 @@
 package pe.edu.upeu.pharmamobilee.presentation.producto
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -13,6 +14,7 @@ import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +23,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import pe.edu.upeu.pharmamobilee.domain.model.Producto
 import pe.edu.upeu.pharmamobilee.presentacion.components.ValidatedTextField
 import pe.edu.upeu.pharmamobilee.presentacion.producto.InventarioTabs
 
@@ -38,16 +41,69 @@ fun ProductoScreen(
             .padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(16.dp)
     ) {
-        ProductoFormulario(
-            uiState = uiState,
-            onNombreChange = viewModel::actualizarNombre,
-            onPrecioChange = viewModel::actualizarPrecio,
-            onStockChange = viewModel::actualizarStock,
-            onActivoChange = viewModel::actualizarActivo,
-            onRegistrar = viewModel::registrarProducto
+        Text(
+            text = "Gestiona tu inventario",
+            style = MaterialTheme.typography.headlineSmall
+        )
+        Text(
+            text = "Registra productos y controla su disponibilidad desde una sola vista.",
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
-        when (val fase = uiState.fase) {
+        uiState.mensajeExito?.let {
+            Text(
+                text = it,
+                color = MaterialTheme.colorScheme.primary
+            )
+        }
+
+        BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
+            val formulario: @Composable () -> Unit = {
+                ProductoFormulario(
+                    uiState = uiState,
+                    onNombreChange = viewModel::actualizarNombre,
+                    onPrecioChange = viewModel::actualizarPrecio,
+                    onStockChange = viewModel::actualizarStock,
+                    onActivoChange = viewModel::actualizarActivo,
+                    onRegistrar = viewModel::registrarProducto,
+                    onCancelarEdicion = viewModel::cancelarEdicion
+                )
+            }
+            val inventario: @Composable () -> Unit = {
+                ProductoContenido(
+                    uiState = uiState,
+                    onReintentar = viewModel::cargarProductos,
+                    onEditarProducto = viewModel::editarProducto
+                )
+            }
+
+            if (maxWidth >= 840.dp) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(20.dp),
+                    verticalAlignment = Alignment.Top
+                ) {
+                    Column(modifier = Modifier.weight(0.9f)) { formulario() }
+                    Column(modifier = Modifier.weight(1.4f)) { inventario() }
+                }
+            } else {
+                Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
+                    formulario()
+                    inventario()
+                }
+            }
+        }
+
+    }
+}
+
+@Composable
+private fun ProductoContenido(
+    uiState: ProductoUiState,
+    onReintentar: () -> Unit,
+    onEditarProducto: (Producto) -> Unit
+) {
+    when (val fase = uiState.fase) {
             ProductoFase.Cargando -> {
                 Column(
                     modifier = Modifier.fillMaxWidth(),
@@ -60,17 +116,26 @@ fun ProductoScreen(
             }
 
             ProductoFase.SinProductos -> {
-                Text(
-                    text = "No hay productos registrados.",
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Column(
+                        modifier = Modifier.padding(20.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Text("Tu inventario está vacío", style = MaterialTheme.typography.titleMedium)
+                        Text("Registra el primer producto con el formulario.")
+                    }
+                }
             }
 
-            is ProductoFase.ConProductos -> {
+            ProductoFase.ConProductos -> {
                 InventarioTabs(
-                    productos = fase.productos,
-                    onEditarProducto = null
+                    productos = uiState.productos,
+                    onEditarProducto = onEditarProducto
                 )
             }
 
@@ -80,16 +145,11 @@ fun ProductoScreen(
                     color = MaterialTheme.colorScheme.error,
                     style = MaterialTheme.typography.bodyMedium
                 )
+                Button(onClick = onReintentar) {
+                    Text("Reintentar")
+                }
             }
         }
-
-        uiState.mensajeExito?.let {
-            Text(
-                text = it,
-                color = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
 }
 
 @Composable
@@ -99,10 +159,11 @@ private fun ProductoFormulario(
     onPrecioChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
     onActivoChange: (Boolean) -> Unit,
-    onRegistrar: () -> Unit
+    onRegistrar: () -> Unit,
+    onCancelarEdicion: () -> Unit
 ) {
     Text(
-        text = "Nuevo producto",
+        text = if (uiState.productoEnEdicionId == null) "Nuevo producto" else "Editar producto",
         style = MaterialTheme.typography.titleLarge
     )
 
@@ -168,7 +229,16 @@ private fun ProductoFormulario(
                 onClick = onRegistrar,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                Text("Registrar")
+                Text(if (uiState.productoEnEdicionId == null) "Registrar" else "Guardar cambios")
+            }
+
+            if (uiState.productoEnEdicionId != null) {
+                OutlinedButton(
+                    onClick = onCancelarEdicion,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Text("Cancelar edición")
+                }
             }
         }
     }

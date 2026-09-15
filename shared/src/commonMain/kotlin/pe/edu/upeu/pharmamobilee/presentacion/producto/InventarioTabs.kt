@@ -96,7 +96,7 @@ private fun ListaProductos(
 ) {
     if (productos.isEmpty()) {
         Text(
-            text = "No hay productos en esta categoria.",
+            text = "No hay productos en esta categoría.",
             style = MaterialTheme.typography.bodyMedium,
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             modifier = Modifier.padding(vertical = 12.dp)

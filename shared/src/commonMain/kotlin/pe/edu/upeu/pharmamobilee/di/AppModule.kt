@@ -7,6 +7,7 @@ import org.koin.core.module.dsl.viewModel
 import org.koin.dsl.module
 import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositorioEnMemoria
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
+import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.RegistrarProductoUseCase
 import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoViewModel
 
@@ -20,12 +21,16 @@ val domainModule = module {
     factory {
         RegistrarProductoUseCase(get())
     }
+    factory {
+        ActualizarProductoUseCase(get())
+    }
 }
 
 val presentationModule = module {
     viewModel {
         ProductoViewModel(
             registrarProductoUseCase = get(),
+            actualizarProductoUseCase = get(),
             productoRepository = get()
         )
     }

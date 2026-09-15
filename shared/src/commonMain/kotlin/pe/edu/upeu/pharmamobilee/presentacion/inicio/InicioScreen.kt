@@ -2,6 +2,7 @@ package pe.edu.upeu.pharmamobilee.presentacion.inicio
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -38,7 +39,11 @@ import pharmamobilee.shared.generated.resources.Res
 import pharmamobilee.shared.generated.resources.pharmamobil_logo
 
 @Composable
-fun InicioScreen() {
+fun InicioScreen(
+    onProductosClick: () -> Unit,
+    onClientesClick: () -> Unit,
+    onPedidosClick: () -> Unit
+) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -47,7 +52,11 @@ fun InicioScreen() {
         verticalArrangement = Arrangement.spacedBy(18.dp)
     ) {
         InicioHeader()
-        ModulosResumen()
+        ModulosResumen(
+            onProductosClick = onProductosClick,
+            onClientesClick = onClientesClick,
+            onPedidosClick = onPedidosClick
+        )
         EstadoOperacion()
     }
 }
@@ -90,7 +99,7 @@ private fun InicioHeader() {
                 )
 
                 Text(
-                    text = "Sistema de gestion farmaceutica",
+                    text = "Sistema de gestión farmacéutica",
                     style = MaterialTheme.typography.bodyLarge,
                     color = MaterialTheme.colorScheme.onPrimaryContainer
                 )
@@ -113,7 +122,11 @@ private fun InicioHeader() {
 }
 
 @Composable
-private fun ModulosResumen() {
+private fun ModulosResumen(
+    onProductosClick: () -> Unit,
+    onClientesClick: () -> Unit,
+    onPedidosClick: () -> Unit
+) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
@@ -129,8 +142,9 @@ private fun ModulosResumen() {
         ) {
             ModuloCard(
                 titulo = "Productos",
-                detalle = "Registro, stock y reposicion",
+                detalle = "Registro, stock y reposición",
                 icono = Icons.Default.Inventory2,
+                onClick = onProductosClick,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -138,6 +152,7 @@ private fun ModulosResumen() {
                 titulo = "Clientes",
                 detalle = "Datos de contacto",
                 icono = Icons.Default.Groups,
+                onClick = onClientesClick,
                 modifier = Modifier.fillMaxWidth()
             )
 
@@ -145,6 +160,7 @@ private fun ModulosResumen() {
                 titulo = "Pedidos",
                 detalle = "Venta y detalle",
                 icono = Icons.Default.ShoppingCartCheckout,
+                onClick = onPedidosClick,
                 modifier = Modifier.fillMaxWidth()
             )
         }
@@ -156,10 +172,11 @@ private fun ModuloCard(
     titulo: String,
     detalle: String,
     icono: ImageVector,
+    onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     Card(
-        modifier = modifier,
+        modifier = modifier.clickable(onClick = onClick),
         colors = CardDefaults.cardColors(
             containerColor = MaterialTheme.colorScheme.surfaceContainer
         )
@@ -236,7 +253,7 @@ private fun EstadoOperacion() {
                 )
 
                 Text(
-                    text = "Usa el menu para registrar productos, revisar clientes y gestionar pedidos.",
+                    text = "Usa el menú para registrar productos, revisar clientes y gestionar pedidos.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSecondaryContainer
                 )
