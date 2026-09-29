@@ -1,20 +1,30 @@
 package pe.edu.upeu.pharmamobilee.presentacion.producto
 
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Block
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
-import androidx.compose.material3.AssistChip
-import androidx.compose.material3.Card
-import androidx.compose.material3.CardDefaults
-import androidx.compose.material3.HorizontalDivider
+import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -25,62 +35,100 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import pe.edu.upeu.pharmamobilee.domain.model.OrigenProducto
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
+import pe.edu.upeu.pharmamobilee.presentacion.components.SectionHeader
 
-private val titulosTabs = listOf(
-    "Activos",
-    "Inactivos",
-    "Bajo stock"
+private val tabs = listOf(
+    ProductoTab("Activos", Icons.Default.CheckCircle),
+    ProductoTab("Inactivos", Icons.Default.Block),
+    ProductoTab("Bajo stock", Icons.Default.WarningAmber)
+)
+
+private data class ProductoTab(
+    val titulo: String,
+    val icono: androidx.compose.ui.graphics.vector.ImageVector
 )
 
 @Composable
 fun InventarioTabs(
     productos: List<Producto>,
-    onEditarProducto: (Producto) -> Unit,
+    onEditarProducto: ((Producto) -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     var tabSeleccionada by remember {
         mutableStateOf(0)
     }
+    var busqueda by remember { mutableStateOf("") }
 
-    val productosFiltrados = when (tabSeleccionada) {
+    val productosPorCategoria = when (tabSeleccionada) {
         0 -> filtrarProductosInventario(productos, ProductoFiltro.Activos)
         1 -> filtrarProductosInventario(productos, ProductoFiltro.Inactivos)
         else -> filtrarProductosInventario(productos, ProductoFiltro.BajoStock)
+    }
+    val productosFiltrados = productosPorCategoria.filter {
+        it.nombre.contains(busqueda.trim(), ignoreCase = true)
     }
 
     Column(
         modifier = modifier,
         verticalArrangement = Arrangement.spacedBy(12.dp)
     ) {
-        Text(
-            text = "Inventario",
-            style = MaterialTheme.typography.titleLarge
+        SectionHeader(
+            title = "Inventario",
+            description = "${productosFiltrados.size} productos en esta categoría",
+            icon = Icons.Default.Inventory2
         )
 
-        Text(
-            text = "${productosFiltrados.size} productos",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
-        )
-
-        PrimaryTabRow(
-            selectedTabIndex = tabSeleccionada
+        Surface(
+            shape = MaterialTheme.shapes.large,
+            tonalElevation = 2.dp,
+            color = MaterialTheme.colorScheme.surfaceContainer
         ) {
-            titulosTabs.forEachIndexed { index, titulo ->
-                Tab(
-                    selected = tabSeleccionada == index,
-                    onClick = {
-                        tabSeleccionada = index
-                    },
-                    text = {
-                        Text(titulo)
-                    }
-                )
+            PrimaryTabRow(
+                selectedTabIndex = tabSeleccionada,
+                containerColor = MaterialTheme.colorScheme.surfaceContainer
+            ) {
+                tabs.forEachIndexed { index, tab ->
+                    Tab(
+                        selected = tabSeleccionada == index,
+                        onClick = { tabSeleccionada = index },
+                        text = { Text(tab.titulo) },
+                        icon = {
+                            Icon(
+                                imageVector = tab.icono,
+                                contentDescription = null,
+                                modifier = Modifier.size(20.dp)
+                            )
+                        }
+                    )
+                }
             }
         }
+
+        OutlinedTextField(
+            value = busqueda,
+            onValueChange = { busqueda = it },
+            modifier = Modifier.fillMaxWidth(),
+            label = { Text("Buscar producto") },
+            placeholder = { Text("Ej. Paracetamol") },
+            leadingIcon = {
+                Icon(imageVector = Icons.Default.Search, contentDescription = null)
+            },
+            trailingIcon = {
+                if (busqueda.isNotEmpty()) {
+                    IconButton(onClick = { busqueda = "" }) {
+                        Icon(imageVector = Icons.Default.Close, contentDescription = "Limpiar búsqueda")
+                    }
+                }
+            },
+            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+            singleLine = true,
+            shape = MaterialTheme.shapes.large
+        )
 
         ListaProductos(
             productos = productosFiltrados,
@@ -92,15 +140,27 @@ fun InventarioTabs(
 @Composable
 private fun ListaProductos(
     productos: List<Producto>,
-    onEditarProducto: (Producto) -> Unit
+    onEditarProducto: ((Producto) -> Unit)?
 ) {
     if (productos.isEmpty()) {
-        Text(
-            text = "No hay productos en esta categoria.",
-            style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(vertical = 12.dp)
-        )
+        Surface(
+            modifier = Modifier.fillMaxWidth(),
+            shape = MaterialTheme.shapes.large,
+            color = MaterialTheme.colorScheme.surfaceContainerLow
+        ) {
+            Column(
+                modifier = Modifier.padding(24.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Inventory2,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(text = "No hay productos en esta categoría.")
+            }
+        }
         return
     }
 
@@ -108,10 +168,12 @@ private fun ListaProductos(
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         productos.forEach { producto ->
-            ProductoInventarioCard(
+            ProductCard(
                 producto = producto,
-                onEditar = {
-                    onEditarProducto(producto)
+                onEditar = onEditarProducto?.takeIf {
+                    producto.origen == OrigenProducto.LOCAL
+                }?.let {
+                    { it(producto) }
                 }
             )
         }
@@ -119,82 +181,146 @@ private fun ListaProductos(
 }
 
 @Composable
-private fun ProductoInventarioCard(
+fun ProductCard(
     producto: Producto,
-    onEditar: () -> Unit
+    onEditar: (() -> Unit)?
 ) {
-    Card(
+    ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surfaceContainer
-        )
     ) {
         Column(
-            modifier = Modifier.padding(14.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+            modifier = Modifier.padding(16.dp),
+            verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    modifier = Modifier.weight(1f)
+                Surface(
+                    shape = CircleShape,
+                    color = MaterialTheme.colorScheme.primaryContainer
                 ) {
+                    Box(modifier = Modifier.size(48.dp), contentAlignment = Alignment.Center) {
+                        Text(
+                            text = producto.nombre.take(1).uppercase(),
+                            style = MaterialTheme.typography.titleLarge,
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                    }
+                }
+
+                Column(modifier = Modifier.weight(1f)) {
                     Text(
                         text = producto.nombre,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.SemiBold
                     )
 
-                    Text(
-                        text = if (producto.activo) "Activo" else "Inactivo",
-                        style = MaterialTheme.typography.bodySmall,
-                        color = if (producto.activo) {
-                            MaterialTheme.colorScheme.primary
-                        } else {
-                            MaterialTheme.colorScheme.error
-                        }
-                    )
+                    Text("Código #${producto.id}", style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (producto.origen == OrigenProducto.REMOTO) {
+                        Text(
+                            text = producto.categoria,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
 
-                Text(
-                    text = "S/ ${producto.precio.formatearPrecio()}",
-                    style = MaterialTheme.typography.titleSmall,
-                    color = MaterialTheme.colorScheme.primary
-                )
-
-                IconButton(
-                    onClick = onEditar
-                ) {
-                    Icon(
-                        imageVector = Icons.Default.Edit,
-                        contentDescription = "Editar ${producto.nombre}"
-                    )
+                if (onEditar != null) {
+                    IconButton(
+                        onClick = onEditar
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Edit,
+                            contentDescription = "Editar ${producto.nombre}"
+                        )
+                    }
                 }
             }
-
-            HorizontalDivider()
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Stock: ${producto.stock}",
-                    style = MaterialTheme.typography.bodyMedium
-                )
+                Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
+                    Text(
+                        text = "S/ ${producto.precio.formatearPrecio()}",
+                        style = MaterialTheme.typography.titleLarge,
+                        color = MaterialTheme.colorScheme.primary
+                    )
+                    Text("Precio unitario", style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant)
+                }
 
-                if (producto.stock <= 5) {
-                    AssistChip(
-                        onClick = {},
-                        label = {
-                            Text("Bajo stock")
-                        }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    if (producto.origen == OrigenProducto.LOCAL) {
+                        EstadoProductoBadge(activo = producto.activo)
+                    }
+                    StockBadge(
+                        stock = producto.stock,
+                        stockDisponible = producto.stockDisponible,
+                        bajoStock = producto.requiereReposicion
                     )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun EstadoProductoBadge(activo: Boolean) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (activo) MaterialTheme.colorScheme.tertiaryContainer
+        else MaterialTheme.colorScheme.surfaceVariant
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (activo) Icons.Default.CheckCircle else Icons.Default.Block,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp)
+            )
+            Text(text = if (activo) "Activo" else "Inactivo", style = MaterialTheme.typography.labelMedium)
+        }
+    }
+}
+
+@Composable
+private fun StockBadge(stock: Int, stockDisponible: Boolean, bajoStock: Boolean) {
+    Surface(
+        shape = RoundedCornerShape(50),
+        color = if (bajoStock) MaterialTheme.colorScheme.errorContainer
+        else MaterialTheme.colorScheme.secondaryContainer
+    ) {
+        Row(
+            modifier = Modifier.padding(horizontal = 10.dp, vertical = 7.dp),
+            horizontalArrangement = Arrangement.spacedBy(5.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Icon(
+                imageVector = if (bajoStock) Icons.Default.WarningAmber else Icons.Default.Inventory2,
+                contentDescription = null,
+                modifier = Modifier.size(16.dp),
+                tint = if (bajoStock) MaterialTheme.colorScheme.onErrorContainer
+                else MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            Text(
+                text = when {
+                    !stockDisponible -> "Catálogo API"
+                    bajoStock -> "Bajo · $stock"
+                    else -> "Stock $stock"
+                },
+                style = MaterialTheme.typography.labelMedium,
+                color = if (bajoStock) MaterialTheme.colorScheme.onErrorContainer
+                else MaterialTheme.colorScheme.onSecondaryContainer
+                )
         }
     }
 }

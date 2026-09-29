@@ -1,0 +1,97 @@
+--------- beginning of main
+09-29 20:03:34.022 I/libprocessgroup(10161): Created cgroup /sys/fs/cgroup/apps/uid_10229/pid_10161
+09-29 20:03:34.125 I/Zygote  (10161): Process 10161 created for pe.edu.upeu.pharmamobilee
+09-29 20:03:34.135 I/u.pharmamobilee(10161): Late-enabling -Xcheck:jni
+09-29 20:03:34.397 I/u.pharmamobilee(10161): Using generational CollectorTypeCMC GC.
+09-29 20:03:34.420 W/u.pharmamobilee(10161): Unexpected CPU variant for x86: x86_64.
+09-29 20:03:34.420 W/u.pharmamobilee(10161): Known variants: atom, sandybridge, silvermont, goldmont, goldmont-plus, goldmont-without-sha-xsaves, tremont, kabylake, alderlake, pantherlake, default
+09-29 20:03:34.876 D/nativeloader(10161): Load libframework-connectivity-tiramisu-jni.so using APEX ns com_android_tethering for caller /apex/com.android.tethering/javalib/framework-connectivity-t.jar: ok
+09-29 20:03:36.405 D/ApplicationLoaders(10161): Returning zygote-cached class loader: /system_ext/framework/androidx.window.extensions.jar
+09-29 20:03:36.406 D/ApplicationLoaders(10161): Returning zygote-cached class loader: /system_ext/framework/androidx.window.sidecar.jar
+09-29 20:03:37.727 D/nativeloader(10161): Configuring clns-9 for other apk /data/app/~~spqKR3gxJ_akCmL8ebRApQ==/pe.edu.upeu.pharmamobilee-bWMRBXVXa_E55iR3ljKcBA==/base.apk. target_sdk_version=36, uses_libraries=, library_path=/data/app/~~spqKR3gxJ_akCmL8ebRApQ==/pe.edu.upeu.pharmamobilee-bWMRBXVXa_E55iR3ljKcBA==/lib/x86_64:/data/app/~~spqKR3gxJ_akCmL8ebRApQ==/pe.edu.upeu.pharmamobilee-bWMRBXVXa_E55iR3ljKcBA==/base.apk!/lib/x86_64, permitted_path=/data:/mnt/expand:/data/user/0/pe.edu.upeu.pharmamobilee
+--------- beginning of system
+09-29 20:03:37.820 D/ActivityThread(10161): Set OS env TMPDIR to /data/user/0/pe.edu.upeu.pharmamobilee/cache
+09-29 20:03:37.862 V/GraphicsEnvironment(10161): Currently set values for:
+09-29 20:03:37.863 V/GraphicsEnvironment(10161):   angle_gl_driver_selection_pkgs=[]
+09-29 20:03:37.863 V/GraphicsEnvironment(10161):   angle_gl_driver_selection_values=[]
+09-29 20:03:37.863 V/GraphicsEnvironment(10161): pe.edu.upeu.pharmamobilee is not listed in per-application setting
+09-29 20:03:37.868 V/GraphicsEnvironment(10161): No special selections for ANGLE, returning default driver choice
+09-29 20:03:38.111 V/GraphicsEnvironment(10161): Neither updatable production driver nor prerelease driver is supported.
+09-29 20:03:39.362 I/Choreographer(10161): Skipped 52 frames!  The application may be doing too much work on its main thread.
+09-29 20:03:39.374 I/DisplayManager(10161): Choreographer implicitly registered for the refresh rate.
+09-29 20:03:39.823 D/CompatChangeReporter(10161): Compat change id reported: 377864165; UID 10229; state: ENABLED
+09-29 20:03:39.915 I/GFXSTREAM(10161): [eglDisplay.cpp(297)] Opening libGLESv1_CM_emulation.so
+09-29 20:03:39.918 I/GFXSTREAM(10161): [eglDisplay.cpp(297)] Opening libGLESv2_emulation.so
+09-29 20:03:39.922 W/libc    (10161): Access denied finding property "vendor.mesa.virtgpu.kumquat"
+09-29 20:03:40.026 W/HWUI    (10161): Failed to choose config with EGL_SWAP_BEHAVIOR_PRESERVED, retrying without...
+09-29 20:03:40.026 W/HWUI    (10161): Failed to initialize 101010-2 format, error = EGL_SUCCESS
+09-29 20:03:40.072 W/HWUI    (10161): Unknown dataspace 0
+09-29 20:03:40.235 D/WindowOnBackDispatcher(10161): setTopOnBackInvokedCallback (unwrapped): android.app.Activity$$ExternalSyntheticLambda0@6fc0d94
+09-29 20:03:40.276 W/libc    (10161): Access denied finding property "vendor.mesa.virtgpu.kumquat"
+09-29 20:03:40.283 D/WindowOnBackDispatcher(10161): setOnBackInvokedCallbackInfo: android.app.Activity$$ExternalSyntheticLambda0@6fc0d94
+09-29 20:03:41.450 I/u.pharmamobilee(10161): hiddenapi: Accessing hidden method Landroid/os/SystemProperties;->addChangeCallback(Ljava/lang/Runnable;)V (runtime_flags=0, domain=platform, api=unsupported) from Landroidx/compose/ui/platform/AndroidComposeView$Companion; (domain=app, TargetSdkVersion=36) using reflection: allowed
+09-29 20:03:41.929 D/VRI[MainActivity](10161): WindowInsets changed: 1080x2400 statusBars:[0,63,0,0] navigationBars:[0,0,0,63] mandatorySystemGestures:[0,63,0,84] 
+09-29 20:03:42.994 I/u.pharmamobilee(10161): Compiler allocated 5567KB to compile void android.view.ViewRootImpl.performTraversals(long)
+09-29 20:03:43.567 W/System.err(10161): SLF4J(W): No SLF4J providers were found.
+09-29 20:03:43.615 W/System.err(10161): SLF4J(W): Defaulting to no-operation (NOP) logger implementation
+09-29 20:03:43.615 W/System.err(10161): SLF4J(W): See https://www.slf4j.org/codes.html#noProviders for further details.
+09-29 20:03:43.768 I/System.out(10161): HttpClient: REQUEST: https://api.escuelajs.co/api/v1/products?limit=10
+09-29 20:03:43.768 I/System.out(10161): METHOD: GET
+09-29 20:03:43.768 I/System.out(10161): COMMON HEADERS
+09-29 20:03:43.768 I/System.out(10161): -> Accept: application/json
+09-29 20:03:43.768 I/System.out(10161): -> Content-Type: application/json
+09-29 20:03:43.768 I/System.out(10161): CONTENT HEADERS
+09-29 20:03:43.768 I/System.out(10161): -> Content-Length: 0
+09-29 20:03:44.605 I/HWUI    (10161): Using FreeType backend (prop=Auto)
+09-29 20:03:45.233 W/u.pharmamobilee(10161): Verification of void okhttp3.internal.connection.RouteSelector.<clinit>() took 479.282ms (18.78 bytecodes/s) (0B arena alloc)
+09-29 20:03:46.107 I/u.pharmamobilee(10161): Background concurrent mark compact GC freed 3092KB AllocSpace bytes, 1(32KB) LOS objects, 49% free, 4388KB/8776KB, paused 54.995ms,259.386ms total 1.669s
+09-29 20:03:46.718 I/Surface (10161): Creating surface for consumer unnamed-10161-0 with slotExpansion=1 for 64 slots
+09-29 20:03:46.731 I/Surface (10161): Creating surface for consumer VRI[MainActivity]#0(BLAST Consumer)0 with slotExpansion=1 for 64 slots
+09-29 20:03:47.194 I/HWUI    (10161): Davey! duration=6957ms; Flags=1, FrameTimelineVsyncId=53729, IntendedVsync=1110048778276, Vsync=1110065444942, InputEventId=0, HandleInputStart=1110080343118, AnimationStart=1110080370218, PerformTraversalsStart=1110080409918, DrawStart=1116682600018, FrameDeadline=1110065444942, FrameStartTime=1110080271118, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=1110065444942, AnimationCounter=-1, SyncQueued=1116802251818, SyncStart=1116806754118, IssueDrawCommandsStart=1116807335518, SwapBuffers=1116909838018, FrameCompleted=1117011197818, DequeueBufferDuration=31100, QueueBufferDuration=1239100, GpuCompleted=1117011197818, SwapBuffersCompleted=1116923984118, DisplayPresentTime=0, CommandSubmissionCompleted=1116909838018, 
+09-29 20:03:47.271 W/u.pharmamobilee(10161): Verification of java.io.Reader okhttp3.ResponseBody.charStream() took 121.553ms (230.35 bytecodes/s) (0B arena alloc)
+09-29 20:03:47.280 I/Choreographer(10161): Skipped 398 frames!  The application may be doing too much work on its main thread.
+09-29 20:03:47.387 D/InsetsController(10161): hide(ime())
+09-29 20:03:47.388 I/ImeTracker(10161): pe.edu.upeu.pharmamobilee:0bf7139d: onCancelled at PHASE_CLIENT_ALREADY_HIDDEN
+09-29 20:03:47.539 W/u.pharmamobilee(10161): Verification of kotlinx.io.Source io.ktor.utils.io.ByteChannel.getReadBuffer() took 138.912ms (683.89 bytecodes/s) (0B arena alloc)
+09-29 20:03:47.542 D/ProfileInstaller(10161): Installing profile for pe.edu.upeu.pharmamobilee
+09-29 20:03:47.883 I/System.out(10161): HttpClient: RESPONSE: 200 
+09-29 20:03:47.883 I/System.out(10161): METHOD: GET
+09-29 20:03:47.883 I/System.out(10161): FROM: https://api.escuelajs.co/api/v1/products?limit=10
+09-29 20:03:47.883 I/System.out(10161): COMMON HEADERS
+09-29 20:03:47.883 I/System.out(10161): -> access-control-allow-origin: *
+09-29 20:03:47.883 I/System.out(10161): -> content-length: 79711
+09-29 20:03:47.884 I/System.out(10161): -> content-security-policy: script-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net;img-src 'self' data: https://cdn.jsdelivr.net;default-src 'self';base-uri 'self';font-src 'self' https: data:;form-action 'self';frame-ancestors 'self';object-src 'none';script-src-attr 'none';style-src 'self' https: 'unsafe-inline';upgrade-insecure-requests
+09-29 20:03:47.884 I/System.out(10161): -> content-type: application/json; charset=utf-8
+09-29 20:03:47.884 I/System.out(10161): -> cross-origin-opener-policy: same-origin
+09-29 20:03:47.884 I/System.out(10161): -> cross-origin-resource-policy: same-origin
+09-29 20:03:47.884 I/System.out(10161): -> date: Tue, 29 Sep 2026 20:03:46 GMT
+09-29 20:03:47.884 I/System.out(10161): -> etag: W/"1375f-+XLHc3shot6B5XAyoYSUHr1aAOE"
+09-29 20:03:47.884 I/System.out(10161): -> nel: {"report_to":"heroku-nel","response_headers":["Via"],"max_age":3600,"success_fraction":0.01,"failure_fraction":0.1}
+09-29 20:03:47.884 I/System.out(10161): -> origin-agent-cluster: ?1
+09-29 20:03:47.884 I/System.out(10161): -> referrer-policy: no-referrer
+09-29 20:03:47.884 I/System.out(10161): -> report-to: {"group":"heroku-nel","endpoints":[{"url":"https://nel.heroku.com/reports?s=YIScFJrnLVAWU2968mDiW%2F3W8KIAAnwdHMzCFe2nHgU%3D\u0026sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add\u0026ts=1790712226"}],"max_age":3600}
+09-29 20:03:47.884 I/System.out(10161): -> reporting-endpoints: heroku-nel="https://nel.heroku.com/reports?s=YIScFJrnLVAWU2968mDiW%2F3W8KIAAnwdHMzCFe2nHgU%3D&sid=c46efe9b-d3d2-4a0c-8c76-bfafa16c5add&ts=1790712226"
+09-29 20:03:47.884 I/System.out(10161): -> server: Heroku
+09-29 20:03:47.884 I/System.out(10161): -> strict-transport-security: max-age=31536000; includeSubDomains
+09-29 20:03:47.884 I/System.out(10161): -> via: 2.0 heroku-router
+09-29 20:03:47.884 I/System.out(10161): -> x-content-type-options: nosniff
+09-29 20:03:47.884 I/System.out(10161): -> x-dns-prefetch-control: off
+09-29 20:03:47.884 I/System.out(10161): -> x-download-options: noopen
+09-29 20:03:47.884 I/System.out(10161): -> x-frame-options: SAMEORIGIN
+09-29 20:03:47.884 I/System.out(10161): -> x-permitted-cross-domain-policies: none
+09-29 20:03:47.884 I/System.out(10161): -> x-xss-protection: 0
+09-29 20:05:39.878 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 2256KB AllocSpace bytes, 5(432KB) LOS objects, 30% free, 6084KB/8776KB, paused 1.131ms,14.186ms total 65.867ms
+09-29 20:05:40.309 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 1232KB AllocSpace bytes, 3(176KB) LOS objects, 15% free, 7412KB/8776KB, paused 1.097ms,11.404ms total 23.126ms
+09-29 20:05:40.376 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 720KB AllocSpace bytes, 0(0B) LOS objects, 6% free, 8180KB/8776KB, paused 1.227ms,7.709ms total 15.691ms
+09-29 20:05:40.416 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 480KB AllocSpace bytes, 0(0B) LOS objects, 4% free, 8404KB/8776KB, paused 1.396ms,7.367ms total 14.497ms
+09-29 20:05:40.433 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 320KB AllocSpace bytes, 0(0B) LOS objects, 5% free, 8308KB/8776KB, paused 1.035ms,5.969ms total 12.359ms
+09-29 20:05:40.465 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 320KB AllocSpace bytes, 0(0B) LOS objects, 2% free, 8516KB/8776KB, paused 819us,6.152ms total 12.642ms
+09-29 20:05:40.498 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 80KB AllocSpace bytes, 0(0B) LOS objects, 0% free, 8708KB/8776KB, paused 1.204ms,7.517ms total 16.313ms
+09-29 20:05:40.550 I/u.pharmamobilee(10161): Background concurrent mark compact GC freed 224KB AllocSpace bytes, 3(224KB) LOS objects, 49% free, 9396KB/18MB, paused 28.084ms,7.826ms total 52.325ms
+09-29 20:05:41.319 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 2384KB AllocSpace bytes, 0(0B) LOS objects, 12% free, 16MB/18MB, paused 808us,43.317ms total 61.568ms
+09-29 20:05:41.709 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 816KB AllocSpace bytes, 6(224KB) LOS objects, 5% free, 17MB/18MB, paused 883us,90.750ms total 108.938ms
+09-29 20:05:41.958 I/Choreographer(10161): Skipped 129 frames!  The application may be doing too much work on its main thread.
+09-29 20:05:42.047 I/HWUI    (10161): Davey! duration=2309ms; Flags=0, FrameTimelineVsyncId=55500, IntendedVsync=1229565440162, Vsync=1229598773494, InputEventId=-366503928, HandleInputStart=1229601219218, AnimationStart=1229601275618, PerformTraversalsStart=1229661411718, DrawStart=1229665484818, FrameDeadline=1229582106828, FrameStartTime=1229601161218, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=1229598773494, AnimationCounter=-1, SyncQueued=1231790816618, SyncStart=1231791062718, IssueDrawCommandsStart=1231792807918, SwapBuffers=1231861306618, FrameCompleted=1231874880318, DequeueBufferDuration=22000, QueueBufferDuration=262100, GpuCompleted=1231874880318, SwapBuffersCompleted=1231867310518, DisplayPresentTime=0, CommandSubmissionCompleted=1231861306618, 
+09-29 20:05:42.058 I/HWUI    (10161): Davey! duration=2197ms; Flags=0, FrameTimelineVsyncId=55507, IntendedVsync=1229648773492, Vsync=1231798773406, InputEventId=0, HandleInputStart=1231805233818, AnimationStart=1231805272918, PerformTraversalsStart=1231811741818, DrawStart=1231811869618, FrameDeadline=1231898773402, FrameStartTime=1231804267618, FrameInterval=16666666, WorkloadTarget=16666666, AnimationTime=1231798773406, AnimationCounter=-1, SyncQueued=1231815420918, SyncStart=1231869093318, IssueDrawCommandsStart=1231869484818, SwapBuffers=1231874116518, FrameCompleted=1231899999818, DequeueBufferDuration=18179000, QueueBufferDuration=150300, GpuCompleted=1231899999818, SwapBuffersCompleted=1231893256818, DisplayPresentTime=0, CommandSubmissionCompleted=1231874116518, 
+09-29 20:06:03.115 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 592KB AllocSpace bytes, 1(80KB) LOS objects, 3% free, 17MB/18MB, paused 1.112ms,27.462ms total 53.861ms
+09-29 20:06:28.082 I/u.pharmamobilee(10161): Background young concurrent mark compact GC freed 592KB AllocSpace bytes, 0(0B) LOS objects, 3% free, 17MB/18MB, paused 625us,84.681ms total 94.201ms
