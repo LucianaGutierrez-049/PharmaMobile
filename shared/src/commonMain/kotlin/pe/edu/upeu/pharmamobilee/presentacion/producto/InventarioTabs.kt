@@ -38,6 +38,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToInt
+import pe.edu.upeu.pharmamobilee.domain.model.OrigenProducto
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
 import pe.edu.upeu.pharmamobilee.presentacion.components.SectionHeader
 
@@ -169,7 +170,9 @@ private fun ListaProductos(
         productos.forEach { producto ->
             ProductCard(
                 producto = producto,
-                onEditar = onEditarProducto?.let {
+                onEditar = onEditarProducto?.takeIf {
+                    producto.origen == OrigenProducto.LOCAL
+                }?.let {
                     { it(producto) }
                 }
             )
@@ -216,6 +219,13 @@ fun ProductCard(
 
                     Text("Código #${producto.id}", style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.onSurfaceVariant)
+                    if (producto.origen == OrigenProducto.REMOTO) {
+                        Text(
+                            text = producto.categoria,
+                            style = MaterialTheme.typography.bodySmall,
+                            color = MaterialTheme.colorScheme.secondary
+                        )
+                    }
                 }
 
                 if (onEditar != null) {
@@ -246,9 +256,12 @@ fun ProductCard(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    EstadoProductoBadge(activo = producto.activo)
+                    if (producto.origen == OrigenProducto.LOCAL) {
+                        EstadoProductoBadge(activo = producto.activo)
+                    }
                     StockBadge(
                         stock = producto.stock,
+                        stockDisponible = producto.stockDisponible,
                         bajoStock = producto.requiereReposicion
                     )
                 }
@@ -280,7 +293,7 @@ private fun EstadoProductoBadge(activo: Boolean) {
 }
 
 @Composable
-private fun StockBadge(stock: Int, bajoStock: Boolean) {
+private fun StockBadge(stock: Int, stockDisponible: Boolean, bajoStock: Boolean) {
     Surface(
         shape = RoundedCornerShape(50),
         color = if (bajoStock) MaterialTheme.colorScheme.errorContainer
@@ -299,7 +312,11 @@ private fun StockBadge(stock: Int, bajoStock: Boolean) {
                 else MaterialTheme.colorScheme.onSecondaryContainer
             )
             Text(
-                text = if (bajoStock) "Bajo · $stock" else "Stock $stock",
+                text = when {
+                    !stockDisponible -> "Catálogo API"
+                    bajoStock -> "Bajo · $stock"
+                    else -> "Stock $stock"
+                },
                 style = MaterialTheme.typography.labelMedium,
                 color = if (bajoStock) MaterialTheme.colorScheme.onErrorContainer
                 else MaterialTheme.colorScheme.onSecondaryContainer

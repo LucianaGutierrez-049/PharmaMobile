@@ -52,6 +52,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
+import pe.edu.upeu.pharmamobilee.domain.model.OrigenProducto
 import pe.edu.upeu.pharmamobilee.navigation.Screen
 import pe.edu.upeu.pharmamobilee.presentacion.cliente.ClienteScreen
 import pe.edu.upeu.pharmamobilee.presentacion.inicio.InicioScreen
@@ -252,6 +253,9 @@ private fun PharmaMobilScaffold(
 ) {
     val productoViewModel = koinViewModel<ProductoViewModel>()
     val productoUiState by productoViewModel.uiState.collectAsState()
+    val productosLocales = productoUiState.productos.filter {
+        it.origen == OrigenProducto.LOCAL
+    }
 
     Scaffold(
         modifier = modifier,
@@ -303,9 +307,9 @@ private fun PharmaMobilScaffold(
             when (pantallaActual) {
                 Screen.Inicio -> {
                     InicioScreen(
-                        totalProductos = productoUiState.productos.size,
-                        productosActivos = productoUiState.productos.count { it.activo },
-                        productosBajoStock = productoUiState.productos.count { it.requiereReposicion },
+                        totalProductos = productosLocales.size,
+                        productosActivos = productosLocales.count { it.activo },
+                        productosBajoStock = productosLocales.count { it.requiereReposicion },
                         onProductosClick = { onSeleccionarPantalla(Screen.Productos) },
                         onClientesClick = { onSeleccionarPantalla(Screen.Clientes) },
                         onPedidosClick = { onSeleccionarPantalla(Screen.Pedidos) }
