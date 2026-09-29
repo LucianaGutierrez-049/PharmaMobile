@@ -26,8 +26,8 @@ class ProductoRepositorioEnMemoria(
         return producto
     }
 
-    override suspend fun listar(): List<Producto> {
+    override suspend fun listar(): Result<List<Producto>> = runCatching {
         delay(400)
-        return productos.toList()
+        productos.toList()
     }
 }

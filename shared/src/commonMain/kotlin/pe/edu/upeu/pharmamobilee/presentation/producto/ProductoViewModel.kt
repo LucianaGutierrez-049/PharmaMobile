@@ -6,7 +6,9 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import pe.edu.upeu.pharmamobilee.domain.error.ProductoCargaException
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
+import pe.edu.upeu.pharmamobilee.domain.model.OrigenProducto
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
 import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.ProductoRegistroException
@@ -126,6 +128,7 @@ class ProductoViewModel(
     }
 
     fun editarProducto(producto: Producto) {
+        if (producto.origen == OrigenProducto.REMOTO) return
         _uiState.update {
             it.copy(
                 nombre = producto.nombre,
@@ -162,9 +165,7 @@ class ProductoViewModel(
                 it.copy(fase = ProductoFase.Cargando)
             }
 
-            runCatching {
-                productoRepository.listar()
-            }.onSuccess { productos ->
+            productoRepository.listar().onSuccess { productos ->
                 _uiState.update {
                     it.copy(
                         productos = productos,
@@ -180,7 +181,11 @@ class ProductoViewModel(
                     it.copy(
                         productos = emptyList(),
                         fase = ProductoFase.Error(
-                            error.message ?: "No se pudo cargar el inventario"
+                            if (error is ProductoCargaException) {
+                                error.message ?: "No se pudo cargar el inventario"
+                            } else {
+                                "No se pudo conectar con el servicio. Verifica tu conexión a Internet."
+                            }
                         )
                     )
                 }

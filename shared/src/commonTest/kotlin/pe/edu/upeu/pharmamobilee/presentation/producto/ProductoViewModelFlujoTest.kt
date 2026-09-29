@@ -66,7 +66,10 @@ class ProductoViewModelFlujoTest {
             advanceUntilIdle()
 
             val fase = assertIs<ProductoFase.Error>(viewModel.uiState.value.fase)
-            assertEquals("Error al cargar productos", fase.mensaje)
+            assertEquals(
+                "No se pudo conectar con el servicio. Verifica tu conexión a Internet.",
+                fase.mensaje
+            )
         } finally {
             Dispatchers.resetMain()
         }
@@ -147,9 +150,9 @@ class ProductoViewModelFlujoTest {
             return producto
         }
 
-        override suspend fun listar(): List<Producto> {
+        override suspend fun listar(): Result<List<Producto>> = runCatching {
             errorAlListar?.let { throw it }
-            return productosGuardados.toList()
+            productosGuardados.toList()
         }
     }
 }
