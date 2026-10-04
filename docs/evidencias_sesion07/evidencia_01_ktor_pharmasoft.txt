@@ -1,0 +1,3 @@
+10-04 06:20:27.495 I/System.out( 3478): HttpClient: REQUEST: http://10.0.2.2:8080/api/v1/productos?pagina=0&tamanio=20
+10-04 06:20:29.043 I/System.out( 3478): HttpClient: RESPONSE: 200 
+10-04 06:22:33.250 I/adbd    (  555): adbd service requested 'shell,v2,TERM=dumb,raw:logcat -d -v time | grep HttpClient > /sdcard/evidencia_01_ktor_pharmasoft.txt'
