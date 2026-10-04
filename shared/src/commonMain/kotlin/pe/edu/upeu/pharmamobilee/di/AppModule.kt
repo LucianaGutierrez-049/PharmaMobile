@@ -4,6 +4,7 @@ import org.koin.core.KoinApplication
 import org.koin.core.context.startKoin
 import org.koin.core.module.Module
 import org.koin.core.module.dsl.viewModel
+import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import pe.edu.upeu.pharmamobilee.data.remote.ProductoApi
 import pe.edu.upeu.pharmamobilee.data.remote.crearHttpClient
@@ -15,7 +16,7 @@ import pe.edu.upeu.pharmamobilee.domain.usecase.RegistrarProductoUseCase
 import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoViewModel
 
 val dataModule = module {
-    single { crearHttpClient(get()) }
+    single { crearHttpClient(get(), get(named("urlBase"))) }
     single { ProductoApi(get()) }
     single { ProductoRepositorioEnMemoria() }
     single<ProductoRepository> {

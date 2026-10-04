@@ -10,6 +10,7 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.test.runTest
 import pe.edu.upeu.pharmamobilee.data.remote.ProductoApi
 import pe.edu.upeu.pharmamobilee.data.remote.crearHttpClient
+import pe.edu.upeu.pharmamobilee.domain.model.Producto
 import pe.edu.upeu.pharmamobilee.domain.model.OrigenProducto
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -18,35 +19,49 @@ import kotlin.test.assertTrue
 class ProductoRepositoryImplTest {
 
     @Test
-    fun get200DeserializaMapeaYConservaProductosLocales() = runTest {
+    fun get200DeserializaObjetoPaginadoYListaSoloProductosDelBackend() = runTest {
         val engine = MockEngine { request ->
-            assertEquals("/api/v1/products", request.url.encodedPath)
-            assertEquals("10", request.url.parameters["limit"])
+            assertEquals("/api/v1/productos", request.url.encodedPath)
+            assertEquals("0", request.url.parameters["pagina"])
+            assertEquals("20", request.url.parameters["tamanio"])
             respond(
                 content = """
-                    [{
-                      "id": 90,
-                      "title": "Producto remoto",
-                      "price": 25.5,
-                      "description": "Desde la API",
-                      "images": ["https://example.com/90.png"],
-                      "category": {"id": 4, "name": "Categoría API"},
-                      "campo_nuevo": "se ignora"
-                    }]
+                    {
+                      "contenido": [{
+                        "id": 90,
+                        "nombre": "Producto remoto",
+                        "precio": 25.5,
+                        "stock": 17,
+                        "estado": true,
+                        "categoriaId": 4,
+                        "categoriaNombre": "Categoría API",
+                        "fechaCreacion": "2026-09-20T09:12:44",
+                        "fechaModificacion": "2026-09-20T09:12:44",
+                        "campo_nuevo": "se ignora"
+                      }],
+                      "pagina": 0,
+                      "tamanio": 20,
+                      "totalElementos": 1,
+                      "totalPaginas": 1,
+                      "ultima": true
+                    }
                 """.trimIndent(),
                 status = HttpStatusCode.OK,
                 headers = headersOf(HttpHeaders.ContentType, ContentType.Application.Json.toString())
             )
         }
         val repository = ProductoRepositoryImpl(
-            api = ProductoApi(crearHttpClient(engine)),
-            repositorioLocal = ProductoRepositorioEnMemoria(emptyList())
+            api = ProductoApi(crearHttpClient(engine, "http://localhost/api/v1/")),
+            repositorioLocal = ProductoRepositorioEnMemoria(
+                listOf(Producto(id = 1L, nombre = "Solo local", precio = 5.0, stock = 3))
+            )
         )
 
         val productos = repository.listar().getOrThrow()
 
         assertEquals(1, productos.size)
         assertEquals("Producto remoto", productos.single().nombre)
+        assertEquals(17, productos.single().stock)
         assertEquals(OrigenProducto.REMOTO, productos.single().origen)
     }
 
@@ -56,7 +71,7 @@ class ProductoRepositoryImplTest {
             respondError(HttpStatusCode.InternalServerError)
         }
         val repository = ProductoRepositoryImpl(
-            api = ProductoApi(crearHttpClient(engine)),
+            api = ProductoApi(crearHttpClient(engine, "http://localhost/api/v1/")),
             repositorioLocal = ProductoRepositorioEnMemoria(emptyList())
         )
 

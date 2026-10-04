@@ -23,9 +23,7 @@ class ProductoRepositoryImpl(
         repositorioLocal.actualizar(producto)
 
     override suspend fun listar(): Result<List<Producto>> = runCatching {
-        val productosRemotos = api.obtenerProductos().map { it.toDomain() }
-        val productosLocales = repositorioLocal.listar().getOrThrow()
-        productosLocales + productosRemotos
+        api.listar().contenido.map { it.toDomain() }
     }.fold(
         onSuccess = { Result.success(it) },
         onFailure = { Result.failure(it.toProductoCargaException()) }
