@@ -14,9 +14,10 @@ import io.ktor.http.contentType
 import io.ktor.serialization.kotlinx.json.json
 import kotlinx.serialization.json.Json
 
-const val API_BASE_URL = "https://api.escuelajs.co/api/v1/"
-
-fun crearHttpClient(engine: HttpClientEngine): HttpClient = HttpClient(engine) {
+fun crearHttpClient(
+    engine: HttpClientEngine,
+    urlBase: String
+): HttpClient = HttpClient(engine) {
     expectSuccess = true
 
     install(ContentNegotiation) {
@@ -40,7 +41,7 @@ fun crearHttpClient(engine: HttpClientEngine): HttpClient = HttpClient(engine) {
     }
 
     defaultRequest {
-        url(API_BASE_URL)
+        url(urlBase)
         contentType(ContentType.Application.Json)
     }
 }
