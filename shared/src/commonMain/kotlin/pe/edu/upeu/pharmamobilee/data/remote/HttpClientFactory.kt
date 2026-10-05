@@ -16,14 +16,16 @@ import kotlinx.serialization.json.Json
 
 fun crearHttpClient(
     engine: HttpClientEngine,
-    urlBase: String
+    urlBase: String,
+    tiempoEsperaSolicitudMillis: Long = 15_000,
+    ignorarCamposDesconocidos: Boolean = true
 ): HttpClient = HttpClient(engine) {
     expectSuccess = true
 
     install(ContentNegotiation) {
         json(
             Json {
-                ignoreUnknownKeys = true
+                ignoreUnknownKeys = ignorarCamposDesconocidos
                 isLenient = true
                 encodeDefaults = true
             }
@@ -32,11 +34,11 @@ fun crearHttpClient(
 
     install(Logging) {
         logger = Logger.SIMPLE
-        level = LogLevel.HEADERS
+        level = LogLevel.ALL
     }
 
     install(HttpTimeout) {
-        requestTimeoutMillis = 15_000
+        requestTimeoutMillis = tiempoEsperaSolicitudMillis
         connectTimeoutMillis = 10_000
     }
 
