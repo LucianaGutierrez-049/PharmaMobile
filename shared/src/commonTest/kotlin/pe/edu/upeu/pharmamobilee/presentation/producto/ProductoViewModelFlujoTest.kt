@@ -1,10 +1,12 @@
 package pe.edu.upeu.pharmamobilee.presentation.producto
 
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.CompletableDeferred
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
@@ -29,6 +31,7 @@ class ProductoViewModelFlujoTest {
             val repositorio = ProductoRepositoryFalso(productos = emptyList())
             val viewModel = crearViewModel(repositorio)
 
+            assertIs<ProductoFase.Cargando>(viewModel.uiState.value.fase)
             advanceUntilIdle()
 
             assertIs<ProductoFase.SinProductos>(viewModel.uiState.value.fase)
@@ -49,6 +52,7 @@ class ProductoViewModelFlujoTest {
             val repositorio = ProductoRepositoryFalso(productos = productos)
             val viewModel = crearViewModel(repositorio)
 
+            assertIs<ProductoFase.Cargando>(viewModel.uiState.value.fase)
             advanceUntilIdle()
 
             assertIs<ProductoFase.ConProductos>(viewModel.uiState.value.fase)
@@ -124,13 +128,17 @@ class ProductoViewModelFlujoTest {
     }
 
     @Test
-    fun error400DelServidorSeMuestraDebajoDelCampoNombre() = runTest {
+    fun error400DelServidorSeDistribuyeEnLosCamposDelFormulario() = runTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
-            val mensaje = "El nombre debe tener entre 3 y 150 caracteres"
+            val errores = mapOf(
+                "nombre" to "El nombre debe tener entre 3 y 150 caracteres",
+                "precio" to "El precio debe ser mayor o igual a 0.01",
+                "stock" to "El stock no puede ser negativo"
+            )
             val repositorio = ProductoRepositoryFalso(
                 errorAlRegistrar = ErrorApiException(
-                    ErrorApi.Validacion(mapOf("nombre" to mensaje))
+                    ErrorApi.Validacion(errores)
                 )
             )
             val viewModel = crearViewModel(repositorio)
@@ -142,7 +150,9 @@ class ProductoViewModelFlujoTest {
             viewModel.guardarProducto()
             advanceUntilIdle()
 
-            assertEquals(mensaje, viewModel.uiState.value.nombreError)
+            assertEquals(errores["nombre"], viewModel.uiState.value.nombreError)
+            assertEquals(errores["precio"], viewModel.uiState.value.precioError)
+            assertEquals(errores["stock"], viewModel.uiState.value.stockError)
             assertIs<ProductoOperacion.Inactiva>(viewModel.uiState.value.operacion)
         } finally {
             Dispatchers.resetMain()
@@ -154,11 +164,23 @@ class ProductoViewModelFlujoTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
             val producto = Producto(id = 5L, nombre = "Temporal", precio = 2.0)
-            val repositorio = ProductoRepositoryFalso(productos = listOf(producto))
+            val permitirEliminacion = CompletableDeferred<Unit>()
+            val repositorio = ProductoRepositoryFalso(
+                productos = listOf(producto),
+                permitirEliminacion = permitirEliminacion
+            )
             val viewModel = crearViewModel(repositorio)
             advanceUntilIdle()
 
             viewModel.eliminarProducto(producto.id)
+            runCurrent()
+
+            assertEquals(
+                ProductoOperacion.EnCurso(ProductoOperacion.Tipo.Eliminar),
+                viewModel.uiState.value.operacion
+            )
+
+            permitirEliminacion.complete(Unit)
             advanceUntilIdle()
 
             assertIs<ProductoFase.SinProductos>(viewModel.uiState.value.fase)
@@ -181,7 +203,8 @@ class ProductoViewModelFlujoTest {
     private class ProductoRepositoryFalso(
         productos: List<Producto> = emptyList(),
         private val errorAlListar: Throwable? = null,
-        private val errorAlRegistrar: Throwable? = null
+        private val errorAlRegistrar: Throwable? = null,
+        private val permitirEliminacion: CompletableDeferred<Unit>? = null
     ) : ProductoRepository {
         private val productosGuardados = productos.toMutableList()
         var registros: Int = 0
@@ -213,6 +236,7 @@ class ProductoViewModelFlujoTest {
         }
 
         override suspend fun eliminar(id: Long): Result<Unit> = runCatching {
+            permitirEliminacion?.await()
             check(productosGuardados.removeAll { it.id == id })
         }
     }
