@@ -18,16 +18,14 @@ class ActualizarProductoUseCase(
             return Result.failure(errores.toException())
         }
 
-        return runCatching {
-            productoRepository.actualizar(
-                Producto(
-                    id = id,
-                    nombre = nombre.trim(),
-                    precio = precio.toDouble(),
-                    stock = stock.toInt(),
-                    activo = activo
-                )
+        return productoRepository.actualizar(
+            Producto(
+                id = id,
+                nombre = nombre.trim(),
+                precio = precio.toDouble(),
+                stock = stock.toInt(),
+                activo = activo
             )
-        }
+        )
     }
 }

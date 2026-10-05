@@ -12,8 +12,9 @@ import io.ktor.http.headersOf
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.test.runTest
 import kotlinx.serialization.SerializationException
-import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositorioEnMemoria
 import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositoryImpl
+import pe.edu.upeu.pharmamobilee.domain.error.ErrorApi
+import pe.edu.upeu.pharmamobilee.domain.error.ErrorApiException
 import kotlin.test.Test
 import kotlin.test.assertEquals
 import kotlin.test.assertTrue
@@ -30,7 +31,7 @@ class ConexionRestTest {
 
         val error = repository.listar().exceptionOrNull()
 
-        assertEquals("No se encontró el producto solicitado.", error?.message)
+        assertEquals(ErrorApi.NoEncontrado, (error as ErrorApiException).error)
         assertTrue(error.contieneCausa<ClientRequestException>())
     }
 
@@ -67,8 +68,7 @@ class ConexionRestTest {
 
         val error = repository.listar().exceptionOrNull()
 
-        assertEquals("No se pudo interpretar la respuesta del servidor.", error?.message)
-        assertTrue(error.contieneCausa<SerializationException>())
+        assertEquals(ErrorApi.Servidor, (error as ErrorApiException).error)
     }
 
     @Test
@@ -87,11 +87,7 @@ class ConexionRestTest {
 
         val error = repository.listar().exceptionOrNull()
 
-        assertEquals(
-            "La conexión tardó demasiado. Verifica tu Internet e inténtalo nuevamente.",
-            error?.message
-        )
-        assertTrue(error.contieneCausa<HttpRequestTimeoutException>())
+        assertEquals(ErrorApi.TiempoAgotado, (error as ErrorApiException).error)
     }
 
     private fun crearRepositorio(
@@ -107,7 +103,7 @@ class ConexionRestTest {
                 ignorarCamposDesconocidos = ignorarCamposDesconocidos
             )
         ),
-        repositorioLocal = ProductoRepositorioEnMemoria(emptyList())
+        categoriaPorDefecto = 1L
     )
 
     private companion object {

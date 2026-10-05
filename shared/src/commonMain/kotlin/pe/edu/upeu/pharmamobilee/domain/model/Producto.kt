@@ -9,6 +9,7 @@ data class Producto(
     val descripcion: String = "",
     val imagen: String = "",
     val categoria: String = "Sin categoría",
+    val categoriaId: Long? = null,
     val stockDisponible: Boolean = true,
     val origen: OrigenProducto = OrigenProducto.LOCAL
 ) {

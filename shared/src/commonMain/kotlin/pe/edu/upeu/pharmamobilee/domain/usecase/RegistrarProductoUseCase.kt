@@ -26,7 +26,7 @@ class RegistrarProductoUseCase(
             activo = activo
         )
 
-        return runCatching { productoRepository.registrar(producto) }
+        return productoRepository.registrar(producto)
     }
 }
 

@@ -137,22 +137,30 @@ class ProductoViewModelFlujoTest {
         var actualizaciones: Int = 0
             private set
 
-        override suspend fun registrar(producto: Producto): Producto {
+        override suspend fun registrar(producto: Producto): Result<Producto> = runCatching {
             registros++
-            return producto.copy(id = 100L + registros).also(productosGuardados::add)
+            producto.copy(id = 100L + registros).also(productosGuardados::add)
         }
 
-        override suspend fun actualizar(producto: Producto): Producto {
+        override suspend fun actualizar(producto: Producto): Result<Producto> = runCatching {
             actualizaciones++
             val indice = productosGuardados.indexOfFirst { it.id == producto.id }
             check(indice >= 0)
             productosGuardados[indice] = producto
-            return producto
+            producto
         }
 
         override suspend fun listar(): Result<List<Producto>> = runCatching {
             errorAlListar?.let { throw it }
             productosGuardados.toList()
+        }
+
+        override suspend fun obtener(id: Long): Result<Producto> = runCatching {
+            productosGuardados.first { it.id == id }
+        }
+
+        override suspend fun eliminar(id: Long): Result<Unit> = runCatching {
+            check(productosGuardados.removeAll { it.id == id })
         }
     }
 }
