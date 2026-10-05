@@ -1,0 +1,12 @@
+EVIDENCIA 06 - LOG KTOR DE OPERACIONES EXITOSAS
+Origen: Logcat del emulador Android emulator-5554
+Paquete: pe.edu.upeu.pharmamobilee
+
+10-05 08:52:11.643 I/System.out(4274): HttpClient: REQUEST: http://10.0.2.2:8080/api/v1/productos
+10-05 08:52:12.656 I/System.out(4274): HttpClient: RESPONSE: 201
+
+10-05 08:59:00.919 I/System.out(4274): HttpClient: REQUEST: http://10.0.2.2:8080/api/v1/productos/42
+10-05 08:59:01.912 I/System.out(4274): HttpClient: RESPONSE: 200
+
+10-05 09:04:22.768 I/System.out(5993): HttpClient: REQUEST: http://10.0.2.2:8080/api/v1/productos/42
+10-05 09:04:23.920 I/System.out(5993): HttpClient: RESPONSE: 204
