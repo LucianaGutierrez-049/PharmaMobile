@@ -183,7 +183,7 @@ story.extend([
         [cell("Estudiante", "TableHead"), cell("Luciana Gutierrez", "TableBody")],
         [cell("Asignatura", "TableHead"), cell("Desarrollo de Aplicaciones Móviles", "TableBody")],
         [cell("Ciclo y semestre", "TableHead"), cell("VI · 2026-2", "TableBody")],
-        [cell("Fecha", "TableHead"), cell("4 de octubre de 2026", "TableBody")],
+        [cell("Fecha", "TableHead"), cell("29 de septiembre de 2026", "TableBody")],
         [cell("Rama", "TableHead"), cell("feature/ktor-client-Gutierrez", "TableBody")],
         [cell("Repositorio", "TableHead"), cell("github.com/LucianaGutierrez-049/PharmaMobile", "TableBody")],
     ], colWidths=[4.5 * cm, 11.5 * cm], style=TableStyle([
