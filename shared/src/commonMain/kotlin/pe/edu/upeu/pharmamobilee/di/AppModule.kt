@@ -12,6 +12,8 @@ import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositorioEnMemoria
 import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositoryImpl
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
 import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
+import pe.edu.upeu.pharmamobilee.domain.usecase.EliminarProductoUseCase
+import pe.edu.upeu.pharmamobilee.domain.usecase.ListarProductosUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.RegistrarProductoUseCase
 import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoViewModel
 
@@ -22,7 +24,7 @@ val dataModule = module {
     single<ProductoRepository> {
         ProductoRepositoryImpl(
             api = get(),
-            repositorioLocal = get()
+            categoriaPorDefecto = 1L
         )
     }
 }
@@ -33,6 +35,12 @@ val domainModule = module {
     }
     factory {
         ActualizarProductoUseCase(get())
+    }
+    factory {
+        ListarProductosUseCase(get())
+    }
+    factory {
+        EliminarProductoUseCase(get())
     }
 }
 

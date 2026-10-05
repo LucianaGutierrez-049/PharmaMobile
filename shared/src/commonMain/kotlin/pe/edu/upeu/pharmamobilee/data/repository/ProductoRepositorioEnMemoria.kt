@@ -11,23 +11,34 @@ class ProductoRepositorioEnMemoria(
     private val productos = productosIniciales.toMutableList()
     private var siguienteId = (productos.maxOfOrNull { it.id } ?: 0L) + 1L
 
-    override suspend fun registrar(producto: Producto): Producto {
+    override suspend fun registrar(producto: Producto): Result<Producto> = runCatching {
         delay(400)
         val productoRegistrado = producto.copy(id = siguienteId++)
         productos.add(productoRegistrado)
-        return productoRegistrado
+        productoRegistrado
     }
 
-    override suspend fun actualizar(producto: Producto): Producto {
+    override suspend fun actualizar(producto: Producto): Result<Producto> = runCatching {
         delay(400)
         val indice = productos.indexOfFirst { it.id == producto.id }
         require(indice >= 0) { "No existe el producto con id ${producto.id}" }
         productos[indice] = producto
-        return producto
+        producto
     }
 
     override suspend fun listar(): Result<List<Producto>> = runCatching {
         delay(400)
         productos.toList()
+    }
+
+    override suspend fun obtener(id: Long): Result<Producto> = runCatching {
+        delay(200)
+        productos.first { it.id == id }
+    }
+
+    override suspend fun eliminar(id: Long): Result<Unit> = runCatching {
+        delay(200)
+        val eliminado = productos.removeAll { it.id == id }
+        require(eliminado) { "No existe el producto con id $id" }
     }
 }

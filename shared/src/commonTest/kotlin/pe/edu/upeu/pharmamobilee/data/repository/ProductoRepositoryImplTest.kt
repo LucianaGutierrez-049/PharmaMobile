@@ -52,9 +52,7 @@ class ProductoRepositoryImplTest {
         }
         val repository = ProductoRepositoryImpl(
             api = ProductoApi(crearHttpClient(engine, "http://localhost/api/v1/")),
-            repositorioLocal = ProductoRepositorioEnMemoria(
-                listOf(Producto(id = 1L, nombre = "Solo local", precio = 5.0, stock = 3))
-            )
+            categoriaPorDefecto = 1L
         )
 
         val productos = repository.listar().getOrThrow()
@@ -72,7 +70,7 @@ class ProductoRepositoryImplTest {
         }
         val repository = ProductoRepositoryImpl(
             api = ProductoApi(crearHttpClient(engine, "http://localhost/api/v1/")),
-            repositorioLocal = ProductoRepositorioEnMemoria(emptyList())
+            categoriaPorDefecto = 1L
         )
 
         assertTrue(repository.listar().isFailure)
