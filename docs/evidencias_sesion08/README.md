@@ -2,6 +2,8 @@
 
 ## Verificación realizada
 
+- `evidencia_android_listado.png`: inicio de PharmaMobile ejecutándose en el
+  emulador Android.
 - `evidencia_android_crud.png`: formulario para crear productos y listado
   conectado a PharmaSoft.
 - `evidencia_android_inventario.png`: inventario remoto con los productos de
@@ -14,6 +16,8 @@
   - PUT actualizó nombre, precio y stock.
   - DELETE respondió HTTP 204.
   - GET posterior confirmó el borrado lógico con `estado=false`.
+- Un POST inválido respondió HTTP 400 con mensajes independientes para
+  `nombre`, `precio` y `stock`, compatibles con los errores por campo de la UI.
 
 El registro de prueba quedó inactivo con el nombre
 `Evidencia CRUD Gutierrez Editado`; no se alteraron los productos iniciales.
