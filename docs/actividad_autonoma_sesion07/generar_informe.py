@@ -363,7 +363,7 @@ story.append(KeepTogether([
     p("6. Evidencias de ejecución (continuación)", "H1"),
     p("Evidencia 6 · Código real de ProductoResponseDto", "H2"),
     p("El DTO usado para deserializar productos está declarado con @Serializable. La captura permite contrastar el contrato JSON con los tipos Kotlin, la nulabilidad y los valores predeterminados reales."),
-    evidence_image(ACTIVIDAD / "evidencia_06_codigo_dto.png", max_width=15.8 * cm, max_height=17.0 * cm),
+    evidence_image(ACTIVIDAD / "evidencia_06_codigo_dto.png", max_width=13.8 * cm, max_height=15.0 * cm),
     p("ProductoResponseDto.kt con los nueve campos documentados en el diccionario de DTO.", "Caption"),
 ]))
 story.append(PageBreak())
@@ -388,10 +388,12 @@ story.append(table([
     ["README del proyecto", "Sección Conectividad REST actualizada"],
     ["Rama", "feature/ktor-client-Gutierrez"],
     ["Repositorio", "https://github.com/LucianaGutierrez-049/PharmaMobile"],
-    ["Commit/push de esta actividad", "No realizado todavía; requiere autorización expresa"],
+    ["Commit técnico", "55c54c2 · test: validar errores y compatibilidad JSON de Ktor"],
+    ["Commit documental", "b900072 · docs: agregar evidencias de la actividad autonoma 07"],
+    ["Publicación", "origin/feature/ktor-client-Gutierrez"],
 ], [5.0 * cm, 11.6 * cm]))
 
-story.extend(section("8. Limitación de plataforma y pendientes externos"))
+story.extend(section("8. Consideración de plataforma"))
 story.append(callout("iOS", "No se ejecutaron pruebas ni se incluyeron capturas iOS porque el equipo disponible utiliza Windows y el simulador iOS requiere macOS con Xcode. Esta limitación se declara expresamente para mantener la autenticidad de la evidencia.", "warn"))
 story.append(Spacer(1, 0.25 * cm))
 story.append(p("La cobertura funcional solicitada sí fue verificada en Android y mediante pruebas comunes de Kotlin Multiplatform. Para agregar evidencia iOS auténtica será necesario abrir iosApp/iosApp.xcodeproj en una Mac, ejecutar PharmaSoft y capturar el estado exitoso y un estado de error."))
@@ -408,11 +410,8 @@ story.append(table([
     ["Captura Android sin conexión", "CUMPLE"],
     ["Pruebas 404, timeout y JSON desconocido", "CUMPLE mediante tests automatizados"],
     ["README Conectividad REST", "CUMPLE"],
-    ["Capturas iOS", "NO EJECUTABLE EN WINDOWS"],
-    ["Commit y enlace final de esta actividad", "PENDIENTE DE AUTORIZACIÓN"],
+    ["Capturas iOS", "NO APLICA EN ESTE EQUIPO WINDOWS"],
+    ["Commits y rama feature", "CUMPLE · 55c54c2 y b900072"],
 ], [11.2 * cm, 5.4 * cm]))
-story.append(Spacer(1, 0.3 * cm))
-story.append(callout("Estado del informe", "Documentación técnica completa con evidencia auténtica disponible. No se atribuyen ejecuciones iOS ni capturas manuales que no hayan ocurrido.", "ok"))
-
 doc.build(story, onFirstPage=footer, onLaterPages=footer)
 print(OUT)
