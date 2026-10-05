@@ -26,8 +26,25 @@ class ProductoMapperTest {
         assertEquals(42, producto.stock)
         assertEquals(false, producto.activo)
         assertEquals("Salud", producto.categoria)
+        assertEquals(2L, producto.categoriaId)
         assertEquals(OrigenProducto.REMOTO, producto.origen)
         assertTrue(producto.stockDisponible)
+    }
+
+    @Test
+    fun dominioSeMapeaAlRequestConCategoriaDelServidor() {
+        val producto = ProductoResponseDto(
+            id = 9L,
+            nombre = "Producto API",
+            precio = 8.0,
+            stock = 5,
+            categoriaId = 3L
+        ).toDomain()
+
+        val request = producto.toRequest(categoriaPorDefecto = 1L)
+
+        assertEquals("Producto API", request.nombre)
+        assertEquals(3L, request.categoriaId)
     }
 
     @Test

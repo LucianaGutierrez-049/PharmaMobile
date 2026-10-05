@@ -11,7 +11,8 @@ class ActualizarProductoUseCase(
         nombre: String,
         precio: String,
         stock: String,
-        activo: Boolean
+        activo: Boolean,
+        categoriaId: Long? = null
     ): Result<Producto> {
         val errores = validarDatosProducto(nombre, precio, stock)
         if (errores.tieneErrores) {
@@ -24,7 +25,8 @@ class ActualizarProductoUseCase(
                 nombre = nombre.trim(),
                 precio = precio.toDouble(),
                 stock = stock.toInt(),
-                activo = activo
+                activo = activo,
+                categoriaId = categoriaId
             )
         )
     }
