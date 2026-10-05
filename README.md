@@ -60,6 +60,27 @@ corutina siempre se relanza. El `ViewModel` mantiene por separado la fase del
 listado y la operación CRUD, expone errores por campo y recarga el inventario
 después de crear, actualizar o eliminar.
 
+## Manejo de errores
+
+La capa de datos convierte los fallos técnicos en `ErrorApi` antes de que
+lleguen al `ViewModel`:
+
+| Situación | Error de dominio | Presentación |
+| --- | --- | --- |
+| HTTP 400 | `Validacion` | Mensajes debajo de `nombre`, `precio` o `stock` |
+| HTTP 404 | `NoEncontrado` | Mensaje controlado de recurso no encontrado |
+| HTTP 409 | `Conflicto` | Mensaje de la regla de negocio enviado por PharmaSoft |
+| HTTP 5xx o respuesta inválida | `Servidor` | Mensaje controlado, sin mostrar excepciones técnicas |
+| Backend inaccesible | `SinConexion` | Mensaje de conexión y opción de reintentar |
+| Tiempo de espera agotado | `TiempoAgotado` | Mensaje para intentar nuevamente |
+
+PharmaSoft realiza borrado lógico. Por ese motivo, un segundo `DELETE` sobre el
+mismo producto devuelve actualmente HTTP 409 y se representa como
+`ErrorApi.Conflicto`; no se documenta como 404 porque ese no es el comportamiento
+real del backend. `CancellationException` no se convierte en un error visible:
+se relanza para respetar la cancelación estructurada cuando termina el alcance
+de la corutina.
+
 ## Seguridad de red local
 
 - Android declara `INTERNET` y usa `network_security_config.xml` para autorizar

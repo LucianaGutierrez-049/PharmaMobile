@@ -1,0 +1,23 @@
+Comando:
+.\gradlew.bat :shared:testAndroidHostTest --console=plain
+
+Fecha: 2026-10-05
+Resultado Gradle:
+> Task :shared:testAndroidHostTest
+
+BUILD SUCCESSFUL in 30s
+32 actionable tasks: 3 executed, 29 up-to-date
+Configuration cache entry reused.
+
+Resultados JUnit leídos desde shared/build/test-results:
+archivos XML: 11
+tests: 32
+failures: 0
+errors: 0
+skipped: 0
+
+Verificación final adicional:
+.\gradlew.bat :shared:testAndroidHostTest :androidApp:assembleDebug --console=plain
+BUILD SUCCESSFUL in 5s
+70 actionable tasks: 3 executed, 5 from cache, 62 up-to-date
+
