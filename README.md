@@ -6,11 +6,12 @@ Kotlin Multiplatform y Compose Multiplatform.
 ## Alcance actual
 
 - Modelos de dominio para productos, clientes y pedidos.
-- Registro y edición local de productos con validaciones de negocio.
+- CRUD remoto de productos con validaciones locales y del backend.
 - Inventario con pestañas de activos, inactivos y bajo stock (`stock <= 5`).
 - Navegación adaptable para teléfono, tableta y pantallas amplias.
 - Clean Architecture, MVVM y Koin compartidos entre Android e iOS.
-- Catálogo real de PharmaSoft consultado con Ktor Client mediante GET.
+- Catálogo real de PharmaSoft gestionado con Ktor Client mediante GET, POST,
+  PUT y DELETE.
 
 ## Conectividad REST
 
@@ -20,25 +21,20 @@ proporciona desde el módulo Koin de cada plataforma:
 - Android Emulator: `http://10.0.2.2:8080/api/v1/`
 - iOS Simulator: `http://localhost:8080/api/v1/`
 
-Petición implementada actualmente en la aplicación móvil:
-
-```text
-GET productos?pagina=0&tamanio=20
-```
-
-PharmaSoft admite además los parámetros opcionales `ordenarPor` (`id`,
-`nombre`, `precio` o `stock`) y `direccion` (`asc` o `desc`). Si PharmaMobile
-no los envía, el servidor usa `id` y `asc`.
-
-El contrato CRUD documentado para la Unidad 2 utiliza estas rutas:
+El contrato CRUD implementado utiliza estas rutas:
 
 | Método | Ruta | Estado de implementación móvil |
 | --- | --- | --- |
 | GET | `/api/v1/productos` | Implementado |
-| GET | `/api/v1/productos/{id}` | Documentado; pendiente de la sesión 8 |
-| POST | `/api/v1/productos` | Documentado; pendiente de la sesión 8 |
-| PUT | `/api/v1/productos/{id}` | Documentado; pendiente de la sesión 8 |
-| DELETE | `/api/v1/productos/{id}` | Documentado; pendiente de la sesión 8 |
+| GET | `/api/v1/productos/{id}` | Implementado |
+| POST | `/api/v1/productos` | Implementado |
+| PUT | `/api/v1/productos/{id}` | Implementado |
+| DELETE | `/api/v1/productos/{id}` | Implementado |
+
+El listado envía `pagina=0` y `tamanio=20`. PharmaSoft admite además los
+parámetros opcionales `ordenarPor` (`id`, `nombre`, `precio` o `stock`) y
+`direccion` (`asc` o `desc`). Si PharmaMobile no los envía, el servidor usa
+`id` y `asc`.
 
 PharmaSoft devuelve un objeto paginado. `PaginaResponseDto<ProductoResponseDto>`
 deserializa `contenido`, `pagina`, `tamanio`, `totalElementos`, `totalPaginas` y
@@ -46,9 +42,11 @@ deserializa `contenido`, `pagina`, `tamanio`, `totalElementos`, `totalPaginas` y
 `estado`, `categoriaId`, `categoriaNombre`, `fechaCreacion` y
 `fechaModificacion`.
 
-El mapper convierte el DTO al modelo `Producto` utilizando el stock y el estado
-reales. El dominio no depende de Ktor ni de `kotlinx.serialization`. El listado
-muestra únicamente `contenido` del backend; no mezcla productos simulados.
+`ProductoRequestDto` contiene `nombre`, `precio`, `stock`, `estado` y
+`categoriaId`. Los mappers convierten entre DTO y dominio sin introducir Ktor ni
+`kotlinx.serialization` en la capa de presentación. El repositorio enlazado por
+Koin es la implementación REST; el repositorio en memoria se conserva solamente
+como alternativa no inyectada.
 
 El cliente usa `ContentNegotiation` con `ignoreUnknownKeys = true`, timeout de
 solicitud de 15 segundos y `Logging` en nivel `ALL` para registrar la petición,
@@ -56,9 +54,11 @@ cabeceras, estado y cuerpo durante las pruebas académicas. Los errores 404,
 timeout, deserialización y conexión se convierten en mensajes controlados antes
 de llegar a la interfaz.
 
-Las operaciones de registro y actualización siguen en memoria porque POST y PUT
-corresponden a la sesión siguiente. Por ese motivo, un producto registrado desde
-la aplicación no aparece en el listado remoto.
+Los errores HTTP se traducen en un único punto a `Validacion`, `NoEncontrado`,
+`Conflicto`, `Servidor`, `SinConexion` o `TiempoAgotado`. La cancelación de una
+corutina siempre se relanza. El `ViewModel` mantiene por separado la fase del
+listado y la operación CRUD, expone errores por campo y recarga el inventario
+después de crear, actualizar o eliminar.
 
 ## Seguridad de red local
 
@@ -74,11 +74,11 @@ la aplicación no aparece en el listado remoto.
 .\gradlew.bat :shared:testAndroidHostTest :androidApp:assembleDebug
 ```
 
-Resultado verificado el 4 de octubre de 2026: `BUILD SUCCESSFUL`. En el AVD
-`Medium_Phone`, Ktor ejecutó el GET contra PharmaSoft y recibió HTTP 200. La UI
-mostró Paracetamol 500 mg, Ibuprofeno 400 mg y Naproxeno 550 mg. En modo avión se
-mostró un error recuperable y, al restaurar la conexión, `Reintentar` volvió a
-cargar los tres productos.
+Resultado de la verificación automática de la Guía 08: `BUILD SUCCESSFUL` para
+las pruebas compartidas y la compilación del APK Android. Las pruebas cubren los
+cinco métodos HTTP, el DELETE 204 sin cuerpo, el mapeo de errores 400 y 409, la
+propagación de `CancellationException`, los mappers y los flujos de creación,
+actualización y eliminación del `ViewModel`.
 
 La ejecución del simulador iOS sigue pendiente porque requiere macOS y Xcode.
 En macOS, iniciar PharmaSoft en el puerto 8080, abrir
