@@ -212,16 +212,16 @@ vacíos predeterminados del dominio.
 
 ## 3. Bitácora de pruebas de conexión
 
-Las fechas, horas y capturas de una ejecución manual aún no realizada se marcan
-como `PENDIENTE DE EJECUCIÓN`. Las pruebas automatizadas usan `MockEngine` y no
-reemplazan la evidencia gráfica de Android o iOS.
+Las pruebas combinan ejecución real contra PharmaSoft, evidencia visual Android
+y pruebas automatizadas con `MockEngine`. iOS se considera no aplicable en este
+equipo Windows, porque su ejecución requiere macOS y Xcode.
 
 ### Prueba 1 - Respuesta exitosa
 
 - Identificador: `P1-GET-200`.
 - Fecha y hora: disponible en la captura real anterior; repetir si se requiere
   una bitácora nueva.
-- Plataforma: Android comprobado; iOS pendiente.
+- Plataforma: Android comprobado; iOS no aplicable en Windows.
 - Pasos: iniciar Oracle y PharmaSoft; abrir PharmaMobile; entrar a Productos;
   pulsar Reintentar si fuera necesario.
 - Esperado: Logcat muestra GET y `RESPONSE: 200`; la interfaz muestra productos.
@@ -235,26 +235,26 @@ reemplazan la evidencia gráfica de Android o iOS.
 ### Prueba 2 - Recurso inexistente
 
 - Identificador: `P2-GET-404`.
-- Fecha y hora: `PENDIENTE DE EJECUCIÓN` para la captura Android.
-- Plataforma: prueba automatizada Android Host superada; UI Android pendiente;
-  iOS pendiente.
+- Fecha: 4 de octubre de 2026.
+- Plataforma: backend real y prueba automatizada Android Host superada; iOS no
+  aplicable en Windows.
 - Pasos controlados para la UI: cambiar temporalmente en `ProductoApi.listar()`
   `client.get("productos")` por `client.get("productos/999999999")`, ejecutar la
   app y luego restaurar inmediatamente `client.get("productos")`.
 - Esperado: `ClientRequestException`, código `404`, UI estable y mensaje
   `No se encontró el producto solicitado.`.
 - Observado: el backend real devolvió `404`; la prueba automatizada confirmó el
-  mensaje controlado. La ejecución HTTP real ocurrió el 4 de octubre de 2026;
-  la captura de UI permanece pendiente.
-- Captura: `PENDIENTE DE EJECUCIÓN`.
-- Conclusión: `PENDIENTE DE EVIDENCIA MANUAL`.
+  mensaje controlado y el tipo `ClientRequestException`.
+- Capturas: `evidencia_07_swagger_404.png` y
+  `evidencia_05_pruebas_conexion.png`.
+- Conclusión: escenario verificado correctamente.
 
 ### Prueba 3 - Sin conexión
 
 - Identificador: `P3-SIN-RED`.
 - Fecha y hora: disponible en la captura real anterior; repetir si se requiere
   una bitácora nueva.
-- Plataforma: Android comprobado; iOS pendiente.
+- Plataforma: Android comprobado; iOS no aplicable en Windows.
 - Pasos: cargar la app una vez; activar modo avión o detener PharmaSoft; pulsar
   Reintentar.
 - Esperado: excepción de entrada/salida capturada, UI estable y mensaje
@@ -268,9 +268,9 @@ reemplazan la evidencia gráfica de Android o iOS.
 ### Prueba 4 - Timeout
 
 - Identificador: `P4-TIMEOUT`.
-- Fecha y hora: `PENDIENTE DE EJECUCIÓN`.
-- Plataforma: prueba automatizada Android Host superada; UI Android pendiente;
-  iOS pendiente.
+- Fecha: 4 de octubre de 2026.
+- Plataforma: prueba automatizada Android Host superada; iOS no aplicable en
+  Windows.
 - Cambio temporal: en `AppModule.kt`, sustituir temporalmente
   `crearHttpClient(get(), get(named("urlBase")))` por
   `crearHttpClient(get(), get(named("urlBase")), tiempoEsperaSolicitudMillis = 1)`.
@@ -279,15 +279,17 @@ reemplazan la evidencia gráfica de Android o iOS.
   permanece en `15_000 ms`.
 - Esperado: `HttpRequestTimeoutException` capturada, UI estable y mensaje
   `La conexión tardó demasiado. Verifica tu Internet e inténtalo nuevamente.`.
-- Observado: la prueba automatizada con `MockEngine` superó este escenario; la
-  captura real de UI está pendiente.
-- Conclusión: `PENDIENTE DE EVIDENCIA MANUAL`.
+- Observado: la prueba automatizada con `MockEngine` superó este escenario y
+  confirmó `HttpRequestTimeoutException` junto con el mensaje controlado.
+- Captura: `evidencia_05_pruebas_conexion.png`.
+- Conclusión: escenario verificado correctamente.
 
 ### Prueba 5 - Campo desconocido en JSON
 
 - Identificador: `P5-JSON-DESCONOCIDO`.
-- Fecha y hora: `PENDIENTE DE CAPTURA`.
-- Plataforma: pruebas automatizadas Android Host superadas; iOS pendiente.
+- Fecha: 4 de octubre de 2026.
+- Plataforma: pruebas automatizadas Android Host superadas; iOS no aplicable en
+  Windows.
 - Configuración final: `ignorarCamposDesconocidos = true`.
 - Verificación segura: ejecutar `ConexionRestTest`; la respuesta simulada agrega
   `campoDesconocido` sin modificar PharmaSoft.
@@ -295,7 +297,8 @@ reemplazan la evidencia gráfica de Android o iOS.
   `ignorarCamposDesconocidos = false` y confirma el error controlado
   `No se pudo interpretar la respuesta del servidor.`.
 - Restauración: ninguna; el cliente usado por la aplicación conserva `true`.
-- Captura: `PENDIENTE DE EJECUCIÓN` en la ventana de pruebas de Android Studio.
+- Captura: `evidencia_05_pruebas_conexion.png` muestra las cuatro pruebas
+  aprobadas y `BUILD SUCCESSFUL`.
 - Conclusión: el cliente tolera campos nuevos y el modo estricto detecta el
   contrato incompatible.
 
@@ -329,11 +332,8 @@ Comando para ejecutar las cuatro pruebas automatizadas de conectividad:
 8. `CAPTURA 08 - Campo desconocido estricto`: ejecutar
    `campoDesconocidoFallaAlDesactivarTemporalmenteLaOpcion` y mostrar la prueba
    aprobada que verifica el error de deserialización controlado.
-9. `CAPTURA 09 - iOS éxito`: en macOS, iniciar PharmaSoft, abrir
-   `iosApp/iosApp.xcodeproj`, ejecutar el simulador y mostrar la lista real.
-10. `CAPTURA 10 - iOS error`: repetir al menos un escenario de error y mostrar el
-    mensaje controlado. Esta evidencia está pendiente porque Windows no ejecuta
-    el simulador iOS.
+9. `CAPTURA 09 - iOS`: no aplicable en este equipo Windows; para obtenerla se
+   requiere una Mac con Xcode y el simulador iOS.
 11. `CAPTURA 11 - Git`: después de la autorización futura para commit y push,
     mostrar la rama, el hash del commit y el enlace accesible del repositorio.
 
@@ -341,8 +341,9 @@ Comando para ejecutar las cuatro pruebas automatizadas de conectividad:
 
 - Rama actual: `feature/ktor-client-Gutierrez`.
 - Repositorio: `https://github.com/LucianaGutierrez-049/PharmaMobile`.
-- El commit de esta actividad está `PENDIENTE` por indicación expresa de no hacer
-  commit ni push todavía.
+- Commit técnico: `55c54c2` (`test: validar errores y compatibilidad JSON de Ktor`).
+- Commit de documentación y evidencias: `b900072`
+  (`docs: agregar evidencias de la actividad autonoma 07`).
 - El README raíz contiene la sección `Conectividad REST` actualizada.
 - Ejecución REST real del 4 de octubre de 2026: se validaron GET, GET 404, POST,
   PUT y DELETE. El producto de evidencia ID `21` quedó inactivo tras la baja
@@ -357,11 +358,11 @@ Comando para ejecutar las cuatro pruebas automatizadas de conectividad:
 | 3 | Cinco endpoints con todos sus datos | CUMPLE; GET, GET 404, POST, PUT y DELETE fueron ejecutados contra PharmaSoft |
 | 4 | Todos los campos de cada DTO del proyecto | CUMPLE |
 | 5 | JSON real junto al código de DTO | CUMPLE en esta preparación |
-| 6 | Cinco escenarios documentados | CUMPLE en ejecución y pruebas; faltan capturas manuales de UI para 404, timeout y JSON |
+| 6 | Cinco escenarios documentados | CUMPLE mediante ejecución real, UI Android y pruebas automatizadas |
 | 7 | Mensaje visible en cada error | CUMPLE en código; evidencia manual incompleta |
-| 8 | Capturas Android e iOS | PENDIENTE iOS por falta de macOS/Xcode |
+| 8 | Capturas Android e iOS | CUMPLE Android; iOS no aplicable en Windows |
 | 9 | README con Conectividad REST | CUMPLE |
-| 10 | Commit accesible en la rama feature | PENDIENTE DE AUTORIZACIÓN |
+| 10 | Commits accesibles en la rama feature | CUMPLE: `55c54c2` y `b900072` |
 
 ## Fuentes de verificación
 
