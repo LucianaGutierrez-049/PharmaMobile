@@ -21,6 +21,7 @@ import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.filled.Payments
 import androidx.compose.material3.Button
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,6 +63,11 @@ fun ProductoScreen(
     LaunchedEffect(uiState.mensajeExito) {
         uiState.mensajeExito?.let { snackbarHostState.showSnackbar(it) }
     }
+    LaunchedEffect(uiState.operacion) {
+        (uiState.operacion as? ProductoOperacion.Fallida)?.let {
+            snackbarHostState.showSnackbar(it.mensaje)
+        }
+    }
     LaunchedEffect(uiState.productoEnEdicionId) {
         if (uiState.productoEnEdicionId != null) formularioExpandido = true
     }
@@ -88,7 +94,7 @@ fun ProductoScreen(
                     onPrecioChange = viewModel::actualizarPrecio,
                     onStockChange = viewModel::actualizarStock,
                     onActivoChange = viewModel::actualizarActivo,
-                    onRegistrar = viewModel::registrarProducto,
+                    onRegistrar = viewModel::guardarProducto,
                     onCancelarEdicion = viewModel::cancelarEdicion,
                     expandido = formularioExpandido,
                     onExpandidoChange = { formularioExpandido = it }
@@ -98,7 +104,8 @@ fun ProductoScreen(
                 ProductoContenido(
                     uiState = uiState,
                     onReintentar = viewModel::cargarProductos,
-                    onEditarProducto = viewModel::editarProducto
+                    onEditarProducto = viewModel::editarProducto,
+                    onEliminarProducto = viewModel::eliminarProducto
                 )
             }
 
@@ -129,7 +136,8 @@ fun ProductoScreen(
 private fun ProductoContenido(
     uiState: ProductoUiState,
     onReintentar: () -> Unit,
-    onEditarProducto: (Producto) -> Unit
+    onEditarProducto: (Producto) -> Unit,
+    onEliminarProducto: (Long) -> Unit
 ) {
     when (val fase = uiState.fase) {
             ProductoFase.Cargando -> LoadingState(title = "Cargando productos")
@@ -147,7 +155,10 @@ private fun ProductoContenido(
             ProductoFase.ConProductos -> {
                 InventarioTabs(
                     productos = uiState.productos,
-                    onEditarProducto = onEditarProducto
+                    onEditarProducto = onEditarProducto,
+                    onEliminarProducto = onEliminarProducto,
+                    eliminando = (uiState.operacion as? ProductoOperacion.EnCurso)
+                        ?.tipo == ProductoOperacion.Tipo.Eliminar
                 )
             }
 
@@ -169,6 +180,10 @@ private fun ProductoFormulario(
     expandido: Boolean,
     onExpandidoChange: (Boolean) -> Unit
 ) {
+    val operacionEnCurso = uiState.operacion as? ProductoOperacion.EnCurso
+    val guardando = operacionEnCurso?.tipo == ProductoOperacion.Tipo.Crear ||
+        operacionEnCurso?.tipo == ProductoOperacion.Tipo.Actualizar
+
     ElevatedCard(modifier = Modifier.fillMaxWidth()) {
         Column(
             modifier = Modifier.padding(20.dp),
@@ -270,14 +285,29 @@ private fun ProductoFormulario(
 
             Button(
                 onClick = onRegistrar,
+                enabled = !guardando,
                 modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)
             ) {
-                Text(if (uiState.productoEnEdicionId == null) "Registrar" else "Guardar cambios")
+                if (guardando) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(22.dp),
+                        strokeWidth = 2.dp
+                    )
+                } else {
+                    Text(
+                        if (uiState.productoEnEdicionId == null) {
+                            "Registrar"
+                        } else {
+                            "Guardar cambios"
+                        }
+                    )
+                }
             }
 
             if (uiState.productoEnEdicionId != null) {
                 OutlinedButton(
                     onClick = onCancelarEdicion,
+                    enabled = !guardando,
                     modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
                 ) {
                     Text("Cancelar edición")

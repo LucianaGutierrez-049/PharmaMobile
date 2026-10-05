@@ -14,10 +14,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Edit
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -27,6 +29,7 @@ import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -57,12 +60,15 @@ private data class ProductoTab(
 fun InventarioTabs(
     productos: List<Producto>,
     onEditarProducto: ((Producto) -> Unit)?,
+    onEliminarProducto: ((Long) -> Unit)?,
+    eliminando: Boolean,
     modifier: Modifier = Modifier
 ) {
     var tabSeleccionada by remember {
         mutableStateOf(0)
     }
     var busqueda by remember { mutableStateOf("") }
+    var productoAEliminar by remember { mutableStateOf<Producto?>(null) }
 
     val productosPorCategoria = when (tabSeleccionada) {
         0 -> filtrarProductosInventario(productos, ProductoFiltro.Activos)
@@ -132,7 +138,35 @@ fun InventarioTabs(
 
         ListaProductos(
             productos = productosFiltrados,
-            onEditarProducto = onEditarProducto
+            onEditarProducto = onEditarProducto,
+            onSolicitarEliminar = {
+                if (!eliminando) productoAEliminar = it
+            }
+        )
+    }
+
+    productoAEliminar?.let { producto ->
+        AlertDialog(
+            onDismissRequest = { productoAEliminar = null },
+            title = { Text("Eliminar producto") },
+            text = {
+                Text("¿Deseas eliminar ${producto.nombre}? Esta acción dará de baja el producto en PharmaSoft.")
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        productoAEliminar = null
+                        onEliminarProducto?.invoke(producto.id)
+                    }
+                ) {
+                    Text("Eliminar")
+                }
+            },
+            dismissButton = {
+                TextButton(onClick = { productoAEliminar = null }) {
+                    Text("Cancelar")
+                }
+            }
         )
     }
 }
@@ -140,7 +174,8 @@ fun InventarioTabs(
 @Composable
 private fun ListaProductos(
     productos: List<Producto>,
-    onEditarProducto: ((Producto) -> Unit)?
+    onEditarProducto: ((Producto) -> Unit)?,
+    onSolicitarEliminar: (Producto) -> Unit
 ) {
     if (productos.isEmpty()) {
         Surface(
@@ -170,11 +205,8 @@ private fun ListaProductos(
         productos.forEach { producto ->
             ProductCard(
                 producto = producto,
-                onEditar = onEditarProducto?.takeIf {
-                    producto.origen == OrigenProducto.LOCAL
-                }?.let {
-                    { it(producto) }
-                }
+                onEditar = onEditarProducto?.let { { it(producto) } },
+                onEliminar = { onSolicitarEliminar(producto) }
             )
         }
     }
@@ -183,7 +215,8 @@ private fun ListaProductos(
 @Composable
 fun ProductCard(
     producto: Producto,
-    onEditar: (() -> Unit)?
+    onEditar: (() -> Unit)?,
+    onEliminar: (() -> Unit)?
 ) {
     ElevatedCard(
         modifier = Modifier.fillMaxWidth(),
@@ -228,14 +261,23 @@ fun ProductCard(
                     }
                 }
 
-                if (onEditar != null) {
-                    IconButton(
-                        onClick = onEditar
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Editar ${producto.nombre}"
-                        )
+                Row {
+                    if (onEditar != null) {
+                        IconButton(onClick = onEditar) {
+                            Icon(
+                                imageVector = Icons.Default.Edit,
+                                contentDescription = "Editar ${producto.nombre}"
+                            )
+                        }
+                    }
+                    if (onEliminar != null) {
+                        IconButton(onClick = onEliminar) {
+                            Icon(
+                                imageVector = Icons.Default.Delete,
+                                contentDescription = "Eliminar ${producto.nombre}",
+                                tint = MaterialTheme.colorScheme.error
+                            )
+                        }
                     }
                 }
             }
@@ -256,9 +298,7 @@ fun ProductCard(
                 }
 
                 Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                    if (producto.origen == OrigenProducto.LOCAL) {
-                        EstadoProductoBadge(activo = producto.activo)
-                    }
+                    EstadoProductoBadge(activo = producto.activo)
                     StockBadge(
                         stock = producto.stock,
                         stockDisponible = producto.stockDisponible,

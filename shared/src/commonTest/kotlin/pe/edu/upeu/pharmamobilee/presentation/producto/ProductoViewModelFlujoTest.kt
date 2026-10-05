@@ -8,8 +8,12 @@ import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
+import pe.edu.upeu.pharmamobilee.domain.error.ErrorApi
+import pe.edu.upeu.pharmamobilee.domain.error.ErrorApiException
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
 import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
+import pe.edu.upeu.pharmamobilee.domain.usecase.EliminarProductoUseCase
+import pe.edu.upeu.pharmamobilee.domain.usecase.ListarProductosUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.RegistrarProductoUseCase
 import kotlin.test.Test
 import kotlin.test.assertEquals
@@ -59,7 +63,7 @@ class ProductoViewModelFlujoTest {
         Dispatchers.setMain(StandardTestDispatcher(testScheduler))
         try {
             val repositorio = ProductoRepositoryFalso(
-                errorAlListar = IllegalStateException("Error al cargar productos")
+                errorAlListar = ErrorApiException(ErrorApi.SinConexion)
             )
             val viewModel = crearViewModel(repositorio)
 
@@ -86,7 +90,7 @@ class ProductoViewModelFlujoTest {
             viewModel.actualizarNombre("Vitamina C")
             viewModel.actualizarPrecio("0")
             viewModel.actualizarStock("12")
-            viewModel.registrarProducto()
+            viewModel.guardarProducto()
             advanceUntilIdle()
 
             assertEquals("El precio debe ser mayor a 0", viewModel.uiState.value.precioError)
@@ -107,7 +111,7 @@ class ProductoViewModelFlujoTest {
 
             viewModel.editarProducto(producto)
             viewModel.actualizarPrecio("8.50")
-            viewModel.registrarProducto()
+            viewModel.guardarProducto()
             advanceUntilIdle()
 
             assertEquals(0, repositorio.registros)
@@ -119,17 +123,65 @@ class ProductoViewModelFlujoTest {
         }
     }
 
+    @Test
+    fun error400DelServidorSeMuestraDebajoDelCampoNombre() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val mensaje = "El nombre debe tener entre 3 y 150 caracteres"
+            val repositorio = ProductoRepositoryFalso(
+                errorAlRegistrar = ErrorApiException(
+                    ErrorApi.Validacion(mapOf("nombre" to mensaje))
+                )
+            )
+            val viewModel = crearViewModel(repositorio)
+            advanceUntilIdle()
+
+            viewModel.actualizarNombre("AB")
+            viewModel.actualizarPrecio("3.50")
+            viewModel.actualizarStock("10")
+            viewModel.guardarProducto()
+            advanceUntilIdle()
+
+            assertEquals(mensaje, viewModel.uiState.value.nombreError)
+            assertIs<ProductoOperacion.Inactiva>(viewModel.uiState.value.operacion)
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
+    @Test
+    fun eliminarRecargaLaListaYFinalizaLaOperacion() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val producto = Producto(id = 5L, nombre = "Temporal", precio = 2.0)
+            val repositorio = ProductoRepositoryFalso(productos = listOf(producto))
+            val viewModel = crearViewModel(repositorio)
+            advanceUntilIdle()
+
+            viewModel.eliminarProducto(producto.id)
+            advanceUntilIdle()
+
+            assertIs<ProductoFase.SinProductos>(viewModel.uiState.value.fase)
+            assertIs<ProductoOperacion.Inactiva>(viewModel.uiState.value.operacion)
+            assertEquals("Producto eliminado correctamente", viewModel.uiState.value.mensajeExito)
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
     private fun crearViewModel(productoRepository: ProductoRepository): ProductoViewModel {
         return ProductoViewModel(
+            listarProductosUseCase = ListarProductosUseCase(productoRepository),
             registrarProductoUseCase = RegistrarProductoUseCase(productoRepository),
             actualizarProductoUseCase = ActualizarProductoUseCase(productoRepository),
-            productoRepository = productoRepository
+            eliminarProductoUseCase = EliminarProductoUseCase(productoRepository)
         )
     }
 
     private class ProductoRepositoryFalso(
         productos: List<Producto> = emptyList(),
-        private val errorAlListar: Throwable? = null
+        private val errorAlListar: Throwable? = null,
+        private val errorAlRegistrar: Throwable? = null
     ) : ProductoRepository {
         private val productosGuardados = productos.toMutableList()
         var registros: Int = 0
@@ -138,6 +190,7 @@ class ProductoViewModelFlujoTest {
             private set
 
         override suspend fun registrar(producto: Producto): Result<Producto> = runCatching {
+            errorAlRegistrar?.let { throw it }
             registros++
             producto.copy(id = 100L + registros).also(productosGuardados::add)
         }
