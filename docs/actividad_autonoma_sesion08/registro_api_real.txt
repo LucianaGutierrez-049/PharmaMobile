@@ -1,0 +1,33 @@
+Ejecución real contra PharmaSoft — 2026-10-05
+
+POST /api/v1/productos
+HTTP 201
+Respuesta: {"id":43,"nombre":"Autonoma08Gutierrez20261005051104","precio":12.5,"stock":7,"estado":true,"categoriaId":1,"categoriaNombre":"Analgésicos","fechaCreacion":"2026-10-05T05:11:04.6276469","fechaModificacion":null}
+
+GET /api/v1/productos?pagina=0&tamanio=20
+HTTP 200
+Resultado comprobado: totalElementos=7; contenido incluye el ID 43.
+
+GET /api/v1/productos/43
+HTTP 200
+Respuesta: {"id":43,"nombre":"Autonoma08Gutierrez20261005051104","precio":12.5,"stock":7,"estado":true,"categoriaId":1,"categoriaNombre":"Analgésicos","fechaCreacion":"2026-10-05T05:11:04.627647","fechaModificacion":null}
+
+PUT /api/v1/productos/43
+HTTP 200
+Respuesta: {"id":43,"nombre":"Autonoma08Gutierrez20261005051104Editado","precio":13.75,"stock":9,"estado":true,"categoriaId":1,"categoriaNombre":"Analgésicos","fechaCreacion":"2026-10-05T05:11:04.627647","fechaModificacion":"2026-10-05T05:11:05.1351411"}
+
+DELETE /api/v1/productos/43
+HTTP 204
+Respuesta sin cuerpo. El producto quedó con borrado lógico.
+
+SEGUNDO DELETE /api/v1/productos/43
+HTTP 409
+Respuesta: {"timestamp":"2026-10-05T05:12:10.0599491","status":409,"error":"Conflict","message":"El producto Autonoma08Gutierrez20261005051104Editado ya se encuentra inactivo","path":"/api/v1/productos/43","validationErrors":null}
+
+PUT /api/v1/productos/999999
+HTTP 404
+Respuesta: {"timestamp":"2026-10-05T05:12:10.0889201","status":404,"error":"Not Found","message":"Producto no encontrado con id: 999999","path":"/api/v1/productos/999999","validationErrors":null}
+
+POST /api/v1/productos con nombre duplicado Paracetamol 500 mg
+HTTP 409
+Respuesta: {"timestamp":"2026-10-05T05:12:10.1037174","status":409,"error":"Conflict","message":"Ya existe un producto con el nombre Paracetamol 500 mg","path":"/api/v1/productos","validationErrors":null}
