@@ -10,6 +10,7 @@ import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
+import pe.edu.upeu.pharmamobilee.domain.platform.Compartidor
 import pe.edu.upeu.pharmamobilee.domain.error.ErrorApi
 import pe.edu.upeu.pharmamobilee.domain.error.ErrorApiException
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
@@ -18,6 +19,7 @@ import pe.edu.upeu.pharmamobilee.domain.usecase.EliminarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.ListarProductosUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.RegistrarProductoUseCase
 import kotlin.test.Test
+import kotlin.test.assertContains
 import kotlin.test.assertEquals
 import kotlin.test.assertIs
 
@@ -191,13 +193,53 @@ class ProductoViewModelFlujoTest {
         }
     }
 
-    private fun crearViewModel(productoRepository: ProductoRepository): ProductoViewModel {
+    @Test
+    fun compartirDelegaTextoComunAlCompartidor() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val producto = Producto(
+                id = 9L,
+                nombre = "Naproxeno 550 mg",
+                precio = 8.5,
+                stock = 14
+            )
+            val compartidor = CompartidorFalso()
+            val viewModel = crearViewModel(
+                productoRepository = ProductoRepositoryFalso(listOf(producto)),
+                compartidor = compartidor
+            )
+            advanceUntilIdle()
+
+            viewModel.compartir(producto)
+
+            assertContains(compartidor.ultimoTexto.orEmpty(), "Naproxeno 550 mg")
+            assertContains(compartidor.ultimoTexto.orEmpty(), "S/")
+            assertContains(compartidor.ultimoTexto.orEmpty(), "Stock: 14")
+        } finally {
+            Dispatchers.resetMain()
+        }
+    }
+
+    private fun crearViewModel(
+        productoRepository: ProductoRepository,
+        compartidor: Compartidor = CompartidorFalso()
+    ): ProductoViewModel {
         return ProductoViewModel(
             listarProductosUseCase = ListarProductosUseCase(productoRepository),
             registrarProductoUseCase = RegistrarProductoUseCase(productoRepository),
             actualizarProductoUseCase = ActualizarProductoUseCase(productoRepository),
-            eliminarProductoUseCase = EliminarProductoUseCase(productoRepository)
+            eliminarProductoUseCase = EliminarProductoUseCase(productoRepository),
+            compartidor = compartidor
         )
+    }
+
+    private class CompartidorFalso : Compartidor {
+        var ultimoTexto: String? = null
+            private set
+
+        override fun compartir(texto: String) {
+            ultimoTexto = texto
+        }
     }
 
     private class ProductoRepositoryFalso(

@@ -10,7 +10,9 @@ import pe.edu.upeu.pharmamobilee.domain.error.ErrorApi
 import pe.edu.upeu.pharmamobilee.domain.error.ErrorApiException
 import pe.edu.upeu.pharmamobilee.domain.error.mensajeUsuario
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
+import pe.edu.upeu.pharmamobilee.domain.platform.Compartidor
 import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
+import pe.edu.upeu.pharmamobilee.domain.usecase.comoTextoParaCompartir
 import pe.edu.upeu.pharmamobilee.domain.usecase.EliminarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.ListarProductosUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.ProductoRegistroException
@@ -20,7 +22,8 @@ class ProductoViewModel(
     private val listarProductosUseCase: ListarProductosUseCase,
     private val registrarProductoUseCase: RegistrarProductoUseCase,
     private val actualizarProductoUseCase: ActualizarProductoUseCase,
-    private val eliminarProductoUseCase: EliminarProductoUseCase
+    private val eliminarProductoUseCase: EliminarProductoUseCase,
+    private val compartidor: Compartidor
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProductoUiState())
     val uiState = _uiState.asStateFlow()
@@ -146,6 +149,10 @@ class ProductoViewModel(
     fun cancelarEdicion() {
         if (_uiState.value.operacion is ProductoOperacion.EnCurso) return
         limpiarFormulario()
+    }
+
+    fun compartir(producto: Producto) {
+        compartidor.compartir(producto.comoTextoParaCompartir())
     }
 
     fun cargarProductos() {

@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -18,6 +20,7 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ElevatedCard
@@ -25,6 +28,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Tab
@@ -61,6 +65,7 @@ fun InventarioTabs(
     productos: List<ProductoUi>,
     onEditarProducto: ((Producto) -> Unit)?,
     onEliminarProducto: ((Long) -> Unit)?,
+    onCompartirProducto: ((Producto) -> Unit)?,
     eliminando: Boolean,
     modifier: Modifier = Modifier
 ) {
@@ -139,6 +144,7 @@ fun InventarioTabs(
         ListaProductos(
             productos = productosFiltrados,
             onEditarProducto = onEditarProducto,
+            onCompartirProducto = onCompartirProducto,
             onSolicitarEliminar = {
                 if (!eliminando) productoAEliminar = it
             }
@@ -175,6 +181,7 @@ fun InventarioTabs(
 private fun ListaProductos(
     productos: List<ProductoUi>,
     onEditarProducto: ((Producto) -> Unit)?,
+    onCompartirProducto: ((Producto) -> Unit)?,
     onSolicitarEliminar: (ProductoUi) -> Unit
 ) {
     if (productos.isEmpty()) {
@@ -206,6 +213,7 @@ private fun ListaProductos(
             ProductCard(
                 producto = producto,
                 onEditar = onEditarProducto?.let { { it(producto.producto) } },
+                onCompartir = onCompartirProducto?.let { { it(producto.producto) } },
                 onEliminar = { onSolicitarEliminar(producto) }
             )
         }
@@ -216,6 +224,7 @@ private fun ListaProductos(
 fun ProductCard(
     producto: ProductoUi,
     onEditar: (() -> Unit)?,
+    onCompartir: (() -> Unit)?,
     onEliminar: (() -> Unit)?
 ) {
     ElevatedCard(
@@ -304,6 +313,20 @@ fun ProductCard(
                         stockDisponible = producto.stockDisponible,
                         bajoStock = producto.requiereReposicion
                     )
+                }
+            }
+
+            if (onCompartir != null) {
+                OutlinedButton(
+                    onClick = onCompartir,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = null
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Compartir")
                 }
             }
         }

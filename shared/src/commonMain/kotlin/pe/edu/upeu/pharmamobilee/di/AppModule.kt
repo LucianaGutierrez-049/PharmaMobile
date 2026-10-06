@@ -50,7 +50,8 @@ val presentationModule = module {
             listarProductosUseCase = get(),
             registrarProductoUseCase = get(),
             actualizarProductoUseCase = get(),
-            eliminarProductoUseCase = get()
+            eliminarProductoUseCase = get(),
+            compartidor = get()
         )
     }
 }
