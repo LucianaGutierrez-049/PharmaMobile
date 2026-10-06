@@ -1,6 +1,6 @@
 package pe.edu.upeu.pharmamobilee.presentacion.producto
 
-import pe.edu.upeu.pharmamobilee.domain.model.Producto
+import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoUi
 
 enum class ProductoFiltro {
     Activos,
@@ -9,9 +9,9 @@ enum class ProductoFiltro {
 }
 
 fun filtrarProductosInventario(
-    productos: List<Producto>,
+    productos: List<ProductoUi>,
     filtro: ProductoFiltro
-): List<Producto> {
+): List<ProductoUi> {
     return when (filtro) {
         ProductoFiltro.Activos -> productos.filter { it.activo }
         ProductoFiltro.Inactivos -> productos.filter { !it.activo }

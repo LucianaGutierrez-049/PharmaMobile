@@ -56,7 +56,7 @@ class ProductoViewModelFlujoTest {
             advanceUntilIdle()
 
             assertIs<ProductoFase.ConProductos>(viewModel.uiState.value.fase)
-            assertEquals(productos, viewModel.uiState.value.productos)
+            assertEquals(productos, viewModel.uiState.value.productos.map { it.producto })
         } finally {
             Dispatchers.resetMain()
         }
@@ -120,7 +120,7 @@ class ProductoViewModelFlujoTest {
 
             assertEquals(0, repositorio.registros)
             assertEquals(1, repositorio.actualizaciones)
-            assertEquals(8.50, viewModel.uiState.value.productos.single().precio)
+            assertEquals(8.50, viewModel.uiState.value.productos.single().producto.precio)
             assertEquals(null, viewModel.uiState.value.productoEnEdicionId)
         } finally {
             Dispatchers.resetMain()
