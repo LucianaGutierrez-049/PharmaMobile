@@ -105,7 +105,8 @@ fun ProductoScreen(
                     uiState = uiState,
                     onReintentar = viewModel::cargarProductos,
                     onEditarProducto = viewModel::editarProducto,
-                    onEliminarProducto = viewModel::eliminarProducto
+                    onEliminarProducto = viewModel::eliminarProducto,
+                    onCompartirProducto = viewModel::compartir
                 )
             }
 
@@ -137,7 +138,8 @@ private fun ProductoContenido(
     uiState: ProductoUiState,
     onReintentar: () -> Unit,
     onEditarProducto: (Producto) -> Unit,
-    onEliminarProducto: (Long) -> Unit
+    onEliminarProducto: (Long) -> Unit,
+    onCompartirProducto: (Producto) -> Unit
 ) {
     when (val fase = uiState.fase) {
             ProductoFase.Cargando -> LoadingState(title = "Cargando productos")
@@ -157,6 +159,7 @@ private fun ProductoContenido(
                     productos = uiState.productos,
                     onEditarProducto = onEditarProducto,
                     onEliminarProducto = onEliminarProducto,
+                    onCompartirProducto = onCompartirProducto,
                     eliminando = (uiState.operacion as? ProductoOperacion.EnCurso)
                         ?.tipo == ProductoOperacion.Tipo.Eliminar
                 )
