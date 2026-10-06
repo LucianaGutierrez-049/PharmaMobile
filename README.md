@@ -89,6 +89,42 @@ de la corutina.
 - La excepción de tráfico en claro es solo para desarrollo; producción debe usar
   HTTPS.
 
+## Capacidades nativas
+
+La sesión 09 incorpora capacidades específicas de Android e iOS sin introducir
+dependencias de plataforma en la presentación compartida:
+
+- `platform/Formato.kt` declara `expect fun formatearSoles(valor: Double)` en
+  `commonMain`.
+- `Formato.android.kt` implementa el `actual` con `NumberFormat` y la
+  configuración regional `es-PE`.
+- `Formato.ios.kt` implementa el `actual` con `NSNumberFormatter` y
+  `NSLocale("es_PE")`.
+- `Producto.toUi()` aplica el formato monetario en la capa de presentación. El
+  modelo de dominio conserva `precio` como `Double` y los composables reciben el
+  texto ya formateado.
+- `domain/platform/Compartidor.kt` define el contrato común. La extensión
+  `Producto.comoTextoParaCompartir()` arma una sola vez el mensaje con nombre,
+  precio formateado y stock.
+- `CompartidorAndroid` usa `Intent.ACTION_SEND`, MIME `text/plain`,
+  `Intent.EXTRA_TEXT` y un selector con `FLAG_ACTIVITY_NEW_TASK`.
+- `CompartidorIos` usa `UIActivityViewController` y presenta la hoja desde el
+  controlador raíz disponible.
+- `PlatformModule.android.kt` y `PlatformModule.ios.kt` registran en Koin la
+  implementación correspondiente de `Compartidor`. `ProductoViewModel` recibe
+  el contrato por constructor.
+- Cada tarjeta del inventario muestra el precio nativo e incluye el botón
+  **Compartir**. Compose solo invoca una acción común del ViewModel; no conoce
+  `Context`, `Intent` ni UIKit.
+
+El módulo Kotlin se expone a Swift como el framework `Shared`. `iOSApp.swift`
+inicializa Koin mediante `KoinIosKt.initKoinIos()` y `ContentView.swift` obtiene
+la interfaz Compose con `MainViewControllerKt.MainViewController()`.
+
+Android se compila y prueba desde Windows. La compilación y ejecución real de
+`iosMain`, el formato monetario iOS y la hoja de compartir permanecen pendientes
+de una máquina macOS con Xcode; no se presentan como evidencias ejecutadas.
+
 ## Verificación
 
 ```powershell
