@@ -1,7 +1,5 @@
 package pe.edu.upeu.pharmamobilee.presentation.producto
 
-import pe.edu.upeu.pharmamobilee.domain.model.Producto
-
 data class ProductoUiState(
     val nombre: String = "",
     val precio: String = "",
@@ -13,7 +11,7 @@ data class ProductoUiState(
     val mensajeExito: String? = null,
     val productoEnEdicionId: Long? = null,
     val categoriaEnEdicionId: Long? = null,
-    val productos: List<Producto> = emptyList(),
+    val productos: List<ProductoUi> = emptyList(),
     val fase: ProductoFase = ProductoFase.Cargando,
     val operacion: ProductoOperacion = ProductoOperacion.Inactiva
 )

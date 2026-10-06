@@ -40,10 +40,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.unit.dp
-import kotlin.math.roundToInt
 import pe.edu.upeu.pharmamobilee.domain.model.OrigenProducto
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
 import pe.edu.upeu.pharmamobilee.presentacion.components.SectionHeader
+import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoUi
 
 private val tabs = listOf(
     ProductoTab("Activos", Icons.Default.CheckCircle),
@@ -58,7 +58,7 @@ private data class ProductoTab(
 
 @Composable
 fun InventarioTabs(
-    productos: List<Producto>,
+    productos: List<ProductoUi>,
     onEditarProducto: ((Producto) -> Unit)?,
     onEliminarProducto: ((Long) -> Unit)?,
     eliminando: Boolean,
@@ -68,7 +68,7 @@ fun InventarioTabs(
         mutableStateOf(0)
     }
     var busqueda by remember { mutableStateOf("") }
-    var productoAEliminar by remember { mutableStateOf<Producto?>(null) }
+    var productoAEliminar by remember { mutableStateOf<ProductoUi?>(null) }
 
     val productosPorCategoria = when (tabSeleccionada) {
         0 -> filtrarProductosInventario(productos, ProductoFiltro.Activos)
@@ -173,9 +173,9 @@ fun InventarioTabs(
 
 @Composable
 private fun ListaProductos(
-    productos: List<Producto>,
+    productos: List<ProductoUi>,
     onEditarProducto: ((Producto) -> Unit)?,
-    onSolicitarEliminar: (Producto) -> Unit
+    onSolicitarEliminar: (ProductoUi) -> Unit
 ) {
     if (productos.isEmpty()) {
         Surface(
@@ -205,7 +205,7 @@ private fun ListaProductos(
         productos.forEach { producto ->
             ProductCard(
                 producto = producto,
-                onEditar = onEditarProducto?.let { { it(producto) } },
+                onEditar = onEditarProducto?.let { { it(producto.producto) } },
                 onEliminar = { onSolicitarEliminar(producto) }
             )
         }
@@ -214,7 +214,7 @@ private fun ListaProductos(
 
 @Composable
 fun ProductCard(
-    producto: Producto,
+    producto: ProductoUi,
     onEditar: (() -> Unit)?,
     onEliminar: (() -> Unit)?
 ) {
@@ -289,7 +289,7 @@ fun ProductCard(
             ) {
                 Column(verticalArrangement = Arrangement.spacedBy(2.dp)) {
                     Text(
-                        text = "S/ ${producto.precio.formatearPrecio()}",
+                        text = producto.precio,
                         style = MaterialTheme.typography.titleLarge,
                         color = MaterialTheme.colorScheme.primary
                     )
@@ -363,11 +363,4 @@ private fun StockBadge(stock: Int, stockDisponible: Boolean, bajoStock: Boolean)
                 )
         }
     }
-}
-
-private fun Double.formatearPrecio(): String {
-    val centavosTotales = (this * 100).roundToInt()
-    val entero = centavosTotales / 100
-    val centimos = centavosTotales % 100
-    return "$entero.${centimos.toString().padStart(2, '0')}"
 }
