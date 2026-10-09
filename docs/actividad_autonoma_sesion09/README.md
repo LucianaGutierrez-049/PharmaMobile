@@ -129,13 +129,140 @@ rg -n '^import\s+(android\.|platform\.)' shared/src/commonMain
 ```
 
 Resultado real: **0 coincidencias**. La compilación
-`:shared:compileAndroidMain` finalizó con `BUILD SUCCESSFUL`. El código iOS fue
-escrito, pero su compilación y ejecución permanecen pendientes de macOS/Xcode.
+`:shared:compileAndroidMain` finalizó con `BUILD SUCCESSFUL`. Además,
+`:shared:assemble` compiló `compileKotlinIosArm64` y
+`compileKotlinIosSimulatorArm64` correctamente desde Windows. Las tareas de
+enlace de los frameworks se omitieron y la ejecución iOS permanece pendiente de
+macOS/Xcode.
 
 ## Estado de evidencias
 
 - Android, moneda: disponible en `docs/evidencias_sesion09/evidencia_01_listado_android.png`.
 - Android, compartir: disponible en `docs/evidencias_sesion09/evidencia_02_selector_compartir_android.png`.
-- Android, información del dispositivo: **PENDIENTE DE EJECUCIÓN REAL**.
+- Android, información del dispositivo: disponible en
+  `docs/actividad_autonoma_sesion09/evidencias/evidencia_03_info_dispositivo_android.png`.
 - iOS, tres capacidades: **PENDIENTE DE MAC/XCODE**.
-- Error por `actual` ausente: **PENDIENTE DE EJECUCIÓN REAL**.
+- Error por `actual` ausente: **CUMPLE**; mensaje literal guardado en
+  `docs/actividad_autonoma_sesion09/error_actual_faltante.txt`.
+
+## Producto 4. Plan exacto de evidencias
+
+### Android 1. Formato de moneda
+
+**Qué abrir:** PharmaMobile en el emulador Android y la sección Productos.
+
+**Qué hacer:** esperar a que cargue el inventario de PharmaSoft.
+
+**Qué debe verse:** la tarjeta de Paracetamol 500 mg con el precio literal
+`S/ 4.50`.
+
+**Cuándo tomar la captura:** cuando el nombre y el precio estén visibles en la
+misma tarjeta. Evidencia ya disponible en
+`docs/evidencias_sesion09/evidencia_01_listado_android.png`.
+
+### Android 2. Compartir producto
+
+**Qué abrir:** Productos y la tarjeta de Paracetamol 500 mg.
+
+**Qué hacer:** pulsar el botón Compartir.
+
+**Qué debe verse:** el selector nativo Android y el texto
+`Paracetamol 500 mg - S/ 4.50 - Stock: 120`.
+
+**Cuándo tomar la captura:** con el selector abierto y el texto visible.
+Evidencia ya disponible en
+`docs/evidencias_sesion09/evidencia_02_selector_compartir_android.png`.
+
+### Android 3. Información del dispositivo
+
+**Qué abrir:** menú lateral de PharmaMobile y opción **Acerca de**.
+
+**Qué hacer:** entrar a la nueva pantalla.
+
+**Qué debe verse:** título `Información del dispositivo`, `Sistema: Android` y
+la versión real informada por `Build.VERSION.RELEASE`.
+
+**Cuándo tomar la captura:** cuando los dos valores estén completamente
+visibles. Evidencia real obtenida en el emulador `Medium_Phone`: sistema
+`Android`, versión `17`. Archivo:
+`docs/actividad_autonoma_sesion09/evidencias/evidencia_03_info_dispositivo_android.png`.
+
+### Compilador. actual faltante
+
+**Qué abrir:**
+`shared/src/androidMain/kotlin/pe/edu/upeu/pharmamobilee/platform/Formato.android.kt`
+y una terminal en la raíz del proyecto.
+
+**Qué hacer:** comentar temporalmente las dos líneas de la función
+`actual fun formatearSoles`, ejecutar
+`.\gradlew.bat :shared:compileAndroidMain --console=plain` y restaurar el
+archivo inmediatamente.
+
+**Qué debe verse:**
+`Expected formatearSoles has no actual declaration in module <commonMain> for JVM`.
+
+**Cuándo tomar la captura:** con la ruta de `Formato.kt`, el mensaje literal y
+la tarea `:shared:compileAndroidMain FAILED` visibles. La prueba ya fue ejecutada
+y restaurada; falta únicamente la captura de pantalla de la consola si se exige
+como imagen.
+
+## Instrucciones para obtener las evidencias iOS
+
+Estas tareas deben ejecutarse en una Mac con Xcode. No se consideran ejecutadas
+hasta recibir las capturas reales.
+
+1. Clonar o actualizar la rama `feature/expect-actual-Gutierrez`.
+2. Levantar PharmaSoft en el puerto 8080.
+3. Abrir `iosApp/iosApp.xcodeproj` en Xcode y seleccionar un simulador iPhone.
+4. Ejecutar la app y esperar que el inventario cargue desde
+   `http://localhost:8080/api/v1/`.
+5. **Precio:** abrir Productos, localizar Paracetamol 500 mg y capturar la tarjeta
+   con el precio. Registrar el texto literal producido por `NSNumberFormatter`;
+   no asumir que será idéntico al de Android.
+6. **Compartir:** pulsar Compartir en esa tarjeta y capturar
+   `UIActivityViewController` con el texto del producto visible.
+7. **Información del dispositivo:** abrir el menú, entrar a Acerca de y capturar
+   el nombre y la versión reales suministrados por `UIDevice`.
+8. Anotar nombre de la persona que ejecutó, modelo de simulador, versión de iOS,
+   fecha y commit probado.
+
+Estado de las tres capturas: **PENDIENTE DE MAC/XCODE**.
+
+## Verificación automática real
+
+- `:shared:assemble`: **BUILD SUCCESSFUL** en 2 min 10 s. Compiló el código
+  Kotlin de `iosArm64` e `iosSimulatorArm64`, pero omitió el enlace de frameworks
+  y no ejecutó iOS.
+- `:shared:testAndroidHostTest`: **34 pruebas, 0 fallos, 0 errores y 0 omitidas**.
+- `:androidApp:assembleDebug`: **BUILD SUCCESSFUL**.
+- APK generado en
+  `androidApp/build/outputs/apk/debug/androidApp-debug.apk`.
+- Ejecución Android: APK instalado y pantalla Acerca de verificada en el
+  emulador `Medium_Phone`; mostró `Sistema: Android` y `Versión: 17`.
+
+## Checklist de once puntos
+
+| N.º | Verificación | Estado |
+| --- | --- | --- |
+| 1 | PDF preparado para llamarse `S09_ActividadAutonoma_Gutierrez.pdf` | PENDIENTE DE EJECUCIÓN REAL |
+| 2 | Portada con nombre, sesión, fecha y enlace a la rama | PENDIENTE DE EJECUCIÓN REAL |
+| 3 | Inventario con firma, archivos, source sets y APIs | CUMPLE |
+| 4 | Cinco preguntas respondidas con código propio | CUMPLE |
+| 5 | Pregunta 4 con mensaje literal del compilador | CUMPLE |
+| 6 | `InfoDispositivo` tiene expect y dos actual diferentes | CUMPLE |
+| 7 | Tercera capacidad conectada a la interfaz | CUMPLE |
+| 8 | Sin imports `android.*` ni `platform.*` en commonMain | CUMPLE |
+| 9 | Evidencias de las tres capacidades en Android e iOS | PENDIENTE DE MAC/XCODE |
+| 10 | README contiene `Código específico de plataforma` | CUMPLE |
+| 11 | Commits identificados en la rama propia | CUMPLE |
+
+## Commits de la actividad
+
+- `e0d3a08` - `docs: registra inventario de capacidades nativas`.
+- `a1bfc75` - `docs: prepara comparacion de implementaciones por plataforma`.
+- `2599ce6` - `feat: agrega informacion del dispositivo con expect actual`.
+
+Rama de entrega:
+`https://github.com/LucianaGutierrez-049/PharmaMobile/tree/feature/expect-actual-Gutierrez`.
+Los commits permanecen locales hasta recibir autorización expresa para hacer
+push.

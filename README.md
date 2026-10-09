@@ -89,41 +89,80 @@ de la corutina.
 - La excepción de tráfico en claro es solo para desarrollo; producción debe usar
   HTTPS.
 
-## Capacidades nativas
+## Código específico de plataforma
 
 La sesión 09 incorpora capacidades específicas de Android e iOS sin introducir
-dependencias de plataforma en la presentación compartida:
+dependencias nativas en `commonMain`.
 
-- `platform/Formato.kt` declara `expect fun formatearSoles(valor: Double)` en
-  `commonMain`.
-- `Formato.android.kt` implementa el `actual` con `NumberFormat` y la
-  configuración regional `es-PE`.
-- `Formato.ios.kt` implementa el `actual` con `NSNumberFormatter` y
-  `NSLocale("es_PE")`.
+### formatearSoles
+
+- Contrato (`commonMain`):
+  `shared/src/commonMain/kotlin/pe/edu/upeu/pharmamobilee/platform/Formato.kt`.
+- Android (`androidMain`):
+  `shared/src/androidMain/kotlin/pe/edu/upeu/pharmamobilee/platform/Formato.android.kt`,
+  con `NumberFormat` y `Locale("es", "PE")` de la JVM.
+- iOS (`iosMain`):
+  `shared/src/iosMain/kotlin/pe/edu/upeu/pharmamobilee/platform/Formato.ios.kt`,
+  con `NSNumberFormatter`, `NSNumber` y `NSLocale("es_PE")` de Foundation.
 - `Producto.toUi()` aplica el formato monetario en la capa de presentación. El
   modelo de dominio conserva `precio` como `Double` y los composables reciben el
   texto ya formateado.
-- `domain/platform/Compartidor.kt` define el contrato común. La extensión
+
+### Compartidor
+
+- Contrato (`commonMain`):
+  `shared/src/commonMain/kotlin/pe/edu/upeu/pharmamobilee/domain/platform/Compartidor.kt`.
+- Android (`androidMain`):
+  `shared/src/androidMain/kotlin/pe/edu/upeu/pharmamobilee/platform/CompartidorAndroid.kt`,
+  con `Context`, `Intent.ACTION_SEND`, `Intent.EXTRA_TEXT`,
+  `Intent.createChooser` y `FLAG_ACTIVITY_NEW_TASK`.
+- iOS (`iosMain`):
+  `shared/src/iosMain/kotlin/pe/edu/upeu/pharmamobilee/platform/CompartidorIos.kt`,
+  con `UIActivityViewController` y `UIApplication` de UIKit.
+- La extensión
   `Producto.comoTextoParaCompartir()` arma una sola vez el mensaje con nombre,
   precio formateado y stock.
-- `CompartidorAndroid` usa `Intent.ACTION_SEND`, MIME `text/plain`,
-  `Intent.EXTRA_TEXT` y un selector con `FLAG_ACTIVITY_NEW_TASK`.
-- `CompartidorIos` usa `UIActivityViewController` y presenta la hoja desde el
-  controlador raíz disponible.
-- `PlatformModule.android.kt` y `PlatformModule.ios.kt` registran en Koin la
-  implementación correspondiente de `Compartidor`. `ProductoViewModel` recibe
-  el contrato por constructor.
 - Cada tarjeta del inventario muestra el precio nativo e incluye el botón
   **Compartir**. Compose solo invoca una acción común del ViewModel; no conoce
   `Context`, `Intent` ni UIKit.
+
+### InfoDispositivo
+
+- Contrato `expect` (`commonMain`):
+  `shared/src/commonMain/kotlin/pe/edu/upeu/pharmamobilee/platform/InfoDispositivo.kt`.
+- Android (`androidMain`):
+  `shared/src/androidMain/kotlin/pe/edu/upeu/pharmamobilee/platform/InfoDispositivo.android.kt`,
+  con `Build.VERSION.RELEASE`.
+- iOS (`iosMain`):
+  `shared/src/iosMain/kotlin/pe/edu/upeu/pharmamobilee/platform/InfoDispositivo.ios.kt`,
+  con `UIDevice.currentDevice.systemName()` y `systemVersion` de UIKit.
+- La pantalla compartida
+  `shared/src/commonMain/kotlin/pe/edu/upeu/pharmamobilee/presentacion/acerca/AcercaDeScreen.kt`
+  muestra el sistema y la versión sin importar APIs nativas.
+
+### PlatformModule
+
+- Contrato `expect` (`commonMain`):
+  `shared/src/commonMain/kotlin/pe/edu/upeu/pharmamobilee/di/AppModule.kt`.
+- Android (`androidMain`):
+  `shared/src/androidMain/kotlin/pe/edu/upeu/pharmamobilee/di/PlatformModule.android.kt`;
+  registra el motor OkHttp, la URL del emulador y
+  `CompartidorAndroid(androidContext())`.
+- iOS (`iosMain`):
+  `shared/src/iosMain/kotlin/pe/edu/upeu/pharmamobilee/di/PlatformModule.ios.kt`;
+  registra el motor Darwin, la URL local y `CompartidorIos()`.
+- `ProductoViewModel` recibe el contrato `Compartidor` por constructor mediante
+  Koin.
 
 El módulo Kotlin se expone a Swift como el framework `Shared`. `iOSApp.swift`
 inicializa Koin mediante `KoinIosKt.initKoinIos()` y `ContentView.swift` obtiene
 la interfaz Compose con `MainViewControllerKt.MainViewController()`.
 
-Android se compila y prueba desde Windows. La compilación y ejecución real de
-`iosMain`, el formato monetario iOS y la hoja de compartir permanecen pendientes
-de una máquina macOS con Xcode; no se presentan como evidencias ejecutadas.
+Android se compila y prueba desde Windows. `:shared:assemble` también valida la
+compilación Kotlin de `iosArm64` e `iosSimulatorArm64`, pero en Windows omite el
+enlace de los frameworks y no ejecuta la aplicación. El formato monetario iOS,
+la hoja de compartir y la pantalla de información del dispositivo permanecen
+pendientes de ejecución real en una máquina macOS con Xcode.
 
 ## Verificación
 
@@ -131,8 +170,9 @@ de una máquina macOS con Xcode; no se presentan como evidencias ejecutadas.
 .\gradlew.bat :shared:testAndroidHostTest :androidApp:assembleDebug
 ```
 
-Resultado de la verificación automática de la Guía 08: `BUILD SUCCESSFUL` para
-las pruebas compartidas y la compilación del APK Android. Las pruebas cubren los
+Resultado de la verificación automática actual: `BUILD SUCCESSFUL` para
+`:shared:assemble`, las pruebas compartidas y la compilación del APK Android.
+Se ejecutaron 34 pruebas, con 0 fallos, 0 errores y 0 omitidas. Las pruebas cubren los
 cinco métodos HTTP, el DELETE 204 sin cuerpo, el mapeo de errores 400 y 409, la
 propagación de `CancellationException`, los mappers y los flujos de creación,
 actualización y eliminación del `ViewModel`.
