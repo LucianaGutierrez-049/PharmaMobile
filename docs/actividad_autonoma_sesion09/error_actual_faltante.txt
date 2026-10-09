@@ -1,0 +1,22 @@
+PRUEBA REAL DE COMPILACION - ACTIVIDAD AUTONOMA 09
+
+Archivo temporalmente comentado:
+shared/src/androidMain/kotlin/pe/edu/upeu/pharmamobilee/platform/Formato.android.kt
+
+Comando ejecutado:
+.\gradlew.bat :shared:compileAndroidMain --console=plain
+
+Mensaje literal relevante:
+e: file:///C:/Users/lucia/AndroidStudioProjects/PHARMAMOBILEE/shared/src/commonMain/kotlin/pe/edu/upeu/pharmamobilee/platform/Formato.kt:3:1 Expected formatearSoles has no actual declaration in module <commonMain> for JVM
+
+Tarea fallida:
+Execution failed for task ':shared:compileAndroidMain'.
+
+Resultado:
+BUILD FAILED in 28s
+13 actionable tasks: 8 executed, 5 up-to-date
+Configuration cache entry reused.
+
+Restauracion:
+La declaracion actual de Formato.android.kt fue restaurada inmediatamente despues
+de capturar el mensaje. El proyecto no quedo roto.

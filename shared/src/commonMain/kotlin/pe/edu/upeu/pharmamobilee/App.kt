@@ -9,16 +9,21 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Home
+import androidx.compose.material.icons.filled.Info
+import androidx.compose.material.icons.filled.LightMode
+import androidx.compose.material.icons.filled.LocalPharmacy
 import androidx.compose.material.icons.filled.Medication
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -29,16 +34,16 @@ import androidx.compose.material3.NavigationRail
 import androidx.compose.material3.NavigationRailItem
 import androidx.compose.material3.PermanentDrawerSheet
 import androidx.compose.material3.PermanentNavigationDrawer
-import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
-import androidx.compose.material3.Tab
+import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -48,15 +53,16 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import pe.edu.upeu.pharmamobilee.domain.model.Producto
+import pe.edu.upeu.pharmamobilee.domain.model.OrigenProducto
 import pe.edu.upeu.pharmamobilee.navigation.Screen
 import pe.edu.upeu.pharmamobilee.presentacion.cliente.ClienteScreen
+import pe.edu.upeu.pharmamobilee.presentacion.acerca.AcercaDeScreen
 import pe.edu.upeu.pharmamobilee.presentacion.inicio.InicioScreen
 import pe.edu.upeu.pharmamobilee.presentacion.pedido.PedidoScreen
-import pe.edu.upeu.pharmamobilee.presentacion.producto.InventarioTabs
-import pe.edu.upeu.pharmamobilee.presentacion.producto.ProductoScreen
-import pe.edu.upeu.pharmamobilee.presentacion.producto.productosInventarioInicial
+import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoScreen
+import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoViewModel
 import pe.edu.upeu.pharmamobilee.theme.PharmaMobilTheme
+import org.koin.compose.viewmodel.koinViewModel
 
 private enum class TipoNavegacion {
     Compact,
@@ -74,7 +80,8 @@ private val opcionesNavegacion = listOf(
     OpcionNavegacion(Screen.Inicio, "Inicio", Icons.Default.Home),
     OpcionNavegacion(Screen.Productos, "Productos", Icons.Default.Medication),
     OpcionNavegacion(Screen.Clientes, "Clientes", Icons.Default.Person),
-    OpcionNavegacion(Screen.Pedidos, "Pedidos", Icons.Default.ShoppingCart)
+    OpcionNavegacion(Screen.Pedidos, "Pedidos", Icons.Default.ShoppingCart),
+    OpcionNavegacion(Screen.AcercaDe, "Acerca de", Icons.Default.Info)
 )
 
 @Composable
@@ -87,50 +94,30 @@ fun App() {
         mutableStateOf(false)
     }
 
-    val productos = remember {
-        mutableStateListOf<Producto>().also {
-            it.addAll(productosInventarioInicial)
-        }
-    }
-
     PharmaMobilTheme(
         darkTheme = darkTheme
     ) {
-        BoxWithConstraints(
-            modifier = Modifier.fillMaxSize()
-        ) {
-            val tipoNavegacion = when {
-                maxWidth < 600.dp -> TipoNavegacion.Compact
-                maxWidth < 840.dp -> TipoNavegacion.Medium
-                else -> TipoNavegacion.Expanded
-            }
+            BoxWithConstraints(
+                modifier = Modifier.fillMaxSize()
+            ) {
+                val tipoNavegacion = when {
+                    maxWidth < 600.dp -> TipoNavegacion.Compact
+                    maxWidth < 840.dp -> TipoNavegacion.Medium
+                    else -> TipoNavegacion.Expanded
+                }
 
-            PharmaMobilLayout(
-                pantallaActual = pantallaActual,
-                onSeleccionarPantalla = {
-                    pantallaActual = it
-                },
-                darkTheme = darkTheme,
-                onDarkThemeChange = {
-                    darkTheme = it
-                },
-                productos = productos,
-                onRegistrarProducto = { producto ->
-                    productos.add(
-                        producto.copy(
-                            id = (productos.maxOfOrNull { it.id } ?: 0L) + 1L
-                        )
-                    )
-                },
-                onActualizarProducto = { productoActualizado ->
-                    val index = productos.indexOfFirst { it.id == productoActualizado.id }
-                    if (index >= 0) {
-                        productos[index] = productoActualizado
-                    }
-                },
-                tipoNavegacion = tipoNavegacion
-            )
-        }
+                PharmaMobilLayout(
+                    pantallaActual = pantallaActual,
+                    onSeleccionarPantalla = {
+                        pantallaActual = it
+                    },
+                    darkTheme = darkTheme,
+                    onDarkThemeChange = {
+                        darkTheme = it
+                    },
+                    tipoNavegacion = tipoNavegacion
+                )
+            }
     }
 }
 
@@ -140,9 +127,6 @@ private fun PharmaMobilLayout(
     onSeleccionarPantalla: (Screen) -> Unit,
     darkTheme: Boolean,
     onDarkThemeChange: (Boolean) -> Unit,
-    productos: List<Producto>,
-    onRegistrarProducto: (Producto) -> Unit,
-    onActualizarProducto: (Producto) -> Unit,
     tipoNavegacion: TipoNavegacion
 ) {
     val drawerState = rememberDrawerState(
@@ -172,15 +156,15 @@ private fun PharmaMobilLayout(
             ) {
                 PharmaMobilScaffold(
                     pantallaActual = pantallaActual,
+                    onSeleccionarPantalla = onSeleccionarPantalla,
+                    darkTheme = darkTheme,
+                    onDarkThemeChange = onDarkThemeChange,
                     mostrarMenu = true,
                     onMenuClick = {
                         scope.launch {
                             drawerState.open()
                         }
-                    },
-                    productos = productos,
-                    onRegistrarProducto = onRegistrarProducto,
-                    onActualizarProducto = onActualizarProducto
+                    }
                 )
             }
         }
@@ -222,12 +206,13 @@ private fun PharmaMobilLayout(
                 }
 
                 PharmaMobilScaffold(
+                    modifier = Modifier.weight(1f),
                     pantallaActual = pantallaActual,
+                    onSeleccionarPantalla = onSeleccionarPantalla,
+                    darkTheme = darkTheme,
+                    onDarkThemeChange = onDarkThemeChange,
                     mostrarMenu = false,
-                    onMenuClick = {},
-                    productos = productos,
-                    onRegistrarProducto = onRegistrarProducto,
-                    onActualizarProducto = onActualizarProducto
+                    onMenuClick = {}
                 )
             }
         }
@@ -247,11 +232,11 @@ private fun PharmaMobilLayout(
             ) {
                 PharmaMobilScaffold(
                     pantallaActual = pantallaActual,
+                    onSeleccionarPantalla = onSeleccionarPantalla,
+                    darkTheme = darkTheme,
+                    onDarkThemeChange = onDarkThemeChange,
                     mostrarMenu = false,
-                    onMenuClick = {},
-                    productos = productos,
-                    onRegistrarProducto = onRegistrarProducto,
-                    onActualizarProducto = onActualizarProducto
+                    onMenuClick = {}
                 )
             }
         }
@@ -261,20 +246,34 @@ private fun PharmaMobilLayout(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun PharmaMobilScaffold(
+    modifier: Modifier = Modifier,
     pantallaActual: Screen,
+    onSeleccionarPantalla: (Screen) -> Unit,
+    darkTheme: Boolean,
+    onDarkThemeChange: (Boolean) -> Unit,
     mostrarMenu: Boolean,
-    onMenuClick: () -> Unit,
-    productos: List<Producto>,
-    onRegistrarProducto: (Producto) -> Unit,
-    onActualizarProducto: (Producto) -> Unit
+    onMenuClick: () -> Unit
 ) {
+    val productoViewModel = koinViewModel<ProductoViewModel>()
+    val productoUiState by productoViewModel.uiState.collectAsState()
+    val productosLocales = productoUiState.productos.filter {
+        it.origen == OrigenProducto.LOCAL
+    }
+
     Scaffold(
+        modifier = modifier,
+        containerColor = MaterialTheme.colorScheme.background,
         topBar = {
             TopAppBar(
                 title = {
-                    Text(
-                        text = tituloPantalla(pantallaActual)
-                    )
+                    Column {
+                        Text(text = tituloPantalla(pantallaActual), style = MaterialTheme.typography.titleLarge)
+                        Text(
+                            text = "PharmaMobil",
+                            style = MaterialTheme.typography.labelMedium,
+                            color = MaterialTheme.colorScheme.primary
+                        )
+                    }
                 },
                 navigationIcon = {
                     if (mostrarMenu) {
@@ -287,7 +286,19 @@ private fun PharmaMobilScaffold(
                             )
                         }
                     }
-                }
+                },
+                actions = {
+                    IconButton(onClick = { onDarkThemeChange(!darkTheme) }) {
+                        Icon(
+                            imageVector = if (darkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
+                            contentDescription = if (darkTheme) "Activar modo claro" else "Activar modo oscuro"
+                        )
+                    }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface,
+                    titleContentColor = MaterialTheme.colorScheme.onSurface
+                )
             )
         }
     ) { paddingValues ->
@@ -298,14 +309,19 @@ private fun PharmaMobilScaffold(
         ) {
             when (pantallaActual) {
                 Screen.Inicio -> {
-                    InicioScreen()
+                    InicioScreen(
+                        totalProductos = productosLocales.size,
+                        productosActivos = productosLocales.count { it.activo },
+                        productosBajoStock = productosLocales.count { it.requiereReposicion },
+                        onProductosClick = { onSeleccionarPantalla(Screen.Productos) },
+                        onClientesClick = { onSeleccionarPantalla(Screen.Clientes) },
+                        onPedidosClick = { onSeleccionarPantalla(Screen.Pedidos) }
+                    )
                 }
 
                 Screen.Productos -> {
-                    ProductosContenido(
-                        productos = productos,
-                        onRegistrarProducto = onRegistrarProducto,
-                        onActualizarProducto = onActualizarProducto
+                    ProductoScreen(
+                        viewModel = productoViewModel
                     )
                 }
 
@@ -316,84 +332,11 @@ private fun PharmaMobilScaffold(
                 Screen.Pedidos -> {
                     PedidoScreen()
                 }
+
+                Screen.AcercaDe -> {
+                    AcercaDeScreen()
+                }
             }
-        }
-    }
-}
-
-@Composable
-private fun ProductosContenido(
-    productos: List<Producto>,
-    onRegistrarProducto: (Producto) -> Unit,
-    onActualizarProducto: (Producto) -> Unit
-) {
-    var seccionSeleccionada by remember {
-        mutableStateOf(0)
-    }
-
-    var productoEnEdicion by remember {
-        mutableStateOf<Producto?>(null)
-    }
-
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .verticalScroll(rememberScrollState())
-            .padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        PrimaryTabRow(
-            selectedTabIndex = seccionSeleccionada
-        ) {
-            Tab(
-                selected = seccionSeleccionada == 0,
-                onClick = {
-                    seccionSeleccionada = 0
-                },
-                text = {
-                    Text("Inventario")
-                }
-            )
-
-            Tab(
-                selected = seccionSeleccionada == 1,
-                onClick = {
-                    productoEnEdicion = null
-                    seccionSeleccionada = 1
-                },
-                text = {
-                    Text(if (productoEnEdicion == null) "Registrar" else "Editar")
-                }
-            )
-        }
-
-        if (seccionSeleccionada == 0) {
-            InventarioTabs(
-                productos = productos,
-                onEditarProducto = { producto ->
-                    productoEnEdicion = producto
-                    seccionSeleccionada = 1
-                }
-            )
-        } else {
-            ProductoScreen(
-                onRegistrar = { producto ->
-                    onRegistrarProducto(producto)
-                    productoEnEdicion = null
-                    seccionSeleccionada = 0
-                },
-                productoEnEdicion = productoEnEdicion,
-                onActualizar = { producto ->
-                    onActualizarProducto(producto)
-                    productoEnEdicion = null
-                    seccionSeleccionada = 0
-                },
-                onCancelarEdicion = {
-                    productoEnEdicion = null
-                    seccionSeleccionada = 0
-                },
-                modifier = Modifier.fillMaxWidth()
-            )
         }
     }
 }
@@ -405,52 +348,64 @@ private fun DrawerContent(
     darkTheme: Boolean,
     onDarkThemeChange: (Boolean) -> Unit
 ) {
-    DrawerHeader()
+    Column(modifier = Modifier.fillMaxHeight()) {
+        DrawerHeader()
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
-    opcionesNavegacion.forEach { opcion ->
-        NavigationDrawerItem(
-            label = {
-                Text(opcion.titulo)
-            },
-            selected = pantallaActual::class == opcion.screen::class,
-            onClick = {
-                onSeleccionarPantalla(opcion.screen)
-            },
-            icon = {
-                Icon(
-                    imageVector = opcion.icono,
-                    contentDescription = opcion.titulo
-                )
-            }
+        Text(
+            text = "NAVEGACIÓN",
+            style = MaterialTheme.typography.labelSmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(start = 28.dp, top = 20.dp, bottom = 8.dp)
+        )
+
+        opcionesNavegacion.forEach { opcion ->
+            NavigationDrawerItem(
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
+                label = { Text(opcion.titulo) },
+                selected = pantallaActual::class == opcion.screen::class,
+                onClick = { onSeleccionarPantalla(opcion.screen) },
+                icon = {
+                    Icon(imageVector = opcion.icono, contentDescription = opcion.titulo)
+                }
+            )
+        }
+
+        Spacer(modifier = Modifier.weight(1f))
+        HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
+        ThemeSwitch(
+            darkTheme = darkTheme,
+            onDarkThemeChange = onDarkThemeChange
         )
     }
-
-    Spacer(
-        modifier = Modifier.padding(8.dp)
-    )
-
-    ThemeSwitch(
-        darkTheme = darkTheme,
-        onDarkThemeChange = onDarkThemeChange
-    )
 }
 
 @Composable
 private fun DrawerHeader() {
-    Column(
+    Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(24.dp)
+            .padding(24.dp),
+        horizontalArrangement = Arrangement.spacedBy(14.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = "PharmaMobil",
-            style = MaterialTheme.typography.headlineSmall
-        )
+        Surface(shape = CircleShape, color = MaterialTheme.colorScheme.primaryContainer) {
+            Icon(
+                imageVector = Icons.Default.LocalPharmacy,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.padding(12.dp).size(28.dp)
+            )
+        }
 
-        Text(
-            text = "Gestión farmacéutica",
-            style = MaterialTheme.typography.bodyMedium
-        )
+        Column {
+            Text(text = "PharmaMobil", style = MaterialTheme.typography.titleLarge)
+            Text(
+                text = "Gestión farmacéutica",
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+        }
     }
 }
 
@@ -502,5 +457,6 @@ private fun tituloPantalla(
         Screen.Productos -> "Productos"
         Screen.Clientes -> "Clientes"
         Screen.Pedidos -> "Pedidos"
+        Screen.AcercaDe -> "Acerca de"
     }
 }
