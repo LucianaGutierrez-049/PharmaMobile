@@ -106,6 +106,32 @@ recibe contratos como `Compartidor`; solo la acción final que abre la interfaz
 nativa vive en el source set específico. El mismo criterio mantiene en común el
 repositorio REST, los casos de uso y las reglas de validación.
 
+## Producto 3. Información del dispositivo
+
+La tercera capacidad se implementó mediante el contrato común
+`InfoDispositivo`, con las propiedades `sistema` y `version`. El `actual` de
+Android devuelve `Android` y `Build.VERSION.RELEASE`; el de iOS obtiene
+`UIDevice.currentDevice.systemName()` y
+`UIDevice.currentDevice.systemVersion` desde UIKit.
+
+La capacidad está conectada a la pantalla Compose
+`presentacion/acerca/AcercaDeScreen.kt`. La navegación incorpora la opción
+**Acerca de**, y la pantalla muestra dos valores obtenidos únicamente a través
+del contrato común:
+
+- `Sistema: Android` o el nombre real informado por iOS.
+- `Versión: <versión informada por la plataforma>`.
+
+La búsqueda global ejecutada después de la implementación fue:
+
+```powershell
+rg -n '^import\s+(android\.|platform\.)' shared/src/commonMain
+```
+
+Resultado real: **0 coincidencias**. La compilación
+`:shared:compileAndroidMain` finalizó con `BUILD SUCCESSFUL`. El código iOS fue
+escrito, pero su compilación y ejecución permanecen pendientes de macOS/Xcode.
+
 ## Estado de evidencias
 
 - Android, moneda: disponible en `docs/evidencias_sesion09/evidencia_01_listado_android.png`.
