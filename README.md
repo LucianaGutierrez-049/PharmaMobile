@@ -120,14 +120,19 @@ según los permisos devueltos por PharmaSoft, por ejemplo `CATALOGO_LEER`,
 
 Usuarios de prueba provistos por PharmaSoft:
 
-| Usuario | Rol | Alcance principal |
-| --- | --- | --- |
-| `admin` | ADMIN | Acceso administrativo completo |
-| `vendedor` | VENDEDOR | Ventas, clientes y lectura de catálogo |
-| `almacen` | ALMACENERO | Lectura y escritura de catálogo |
+| Usuario | Contraseña de prueba local | Rol | Alcance principal |
+| --- | --- | --- | --- |
+| `admin` | `Admin123` | ADMIN | Acceso administrativo completo |
+| `vendedor` | `Vendedor123` | VENDEDOR | Ventas, clientes y lectura de catálogo |
+| `almacen` | `Almacen123` | ALMACENERO | Lectura y escritura de catálogo |
 
-Las contraseñas de prueba se mantienen en la carga inicial de datos del backend;
-no se documentan secretos JWT ni se incluyen tokens reales en este repositorio.
+Estas cuentas corresponden a la carga inicial académica de PharmaSoft y se usan
+solo en el entorno local de pruebas. No se documentan secretos JWT ni se
+incluyen tokens reales en este repositorio.
+
+Las evidencias de autenticación, CRUD Android, 401/403 y Logging saneado están en
+`docs/evidencias_sesion10/README.md` y en el informe PDF de la Guía 10.
+Se omiten las pruebas y capturas iOS por no disponer de macOS/Xcode.
 
 ## Código específico de plataforma
 
