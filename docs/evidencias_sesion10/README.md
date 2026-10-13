@@ -129,29 +129,34 @@ Resultado comprobado antes del ajuste final de documentación:
 | 9 | Manejo de 401/403 y permisos | CUMPLE | `EjecutarLlamada.kt`, ViewModel y navegación filtrada |
 | 10 | Verificación multiplataforma | PARCIAL | Android compila y tiene APK; iOS compila, pero su ejecución requiere Mac/Xcode |
 
-## 7. Capturas manuales pendientes
+## 7. Capturas reales y descripción
 
-No se deben fabricar evidencias. El AVD disponible presentó el mensaje del
-sistema “System UI isn't responding” durante el intento automatizado y la
-superficie de captura de Chrome no pudo inicializarse. Por eso quedan pendientes
-estas capturas visuales, aunque las pruebas HTTP y de compilación sí fueron
-reales:
+Se ejecutó PharmaMobile en Android y la colección de seguridad en Postman contra
+el backend local. Las imágenes están incluidas en el informe PDF, con título,
+descripción y resultado. Las respuestas de login se capturaron en Test Results
+para no publicar los JWT ni las contraseñas de prueba.
 
-1. Oracle en estado `Up` y PharmaSoft mostrando `Started` y Flyway v3.
-2. Swagger con login HTTP 200, ocultando el valor del token.
-3. Swagger con recurso protegido sin token (401).
-4. Pantalla de login de PharmaMobile.
-5. Login exitoso de ADMIN y menú completo.
-6. ALMACENERO con Productos visible y Clientes oculto.
-7. Cierre de sesión y regreso al login.
-8. Reinicio de la app conservando una sesión válida.
-9. Logcat con `Authorization` censurado.
-10. Resultado `BUILD SUCCESSFUL` y reporte 39/39.
+| Imagen | Descripción y resultado comprobado |
+| --- | --- |
+| `03_admin.png` | Estado de carga: Autenticando, botón y campos deshabilitados. |
+| `04_resultado_login.png` | Login ADMIN exitoso: acceso a Inicio. |
+| `05_menu_admin.png` | Usuario y rol ADMIN; Productos, Clientes y Pedidos disponibles. |
+| `06_sesion_recuperada.png` | Inicio después de detener y reabrir la app; `/auth/me` respondió 200. |
+| `07_logout.png` | Regreso al login y mensaje Sesión cerrada correctamente. |
+| `08_almacen.png` | Credenciales inválidas: mensaje Usuario o contraseña incorrectos. |
+| `10_menu_almacen.png` | ALMACENERO con Productos; Clientes y Pedidos ocultos. |
+| `11_productos_bearer.png` | Inventario remoto con tres productos; escritura habilitada para ALMACENERO. |
+| `12_postman_login_401.jpg` | Contraseña incorrecta: HTTP 401 y mensaje controlado. |
+| `13_postman_health_200.jpg` | `/api/health` sin token: HTTP 200 y backend funcionando. |
+| `14_postman_sin_token_401.jpg` | `/auth/me` sin token: HTTP 401. |
+| `15_postman_admin_200.jpg` | Login ADMIN: HTTP 200 y 4/4 tests aprobados. |
+| `16_postman_almacen_200.jpg` | Login ALMACENERO: HTTP 200 y 4/4 tests aprobados. |
 
-Para obtenerlas, primero iniciar Oracle y PharmaSoft; después ejecutar el APK en
-`Medium_Phone`, capturar cada estado desde Android Studio y guardar las imágenes
-en esta misma carpeta sin mostrar contraseña, JWT ni secreto de firma. Las
-evidencias iOS quedan declaradas como no ejecutadas hasta disponer de una Mac.
+Logcat real confirmó `Authorization: ***` en GET productos y `/auth/me`, ambos
+con HTTP 200. La prueba de recuperación se realizó deteniendo el proceso y
+reabriendo la aplicación; no se ingresaron nuevamente las credenciales.
+
+Las pruebas iOS siguen declaradas como no ejecutadas por falta de Mac/Xcode.
 
 ## 8. Archivos principales modificados o creados
 
