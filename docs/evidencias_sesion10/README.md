@@ -114,20 +114,20 @@ Resultado comprobado antes del ajuste final de documentación:
   guarde, que Bearer se adjunte automáticamente y que `/auth/me` recupere la
   sesión.
 
-## 6. Matriz de evaluación
+## 6. Matriz de los diez criterios reales de la guía
 
 | N.º | Criterio | Estado | Evidencia técnica |
 | ---: | --- | --- | --- |
-| 1 | Dependencias y configuración Ktor Auth | CUMPLE | Catálogo Gradle y `shared/build.gradle.kts` |
-| 2 | DTO de autenticación acordes al backend | CUMPLE | `LoginDto.kt` |
-| 3 | Mapper DTO a dominio | CUMPLE | `SesionMapper.kt` |
-| 4 | Repositorio de autenticación | CUMPLE | `AuthRepository.kt` y `AuthRepositorioRest.kt` |
-| 5 | Bearer automático y login excluido | CUMPLE | `HttpClientFactory.kt` y pruebas MockEngine |
-| 6 | Persistencia segura del token | CUMPLE EN CÓDIGO | Keystore Android y Keychain iOS |
-| 7 | Koin y ViewModel de sesión | CUMPLE | módulos DI y `SesionViewModel.kt` |
-| 8 | Login, logout y recuperación de sesión | CUMPLE EN CÓDIGO | Compose, `/auth/me` y limpieza del token |
-| 9 | Manejo de 401/403 y permisos | CUMPLE | `EjecutarLlamada.kt`, ViewModel y navegación filtrada |
-| 10 | Verificación multiplataforma | PARCIAL | Android compila y tiene APK; iOS compila, pero su ejecución requiere Mac/Xcode |
+| 1 | Login obtiene token real | CUMPLE | Los tres usuarios oficiales autenticaron con 200 |
+| 2 | Almacenamiento seguro | CUMPLE EN ANDROID | Keystore AES/GCM y sesión recuperada; implementación Keychain conservada |
+| 3 | Auth adjunta Authorization automáticamente | CUMPLE | Prueba MockEngine y CRUD real autenticado |
+| 4 | sendWithoutRequest evita solicitud previa sin token | CUMPLE | Rutas protegidas con envío anticipado; login excluido |
+| 5 | Logging sanea Authorization | CUMPLE | `22_logcat_saneado.jpg`, Authorization: *** |
+| 6 | Sesión sobrevive al cierre/reapertura | CUMPLE | Proceso detenido y app reabierta, `/auth/me` 200 |
+| 7 | 401 borra token y regresa al login | CUMPLE | `28_android_401_login.png`; jwt_cifrado ausente tras 401 |
+| 8 | 403 mantiene sesión y muestra mensaje | CUMPLE | `27_android_403.png`; pantalla Productos permanece abierta |
+| 9 | UI oculta acciones según permisos | CUMPLE | ADMIN, VENDEDOR sin escritura y ALMACENERO sin Clientes/Pedidos |
+| 10 | Funcionamiento multiplataforma | IOS OMITIDO POR SOLICITUD | Android ejecutado; iOS no probado por falta de Mac/Xcode |
 
 ## 7. Capturas reales y descripción
 
@@ -151,12 +151,55 @@ para no publicar los JWT ni las contraseñas de prueba.
 | `14_postman_sin_token_401.jpg` | `/auth/me` sin token: HTTP 401. |
 | `15_postman_admin_200.jpg` | Login ADMIN: HTTP 200 y 4/4 tests aprobados. |
 | `16_postman_almacen_200.jpg` | Login ALMACENERO: HTTP 200 y 4/4 tests aprobados. |
+| `19_crud_creado.png` | POST autenticado: producto EvidenciaJWT_S10, id 61, HTTP 201. |
+| `20_crud_listado.png` | GET autenticado: producto de prueba visible en el catálogo. |
+| `21_crud_actualizado.png` | PUT autenticado: precio 14 y stock 18, HTTP 200. |
+| `22_logcat_saneado.jpg` | Captura Android Studio del registro Authorization: ***. |
+| `23_crud_eliminado.png` | Confirmación de baja lógica del producto de prueba. |
+| `24_crud_delete_ok.png` | DELETE autenticado: mensaje de éxito, HTTP 204, estado FALSE en Oracle. |
+| `25_menu_vendedor.png` | Login y menú del tercer usuario oficial VENDEDOR. |
+| `26_vendedor_sin_escritura.png` | Catálogo de VENDEDOR sin formulario, edición ni eliminación. |
+| `27_android_403.png` | 403 real: mensaje de falta de permiso y sesión conservada. |
+| `28_android_401_login.png` | 401 real: token eliminado y regreso al login. |
 
 Logcat real confirmó `Authorization: ***` en GET productos y `/auth/me`, ambos
 con HTTP 200. La prueba de recuperación se realizó deteniendo el proceso y
 reabriendo la aplicación; no se ingresaron nuevamente las credenciales.
 
-Las pruebas iOS siguen declaradas como no ejecutadas por falta de Mac/Xcode.
+### Procedimiento controlado de 401/403
+
+Para el 403 se abrió una sesión ALMACENERO y se preparó un formulario válido.
+Se cambió temporalmente la asignación local de la cuenta `almacen` a VENDEDOR.
+PharmaSoft vuelve a consultar permisos en Oracle en cada solicitud: el POST
+recibió 403 y Android mostró “No tienes permisos para realizar esta operación”,
+sin cerrar sesión. Se restauró el rol ALMACENERO en un bloque finally.
+
+Para el 401 se deshabilitó temporalmente la misma cuenta local de prueba. La
+siguiente solicitud recibió 401 y la app eliminó el JWT y volvió al login con
+“Tu sesión expiró. Inicia sesión nuevamente”. Se restauró estado TRUE en finally.
+Esta prueba verifica revocación y manejo de 401; no se presenta como espera real
+de la expiración temporal del JWT.
+
+Comprobaciones finales: `almacen` conserva ALMACENERO y estado TRUE; los tres
+usuarios vuelven a autenticar con HTTP 200; Prueba403_S10 no existe; el producto
+EvidenciaJWT_S10 queda de baja lógica (FALSE). No se alteraron código ni
+migraciones de PharmaSoft ni productos anteriores.
+
+Las pruebas y capturas iOS se omiten por solicitud expresa y falta de Mac/Xcode.
+No se afirma cumplimiento de ejecución iOS.
+
+### Entregables de la práctica
+
+- Rama: `feature/auth-jwt-Gutierrez`, publicada en GitHub.
+- Login real con ADMIN, VENDEDOR y ALMACENERO: verificado en Android.
+- CRUD autenticado Android: GET/POST/PUT/DELETE verificados con capturas.
+- Registro Authorization saneado: captura real de Android Studio.
+- 403 deliberado y mensaje de la app: verificado y capturado.
+- README con Autenticación y usuarios oficiales: actualizado.
+- Commits reales: `1fc3834` (implementación, 16:13) y `8ed2928`
+  (documentación inicial, 16:28), el 13 de octubre de 2026. La verificación
+  adicional se incorpora como trabajo posterior; no se inventan fechas ni
+  commits de etapas de implementación que no se registraron en su momento.
 
 ## 8. Archivos principales modificados o creados
 
