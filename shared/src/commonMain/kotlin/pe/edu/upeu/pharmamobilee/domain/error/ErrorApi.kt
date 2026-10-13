@@ -4,6 +4,8 @@ sealed interface ErrorApi {
     data class Validacion(val porCampo: Map<String, String>) : ErrorApi
     data object NoEncontrado : ErrorApi
     data class Conflicto(val mensaje: String) : ErrorApi
+    data object SesionExpirada : ErrorApi
+    data object SinPermiso : ErrorApi
     data object Servidor : ErrorApi
     data object SinConexion : ErrorApi
     data object TiempoAgotado : ErrorApi
@@ -18,6 +20,8 @@ fun ErrorApi?.mensajeUsuario(): String = when (this) {
     is ErrorApi.Validacion -> "Revisa los datos ingresados."
     ErrorApi.NoEncontrado -> "No se encontró el producto solicitado."
     is ErrorApi.Conflicto -> mensaje
+    ErrorApi.SesionExpirada -> "Tu sesión expiró. Inicia sesión nuevamente."
+    ErrorApi.SinPermiso -> "No tienes permisos para realizar esta operación."
     ErrorApi.Servidor -> "El servidor no pudo completar la operación. Inténtalo nuevamente."
     ErrorApi.SinConexion -> "No se pudo conectar con el servicio. Verifica tu conexión a Internet."
     ErrorApi.TiempoAgotado -> "La conexión tardó demasiado. Verifica tu Internet e inténtalo nuevamente."

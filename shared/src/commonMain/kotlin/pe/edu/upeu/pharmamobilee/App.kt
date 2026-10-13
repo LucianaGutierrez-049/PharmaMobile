@@ -12,6 +12,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Logout
 import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Info
@@ -22,6 +23,7 @@ import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
@@ -38,10 +40,12 @@ import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -54,6 +58,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import pe.edu.upeu.pharmamobilee.domain.model.OrigenProducto
+import pe.edu.upeu.pharmamobilee.domain.model.Sesion
 import pe.edu.upeu.pharmamobilee.navigation.Screen
 import pe.edu.upeu.pharmamobilee.presentacion.cliente.ClienteScreen
 import pe.edu.upeu.pharmamobilee.presentacion.acerca.AcercaDeScreen
@@ -61,6 +66,8 @@ import pe.edu.upeu.pharmamobilee.presentacion.inicio.InicioScreen
 import pe.edu.upeu.pharmamobilee.presentacion.pedido.PedidoScreen
 import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoScreen
 import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoViewModel
+import pe.edu.upeu.pharmamobilee.presentation.sesion.LoginScreen
+import pe.edu.upeu.pharmamobilee.presentation.sesion.SesionViewModel
 import pe.edu.upeu.pharmamobilee.theme.PharmaMobilTheme
 import org.koin.compose.viewmodel.koinViewModel
 
@@ -86,6 +93,9 @@ private val opcionesNavegacion = listOf(
 
 @Composable
 fun App() {
+    val sesionViewModel = koinViewModel<SesionViewModel>()
+    val sesionUiState by sesionViewModel.uiState.collectAsState()
+    val estadoSesion by sesionViewModel.estadoGlobal.collectAsState()
     var pantallaActual by remember {
         mutableStateOf<Screen>(Screen.Inicio)
     }
@@ -94,9 +104,35 @@ fun App() {
         mutableStateOf(false)
     }
 
+    LaunchedEffect(estadoSesion.sesion?.usuario) {
+        if (estadoSesion.sesion != null) pantallaActual = Screen.Inicio
+    }
+
     PharmaMobilTheme(
         darkTheme = darkTheme
     ) {
+        if (estadoSesion.inicializando) {
+            androidx.compose.foundation.layout.Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                CircularProgressIndicator()
+            }
+            return@PharmaMobilTheme
+        }
+
+        val sesion = estadoSesion.sesion
+        if (sesion == null) {
+            LoginScreen(
+                uiState = sesionUiState,
+                aviso = estadoSesion.aviso,
+                onUsuarioChange = sesionViewModel::actualizarUsuario,
+                onClaveChange = sesionViewModel::actualizarClave,
+                onLogin = sesionViewModel::iniciarSesion
+            )
+            return@PharmaMobilTheme
+        }
+
             BoxWithConstraints(
                 modifier = Modifier.fillMaxSize()
             ) {
@@ -115,7 +151,9 @@ fun App() {
                     onDarkThemeChange = {
                         darkTheme = it
                     },
-                    tipoNavegacion = tipoNavegacion
+                    tipoNavegacion = tipoNavegacion,
+                    sesion = sesion,
+                    onCerrarSesion = sesionViewModel::cerrarSesion
                 )
             }
     }
@@ -127,7 +165,9 @@ private fun PharmaMobilLayout(
     onSeleccionarPantalla: (Screen) -> Unit,
     darkTheme: Boolean,
     onDarkThemeChange: (Boolean) -> Unit,
-    tipoNavegacion: TipoNavegacion
+    tipoNavegacion: TipoNavegacion,
+    sesion: Sesion,
+    onCerrarSesion: () -> Unit
 ) {
     val drawerState = rememberDrawerState(
         initialValue = DrawerValue.Closed
@@ -149,7 +189,9 @@ private fun PharmaMobilLayout(
                                 }
                             },
                             darkTheme = darkTheme,
-                            onDarkThemeChange = onDarkThemeChange
+                            onDarkThemeChange = onDarkThemeChange,
+                            sesion = sesion,
+                            onCerrarSesion = onCerrarSesion
                         )
                     }
                 }
@@ -164,7 +206,9 @@ private fun PharmaMobilLayout(
                         scope.launch {
                             drawerState.open()
                         }
-                    }
+                    },
+                    sesion = sesion,
+                    onCerrarSesion = onCerrarSesion
                 )
             }
         }
@@ -176,7 +220,7 @@ private fun PharmaMobilLayout(
                 NavigationRail(
                     modifier = Modifier.fillMaxHeight()
                 ) {
-                    opcionesNavegacion.forEach { opcion ->
+                    opcionesPara(sesion).forEach { opcion ->
                         NavigationRailItem(
                             selected = pantallaActual::class == opcion.screen::class,
                             onClick = {
@@ -203,6 +247,10 @@ private fun PharmaMobilLayout(
                         onDarkThemeChange = onDarkThemeChange,
                         compacto = true
                     )
+
+                    IconButton(onClick = onCerrarSesion) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión")
+                    }
                 }
 
                 PharmaMobilScaffold(
@@ -212,7 +260,9 @@ private fun PharmaMobilLayout(
                     darkTheme = darkTheme,
                     onDarkThemeChange = onDarkThemeChange,
                     mostrarMenu = false,
-                    onMenuClick = {}
+                    onMenuClick = {},
+                    sesion = sesion,
+                    onCerrarSesion = onCerrarSesion
                 )
             }
         }
@@ -225,7 +275,9 @@ private fun PharmaMobilLayout(
                             pantallaActual = pantallaActual,
                             onSeleccionarPantalla = onSeleccionarPantalla,
                             darkTheme = darkTheme,
-                            onDarkThemeChange = onDarkThemeChange
+                            onDarkThemeChange = onDarkThemeChange,
+                            sesion = sesion,
+                            onCerrarSesion = onCerrarSesion
                         )
                     }
                 }
@@ -236,7 +288,9 @@ private fun PharmaMobilLayout(
                     darkTheme = darkTheme,
                     onDarkThemeChange = onDarkThemeChange,
                     mostrarMenu = false,
-                    onMenuClick = {}
+                    onMenuClick = {},
+                    sesion = sesion,
+                    onCerrarSesion = onCerrarSesion
                 )
             }
         }
@@ -252,7 +306,9 @@ private fun PharmaMobilScaffold(
     darkTheme: Boolean,
     onDarkThemeChange: (Boolean) -> Unit,
     mostrarMenu: Boolean,
-    onMenuClick: () -> Unit
+    onMenuClick: () -> Unit,
+    sesion: Sesion,
+    onCerrarSesion: () -> Unit
 ) {
     val productoViewModel = koinViewModel<ProductoViewModel>()
     val productoUiState by productoViewModel.uiState.collectAsState()
@@ -294,6 +350,9 @@ private fun PharmaMobilScaffold(
                             contentDescription = if (darkTheme) "Activar modo claro" else "Activar modo oscuro"
                         )
                     }
+                    IconButton(onClick = onCerrarSesion) {
+                        Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = "Cerrar sesión")
+                    }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.surface,
@@ -315,13 +374,16 @@ private fun PharmaMobilScaffold(
                         productosBajoStock = productosLocales.count { it.requiereReposicion },
                         onProductosClick = { onSeleccionarPantalla(Screen.Productos) },
                         onClientesClick = { onSeleccionarPantalla(Screen.Clientes) },
-                        onPedidosClick = { onSeleccionarPantalla(Screen.Pedidos) }
+                        onPedidosClick = { onSeleccionarPantalla(Screen.Pedidos) },
+                        mostrarClientes = sesion.puede("CLIENTES_LEER"),
+                        mostrarPedidos = sesion.puede("VENTAS_LEER")
                     )
                 }
 
                 Screen.Productos -> {
                     ProductoScreen(
-                        viewModel = productoViewModel
+                        viewModel = productoViewModel,
+                        puedeEscribir = sesion.puede("CATALOGO_ESCRIBIR")
                     )
                 }
 
@@ -346,10 +408,12 @@ private fun DrawerContent(
     pantallaActual: Screen,
     onSeleccionarPantalla: (Screen) -> Unit,
     darkTheme: Boolean,
-    onDarkThemeChange: (Boolean) -> Unit
+    onDarkThemeChange: (Boolean) -> Unit,
+    sesion: Sesion,
+    onCerrarSesion: () -> Unit
 ) {
     Column(modifier = Modifier.fillMaxHeight()) {
-        DrawerHeader()
+        DrawerHeader(sesion)
         HorizontalDivider(modifier = Modifier.padding(horizontal = 16.dp))
 
         Text(
@@ -359,7 +423,7 @@ private fun DrawerContent(
             modifier = Modifier.padding(start = 28.dp, top = 20.dp, bottom = 8.dp)
         )
 
-        opcionesNavegacion.forEach { opcion ->
+        opcionesPara(sesion).forEach { opcion ->
             NavigationDrawerItem(
                 modifier = Modifier.padding(horizontal = 12.dp, vertical = 2.dp),
                 label = { Text(opcion.titulo) },
@@ -377,11 +441,18 @@ private fun DrawerContent(
             darkTheme = darkTheme,
             onDarkThemeChange = onDarkThemeChange
         )
+        TextButton(
+            onClick = onCerrarSesion,
+            modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp)
+        ) {
+            Icon(Icons.AutoMirrored.Filled.Logout, contentDescription = null)
+            Text("Cerrar sesión", modifier = Modifier.padding(start = 8.dp))
+        }
     }
 }
 
 @Composable
-private fun DrawerHeader() {
+private fun DrawerHeader(sesion: Sesion) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -401,13 +472,28 @@ private fun DrawerHeader() {
         Column {
             Text(text = "PharmaMobil", style = MaterialTheme.typography.titleLarge)
             Text(
-                text = "Gestión farmacéutica",
+                text = sesion.nombreCompleto,
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Text(
+                text = sesion.roles.joinToString(),
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.primary
             )
         }
     }
 }
+
+private fun opcionesPara(sesion: Sesion): List<OpcionNavegacion> =
+    opcionesNavegacion.filter { opcion ->
+        when (opcion.screen) {
+            Screen.Productos -> sesion.puede("CATALOGO_LEER")
+            Screen.Clientes -> sesion.puede("CLIENTES_LEER")
+            Screen.Pedidos -> sesion.puede("VENTAS_LEER")
+            else -> true
+        }
+    }
 
 @Composable
 private fun ThemeSwitch(

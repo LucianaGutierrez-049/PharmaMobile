@@ -11,19 +11,23 @@ import pe.edu.upeu.pharmamobilee.domain.error.ErrorApiException
 import pe.edu.upeu.pharmamobilee.domain.error.mensajeUsuario
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
 import pe.edu.upeu.pharmamobilee.domain.platform.Compartidor
+import pe.edu.upeu.pharmamobilee.domain.repository.AuthRepository
 import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.comoTextoParaCompartir
 import pe.edu.upeu.pharmamobilee.domain.usecase.EliminarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.ListarProductosUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.ProductoRegistroException
 import pe.edu.upeu.pharmamobilee.domain.usecase.RegistrarProductoUseCase
+import pe.edu.upeu.pharmamobilee.presentation.sesion.GestorSesion
 
 class ProductoViewModel(
     private val listarProductosUseCase: ListarProductosUseCase,
     private val registrarProductoUseCase: RegistrarProductoUseCase,
     private val actualizarProductoUseCase: ActualizarProductoUseCase,
     private val eliminarProductoUseCase: EliminarProductoUseCase,
-    private val compartidor: Compartidor
+    private val compartidor: Compartidor,
+    private val authRepository: AuthRepository? = null,
+    private val gestorSesion: GestorSesion? = null
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProductoUiState())
     val uiState = _uiState.asStateFlow()
@@ -181,6 +185,7 @@ class ProductoViewModel(
                 )
             }
         }.onFailure { error ->
+            manejarErrorSesion(error)
             if (mostrarCarga) {
                 _uiState.update {
                     it.copy(
@@ -216,6 +221,7 @@ class ProductoViewModel(
     }
 
     private fun manejarFalloOperacion(fallo: Throwable) {
+        manejarErrorSesion(fallo)
         when (fallo) {
             is ProductoRegistroException -> _uiState.update {
                 it.copy(
@@ -250,6 +256,15 @@ class ProductoViewModel(
                     operacion = ProductoOperacion.Fallida(mensajeDe(fallo))
                 )
             }
+        }
+    }
+
+    private fun manejarErrorSesion(fallo: Throwable) {
+        val error = (fallo as? ErrorApiException)?.error
+        if (error != ErrorApi.SesionExpirada) return
+        viewModelScope.launch {
+            authRepository?.cerrarSesion()
+            gestorSesion?.sinSesion("Tu sesión expiró. Inicia sesión nuevamente.")
         }
     }
 

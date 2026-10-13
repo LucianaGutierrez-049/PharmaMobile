@@ -60,6 +60,30 @@ class EjecutarLlamadaTest {
     }
 
     @Test
+    fun respuesta401SeTraduceComoSesionExpirada() = runTest {
+        val repository = repositoryConRespuesta(
+            status = HttpStatusCode.Unauthorized,
+            content = """{"status":401,"message":"El token ha expirado"}"""
+        )
+
+        val exception = repository.listar().exceptionOrNull() as ErrorApiException
+
+        assertEquals(ErrorApi.SesionExpirada, exception.error)
+    }
+
+    @Test
+    fun respuesta403SeTraduceSinCerrarSesion() = runTest {
+        val repository = repositoryConRespuesta(
+            status = HttpStatusCode.Forbidden,
+            content = """{"status":403,"message":"Sin permiso"}"""
+        )
+
+        val exception = repository.listar().exceptionOrNull() as ErrorApiException
+
+        assertEquals(ErrorApi.SinPermiso, exception.error)
+    }
+
+    @Test
     fun cancellationExceptionSiempreSeRelanza() = runTest {
         assertFailsWith<CancellationException> {
             ejecutarLlamada<Unit> { throw CancellationException("cancelada") }

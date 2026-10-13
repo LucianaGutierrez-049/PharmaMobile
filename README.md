@@ -49,8 +49,9 @@ Koin es la implementación REST; el repositorio en memoria se conserva solamente
 como alternativa no inyectada.
 
 El cliente usa `ContentNegotiation` con `ignoreUnknownKeys = true`, timeout de
-solicitud de 15 segundos y `Logging` en nivel `ALL` para registrar la petición,
-cabeceras, estado y cuerpo durante las pruebas académicas. Los errores 404,
+solicitud de 15 segundos y registro de cabeceras únicamente en compilaciones de
+depuración. La cabecera `Authorization` siempre se censura y en producción el
+registro HTTP queda desactivado. Los errores 404,
 timeout, deserialización y conexión se convierten en mensajes controlados antes
 de llegar a la interfaz.
 
@@ -88,6 +89,45 @@ de la corutina.
 - iOS declara `NSAllowsLocalNetworking` para el entorno local.
 - La excepción de tráfico en claro es solo para desarrollo; producción debe usar
   HTTPS.
+
+## Autenticación
+
+PharmaMobile consume la autenticación JWT de PharmaSoft mediante
+`POST /api/v1/auth/login`. Las credenciales se envían exclusivamente en esa
+petición; la respuesta se convierte a un modelo de sesión con usuario, nombre,
+roles y permisos. El valor del token no se muestra en la interfaz ni se registra
+en los logs.
+
+Ktor Client instala el complemento `Auth` con el proveedor Bearer. Después del
+login, las peticiones protegidas incorporan automáticamente
+`Authorization: Bearer <token>`. La petición de login queda excluida de este
+comportamiento. Al reiniciar la aplicación, `GET /api/v1/auth/me` valida el token
+conservado y reconstruye la sesión.
+
+El token se almacena de forma segura por plataforma:
+
+- Android usa Android Keystore (AES/GCM) y guarda en `SharedPreferences`
+  únicamente el texto cifrado y su vector de inicialización.
+- iOS usa Keychain Services mediante `SecItemAdd`, `SecItemCopyMatching` y
+  `SecItemDelete`.
+
+Un HTTP 401 elimina el token local y devuelve a la pantalla de login con un
+mensaje de sesión expirada. Un HTTP 403 conserva la sesión y muestra un mensaje
+de falta de permisos. El cierre de sesión elimina el token y limpia la caché de
+credenciales Bearer. La navegación y las operaciones de escritura se muestran
+según los permisos devueltos por PharmaSoft, por ejemplo `CATALOGO_LEER`,
+`CATALOGO_ESCRIBIR`, `CLIENTES_LEER` y `VENTAS_LEER`.
+
+Usuarios de prueba provistos por PharmaSoft:
+
+| Usuario | Rol | Alcance principal |
+| --- | --- | --- |
+| `admin` | ADMIN | Acceso administrativo completo |
+| `vendedor` | VENDEDOR | Ventas, clientes y lectura de catálogo |
+| `almacen` | ALMACENERO | Lectura y escritura de catálogo |
+
+Las contraseñas de prueba se mantienen en la carga inicial de datos del backend;
+no se documentan secretos JWT ni se incluyen tokens reales en este repositorio.
 
 ## Código específico de plataforma
 
@@ -172,10 +212,12 @@ pendientes de ejecución real en una máquina macOS con Xcode.
 
 Resultado de la verificación automática actual: `BUILD SUCCESSFUL` para
 `:shared:assemble`, las pruebas compartidas y la compilación del APK Android.
-Se ejecutaron 34 pruebas, con 0 fallos, 0 errores y 0 omitidas. Las pruebas cubren los
+Se ejecutaron 39 pruebas, con 0 fallos, 0 errores y 0 omitidas. Las pruebas cubren los
 cinco métodos HTTP, el DELETE 204 sin cuerpo, el mapeo de errores 400 y 409, la
 propagación de `CancellationException`, los mappers y los flujos de creación,
-actualización y eliminación del `ViewModel`.
+actualización y eliminación del `ViewModel`. También verifican que el login no
+envíe `Authorization`, que el token se guarde, que Ktor agregue Bearer a las
+peticiones protegidas y que la sesión se recupere mediante `/auth/me`.
 
 La ejecución del simulador iOS sigue pendiente porque requiere macOS y Xcode.
 En macOS, iniciar PharmaSoft en el puerto 8080, abrir

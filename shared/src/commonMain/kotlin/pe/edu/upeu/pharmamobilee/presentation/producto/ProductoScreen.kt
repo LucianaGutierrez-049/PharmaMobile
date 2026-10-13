@@ -54,6 +54,7 @@ import pe.edu.upeu.pharmamobilee.presentacion.producto.InventarioTabs
 @Composable
 fun ProductoScreen(
     viewModel: ProductoViewModel,
+    puedeEscribir: Boolean = true,
     modifier: Modifier = Modifier
 ) {
     val uiState by viewModel.uiState.collectAsState()
@@ -104,8 +105,8 @@ fun ProductoScreen(
                 ProductoContenido(
                     uiState = uiState,
                     onReintentar = viewModel::cargarProductos,
-                    onEditarProducto = viewModel::editarProducto,
-                    onEliminarProducto = viewModel::eliminarProducto,
+                    onEditarProducto = if (puedeEscribir) viewModel::editarProducto else null,
+                    onEliminarProducto = if (puedeEscribir) viewModel::eliminarProducto else null,
                     onCompartirProducto = viewModel::compartir
                 )
             }
@@ -115,12 +116,14 @@ fun ProductoScreen(
                     horizontalArrangement = Arrangement.spacedBy(20.dp),
                     verticalAlignment = Alignment.Top
                 ) {
-                    Column(modifier = Modifier.weight(0.9f)) { formulario() }
+                    if (puedeEscribir) {
+                        Column(modifier = Modifier.weight(0.9f)) { formulario() }
+                    }
                     Column(modifier = Modifier.weight(1.4f)) { inventario() }
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(16.dp)) {
-                    formulario()
+                    if (puedeEscribir) formulario()
                     inventario()
                 }
             }
@@ -137,8 +140,8 @@ fun ProductoScreen(
 private fun ProductoContenido(
     uiState: ProductoUiState,
     onReintentar: () -> Unit,
-    onEditarProducto: (Producto) -> Unit,
-    onEliminarProducto: (Long) -> Unit,
+    onEditarProducto: ((Producto) -> Unit)?,
+    onEliminarProducto: ((Long) -> Unit)?,
     onCompartirProducto: (Producto) -> Unit
 ) {
     when (val fase = uiState.fase) {
