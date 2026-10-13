@@ -145,8 +145,8 @@ fun InventarioTabs(
             productos = productosFiltrados,
             onEditarProducto = onEditarProducto,
             onCompartirProducto = onCompartirProducto,
-            onSolicitarEliminar = {
-                if (!eliminando) productoAEliminar = it
+            onSolicitarEliminar = onEliminarProducto?.let {
+                { producto -> if (!eliminando) productoAEliminar = producto }
             }
         )
     }
@@ -182,7 +182,7 @@ private fun ListaProductos(
     productos: List<ProductoUi>,
     onEditarProducto: ((Producto) -> Unit)?,
     onCompartirProducto: ((Producto) -> Unit)?,
-    onSolicitarEliminar: (ProductoUi) -> Unit
+    onSolicitarEliminar: ((ProductoUi) -> Unit)?
 ) {
     if (productos.isEmpty()) {
         Surface(
@@ -214,7 +214,7 @@ private fun ListaProductos(
                 producto = producto,
                 onEditar = onEditarProducto?.let { { it(producto.producto) } },
                 onCompartir = onCompartirProducto?.let { { it(producto.producto) } },
-                onEliminar = { onSolicitarEliminar(producto) }
+                onEliminar = onSolicitarEliminar?.let { { it(producto) } }
             )
         }
     }

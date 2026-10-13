@@ -48,6 +48,8 @@ private suspend fun traducirErrorCliente(
         409 -> ErrorApi.Conflicto(
             cuerpo?.message ?: "La operación no está permitida."
         )
+        401 -> ErrorApi.SesionExpirada
+        403 -> ErrorApi.SinPermiso
         else -> ErrorApi.Servidor
     }
 }

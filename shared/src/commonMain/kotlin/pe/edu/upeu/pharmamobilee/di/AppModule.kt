@@ -8,17 +8,29 @@ import org.koin.core.qualifier.named
 import org.koin.dsl.module
 import pe.edu.upeu.pharmamobilee.data.remote.ProductoApi
 import pe.edu.upeu.pharmamobilee.data.remote.crearHttpClient
+import pe.edu.upeu.pharmamobilee.data.local.AlmacenSeguro
+import pe.edu.upeu.pharmamobilee.data.repository.AuthRepositorioRest
 import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositorioEnMemoria
 import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositoryImpl
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
+import pe.edu.upeu.pharmamobilee.domain.repository.AuthRepository
 import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.EliminarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.ListarProductosUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.RegistrarProductoUseCase
 import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoViewModel
+import pe.edu.upeu.pharmamobilee.presentation.sesion.GestorSesion
+import pe.edu.upeu.pharmamobilee.presentation.sesion.SesionViewModel
 
 val dataModule = module {
-    single { crearHttpClient(get(), get(named("urlBase"))) }
+    single {
+        crearHttpClient(
+            engine = get(),
+            urlBase = get(named("urlBase")),
+            almacenSeguro = get<AlmacenSeguro>(),
+            esDepuracion = get(named("esDepuracion"))
+        )
+    }
     single { ProductoApi(get()) }
     single { ProductoRepositorioEnMemoria() }
     single<ProductoRepository> {
@@ -27,6 +39,7 @@ val dataModule = module {
             categoriaPorDefecto = 1L
         )
     }
+    single<AuthRepository> { AuthRepositorioRest(get(), get()) }
 }
 
 val domainModule = module {
@@ -45,13 +58,17 @@ val domainModule = module {
 }
 
 val presentationModule = module {
+    single { GestorSesion() }
+    viewModel { SesionViewModel(get(), get()) }
     viewModel {
         ProductoViewModel(
             listarProductosUseCase = get(),
             registrarProductoUseCase = get(),
             actualizarProductoUseCase = get(),
             eliminarProductoUseCase = get(),
-            compartidor = get()
+            compartidor = get(),
+            authRepository = get(),
+            gestorSesion = get()
         )
     }
 }

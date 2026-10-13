@@ -48,7 +48,9 @@ fun InicioScreen(
     productosBajoStock: Int,
     onProductosClick: () -> Unit,
     onClientesClick: () -> Unit,
-    onPedidosClick: () -> Unit
+    onPedidosClick: () -> Unit,
+    mostrarClientes: Boolean = true,
+    mostrarPedidos: Boolean = true
 ) {
     Column(
         modifier = Modifier
@@ -67,7 +69,9 @@ fun InicioScreen(
         ModulosResumen(
             onProductosClick = onProductosClick,
             onClientesClick = onClientesClick,
-            onPedidosClick = onPedidosClick
+            onPedidosClick = onPedidosClick,
+            mostrarClientes = mostrarClientes,
+            mostrarPedidos = mostrarPedidos
         )
         EstadoOperacion(onProductosClick = onProductosClick)
     }
@@ -217,7 +221,9 @@ private fun InicioHeader() {
 private fun ModulosResumen(
     onProductosClick: () -> Unit,
     onClientesClick: () -> Unit,
-    onPedidosClick: () -> Unit
+    onPedidosClick: () -> Unit,
+    mostrarClientes: Boolean,
+    mostrarPedidos: Boolean
 ) {
     Column(
         verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -230,36 +236,36 @@ private fun ModulosResumen(
         )
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
-            val tarjetas = listOf<@Composable (Modifier) -> Unit>(
-                { cardModifier -> DashboardCard(
+            val tarjetas = buildList<@Composable (Modifier) -> Unit> {
+                add { cardModifier -> DashboardCard(
                 titulo = "Productos",
                 detalle = "Registro, stock y reposición",
                 icono = Icons.Default.Inventory2,
                 onClick = onProductosClick,
                 modifier = cardModifier
-            ) },
-                { cardModifier -> DashboardCard(
-                titulo = "Clientes",
-                detalle = "Datos de contacto",
-                icono = Icons.Default.Groups,
-                onClick = onClientesClick,
-                modifier = cardModifier
-            ) },
-                { cardModifier -> DashboardCard(
-                titulo = "Pedidos",
-                detalle = "Venta y detalle",
-                icono = Icons.Default.ShoppingCartCheckout,
-                onClick = onPedidosClick,
-                modifier = cardModifier
             ) }
-            )
+                if (mostrarClientes) add { cardModifier -> DashboardCard(
+                    titulo = "Clientes",
+                    detalle = "Datos de contacto",
+                    icono = Icons.Default.Groups,
+                    onClick = onClientesClick,
+                    modifier = cardModifier
+                ) }
+                if (mostrarPedidos) add { cardModifier -> DashboardCard(
+                    titulo = "Pedidos",
+                    detalle = "Venta y detalle",
+                    icono = Icons.Default.ShoppingCartCheckout,
+                    onClick = onPedidosClick,
+                    modifier = cardModifier
+                ) }
+            }
 
             if (maxWidth >= 600.dp) {
                 Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
                     Row(horizontalArrangement = Arrangement.spacedBy(14.dp)) {
                         tarjetas.take(2).forEach { tarjeta -> tarjeta(Modifier.weight(1f)) }
                     }
-                    tarjetas.last()(Modifier.fillMaxWidth())
+                    tarjetas.drop(2).forEach { tarjeta -> tarjeta(Modifier.fillMaxWidth()) }
                 }
             } else {
                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
