@@ -10,6 +10,8 @@ import org.koin.dsl.module
 import pe.edu.upeu.pharmamobilee.domain.platform.Compartidor
 import pe.edu.upeu.pharmamobilee.data.local.AlmacenSeguro
 import pe.edu.upeu.pharmamobilee.data.local.AlmacenSeguroAndroid
+import pe.edu.upeu.pharmamobilee.data.local.CreadorDeDriver
+import pe.edu.upeu.pharmamobilee.data.local.CreadorDeDriverAndroid
 import pe.edu.upeu.pharmamobilee.platform.CompartidorAndroid
 
 actual val platformModule: Module = module {
@@ -19,5 +21,6 @@ actual val platformModule: Module = module {
         androidContext().applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
     }
     single<AlmacenSeguro> { AlmacenSeguroAndroid(androidContext()) }
+    single<CreadorDeDriver> { CreadorDeDriverAndroid(androidContext()) }
     single<Compartidor> { CompartidorAndroid(androidContext()) }
 }

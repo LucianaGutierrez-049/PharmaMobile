@@ -10,6 +10,8 @@ import org.koin.dsl.module
 import pe.edu.upeu.pharmamobilee.domain.platform.Compartidor
 import pe.edu.upeu.pharmamobilee.data.local.AlmacenSeguro
 import pe.edu.upeu.pharmamobilee.data.local.AlmacenSeguroIos
+import pe.edu.upeu.pharmamobilee.data.local.CreadorDeDriver
+import pe.edu.upeu.pharmamobilee.data.local.CreadorDeDriverIos
 import pe.edu.upeu.pharmamobilee.platform.CompartidorIos
 
 actual val platformModule: Module = module {
@@ -17,6 +19,7 @@ actual val platformModule: Module = module {
     single(named("urlBase")) { "http://localhost:8080/api/v1/" }
     single(named("esDepuracion")) { esDepuracionIos() }
     single<AlmacenSeguro> { AlmacenSeguroIos() }
+    single<CreadorDeDriver> { CreadorDeDriverIos() }
     single<Compartidor> { CompartidorIos() }
 }
 

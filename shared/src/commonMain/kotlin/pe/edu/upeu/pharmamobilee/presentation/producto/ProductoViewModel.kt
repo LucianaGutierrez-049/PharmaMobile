@@ -12,6 +12,7 @@ import pe.edu.upeu.pharmamobilee.domain.error.mensajeUsuario
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
 import pe.edu.upeu.pharmamobilee.domain.platform.Compartidor
 import pe.edu.upeu.pharmamobilee.domain.repository.AuthRepository
+import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
 import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
 import pe.edu.upeu.pharmamobilee.domain.usecase.comoTextoParaCompartir
 import pe.edu.upeu.pharmamobilee.domain.usecase.EliminarProductoUseCase
@@ -27,13 +28,33 @@ class ProductoViewModel(
     private val eliminarProductoUseCase: EliminarProductoUseCase,
     private val compartidor: Compartidor,
     private val authRepository: AuthRepository? = null,
-    private val gestorSesion: GestorSesion? = null
+    private val gestorSesion: GestorSesion? = null,
+    private val productoRepository: ProductoRepository? = null
 ) : ViewModel() {
     private val _uiState = MutableStateFlow(ProductoUiState())
     val uiState = _uiState.asStateFlow()
 
     init {
-        cargarProductos()
+        if (productoRepository == null) {
+            cargarProductos()
+        } else {
+            viewModelScope.launch {
+                productoRepository.observar().collect { productos ->
+                    _uiState.update {
+                        it.copy(
+                            productos = productos.map(Producto::toUi),
+                            fase = if (productos.isEmpty()) ProductoFase.SinProductos else ProductoFase.ConProductos
+                        )
+                    }
+                }
+            }
+            viewModelScope.launch {
+                productoRepository.observarUltimaSincronizacion().collect { instante ->
+                    _uiState.update { it.copy(ultimaSincronizacionMillis = instante) }
+                }
+            }
+            sincronizarOffline()
+        }
     }
 
     fun actualizarNombre(nombre: String) {
@@ -96,7 +117,9 @@ class ProductoViewModel(
             }
 
             limpiarFormulario()
-            recargarTrasOperacion(
+            if (productoRepository != null) {
+                _uiState.update { it.copy(operacion = ProductoOperacion.Inactiva, mensajeExito = if (editando) "Producto \"${producto.nombre}\" actualizado correctamente" else "Producto \"${producto.nombre}\" registrado correctamente") }
+            } else recargarTrasOperacion(
                 if (editando) {
                     "Producto \"${producto.nombre}\" actualizado correctamente"
                 } else {
@@ -127,7 +150,9 @@ class ProductoViewModel(
             if (_uiState.value.productoEnEdicionId == id) {
                 limpiarFormulario()
             }
-            recargarTrasOperacion("Producto eliminado correctamente")
+            if (productoRepository != null) {
+                _uiState.update { it.copy(operacion = ProductoOperacion.Inactiva, mensajeExito = "Producto eliminado correctamente") }
+            } else recargarTrasOperacion("Producto eliminado correctamente")
         }
     }
 
@@ -162,6 +187,22 @@ class ProductoViewModel(
     fun cargarProductos() {
         viewModelScope.launch {
             cargarListado(mostrarCarga = true)
+        }
+    }
+
+    fun sincronizar() = sincronizarOffline()
+
+    private fun sincronizarOffline() {
+        val repositorio = productoRepository ?: return
+        viewModelScope.launch {
+            _uiState.update { it.copy(sincronizando = true) }
+            val resultado = repositorio.sincronizar()
+            _uiState.update {
+                it.copy(
+                    sincronizando = false,
+                    avisoRed = resultado.exceptionOrNull()?.let { "Sin conexión: mostrando datos guardados" }
+                )
+            }
         }
     }
 

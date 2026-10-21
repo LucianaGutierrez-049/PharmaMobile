@@ -16,6 +16,7 @@ data class ProductoUi(
     val stockDisponible: Boolean get() = producto.stockDisponible
     val requiereReposicion: Boolean get() = producto.requiereReposicion
     val origen: OrigenProducto get() = producto.origen
+    val pendienteSincronizacion: Boolean get() = producto.pendienteSincronizacion
 }
 
 fun Producto.toUi(): ProductoUi = ProductoUi(

@@ -69,6 +69,9 @@ fun ProductoScreen(
             snackbarHostState.showSnackbar(it.mensaje)
         }
     }
+    LaunchedEffect(uiState.avisoRed) {
+        uiState.avisoRed?.let { snackbarHostState.showSnackbar(it) }
+    }
     LaunchedEffect(uiState.productoEnEdicionId) {
         if (uiState.productoEnEdicionId != null) formularioExpandido = true
     }
@@ -85,6 +88,26 @@ fun ProductoScreen(
             title = "Gestiona tu inventario",
             description = "Controla precios, disponibilidad y reposición desde una sola vista.",
             icon = Icons.Default.Medication
+        )
+
+        OutlinedButton(
+            onClick = viewModel::sincronizar,
+            enabled = !uiState.sincronizando
+        ) {
+            if (uiState.sincronizando) {
+                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
+            } else {
+                Text("Sincronizar inventario")
+            }
+        }
+
+        Text(
+            text = textoAntiguedadSincronizacion(
+                ultimaMillis = uiState.ultimaSincronizacionMillis,
+                ahoraMillis = kotlin.time.Clock.System.now().toEpochMilliseconds()
+            ),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
@@ -104,7 +127,7 @@ fun ProductoScreen(
             val inventario: @Composable () -> Unit = {
                 ProductoContenido(
                     uiState = uiState,
-                    onReintentar = viewModel::cargarProductos,
+                    onReintentar = viewModel::sincronizar,
                     onEditarProducto = if (puedeEscribir) viewModel::editarProducto else null,
                     onEliminarProducto = if (puedeEscribir) viewModel::eliminarProducto else null,
                     onCompartirProducto = viewModel::compartir
