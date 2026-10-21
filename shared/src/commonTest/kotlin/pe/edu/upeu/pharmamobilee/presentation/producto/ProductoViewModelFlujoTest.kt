@@ -25,6 +25,31 @@ import kotlin.test.assertIs
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class ProductoViewModelFlujoTest {
+    @Test
+    fun resumenSeActualizaAlCrearDesactivarYEliminar() = runTest {
+        Dispatchers.setMain(StandardTestDispatcher(testScheduler))
+        try {
+            val viewModel = crearViewModel(ProductoRepositoryFalso())
+            advanceUntilIdle()
+            assertEquals(ResumenInventarioUi(0, 0, 0, 0), viewModel.uiState.value.resumenInventario)
+            viewModel.actualizarNombre("Producto de prueba")
+            viewModel.actualizarPrecio("1.50")
+            viewModel.actualizarStock("2")
+            viewModel.guardarProducto()
+            advanceUntilIdle()
+            assertEquals(ResumenInventarioUi(1, 1, 0, 1), viewModel.uiState.value.resumenInventario)
+            val producto = viewModel.uiState.value.productos.single().producto
+            viewModel.editarProducto(producto)
+            viewModel.actualizarActivo(false)
+            viewModel.guardarProducto()
+            advanceUntilIdle()
+            assertEquals(ResumenInventarioUi(1, 0, 1, 1), viewModel.uiState.value.resumenInventario)
+            viewModel.eliminarProducto(producto.id)
+            advanceUntilIdle()
+            assertEquals(ResumenInventarioUi(0, 0, 0, 0), viewModel.uiState.value.resumenInventario)
+        } finally { Dispatchers.resetMain() }
+    }
+
 
     @Test
     fun repositorioVacioProduceFaseSinProductos() = runTest {
