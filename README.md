@@ -209,20 +209,43 @@ enlace de los frameworks y no ejecuta la aplicación. El formato monetario iOS,
 la hoja de compartir y la pantalla de información del dispositivo permanecen
 pendientes de ejecución real en una máquina macOS con Xcode.
 
+## Persistencia offline-first
+
+El catálogo de productos usa SQLDelight como fuente de verdad de la interfaz.
+La base local `pharma.db` conserva el inventario y permite abrir la aplicación
+cuando PharmaSoft no está disponible. Los productos creados sin conexión usan
+identificadores negativos y quedan marcados como pendientes.
+
+Al sincronizar, PharmaMobile ejecuta el orden seguro: primero envía los
+productos pendientes y solo después descarga el inventario actualizado de
+PharmaSoft. El `ProductoViewModel` observa la base mediante `Flow`, por lo que
+la interfaz se actualiza sin volver a solicitar manualmente la lista después de
+cada registro. Cada producto local muestra la etiqueta **Pendiente de
+sincronizar** hasta recibir el identificador real del servidor.
+
+La tabla `sincronizacion_metadata` conserva el instante de la última
+sincronización completa. La pantalla de productos lo presenta en lenguaje
+natural (`Actualizado hace 2 horas`) y resuelve explícitamente el estado
+`Nunca sincronizado`.
+
+En Android se utiliza `AndroidSqliteDriver`; la implementación iOS queda
+preparada con `NativeSqliteDriver`, aunque su ejecución requiere macOS. Las
+pruebas host crean una base SQLite independiente en memoria para cada caso.
+
 ## Verificación
 
 ```powershell
 .\gradlew.bat :shared:testAndroidHostTest :androidApp:assembleDebug
 ```
 
-Resultado de la verificación automática actual: `BUILD SUCCESSFUL` para
-`:shared:assemble`, las pruebas compartidas y la compilación del APK Android.
-Se ejecutaron 39 pruebas, con 0 fallos, 0 errores y 0 omitidas. Las pruebas cubren los
-cinco métodos HTTP, el DELETE 204 sin cuerpo, el mapeo de errores 400 y 409, la
-propagación de `CancellationException`, los mappers y los flujos de creación,
-actualización y eliminación del `ViewModel`. También verifican que el login no
-envíe `Authorization`, que el token se guarde, que Ktor agregue Bearer a las
-peticiones protegidas y que la sesión se recupere mediante `/auth/me`.
+La verificación cubre el APK Android, el cliente HTTP, autenticación, CRUD,
+estados del `ViewModel` y los seis escenarios exigidos en la Actividad
+Autónoma N.º 11: sincronización con red, registro sin red, envío al reconectar,
+conservación de pendientes durante la bajada, identificadores sin colisión e
+idempotencia de la sincronización. Cada prueba usa una base SQLite nueva en
+memoria y la comunicación REST se simula con `MockEngine` de Ktor. También se
+prueban la antigüedad natural y el caso `Nunca sincronizado`. El reporte HTML actualizado se genera en
+`shared/build/reports/tests/testAndroidHostTest/index.html`.
 
 La ejecución del simulador iOS sigue pendiente porque requiere macOS y Xcode.
 En macOS, iniciar PharmaSoft en el puerto 8080, abrir
