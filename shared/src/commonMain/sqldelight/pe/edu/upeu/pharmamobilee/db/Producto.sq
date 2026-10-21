@@ -1,0 +1,39 @@
+CREATE TABLE producto (
+    id INTEGER NOT NULL PRIMARY KEY,
+    nombre TEXT NOT NULL,
+    precio REAL NOT NULL,
+    stock INTEGER NOT NULL,
+    activo INTEGER NOT NULL DEFAULT 1,
+    pendiente INTEGER NOT NULL DEFAULT 0
+);
+
+CREATE TABLE sincronizacion_metadata (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+    ultima_correcta INTEGER
+);
+
+listarTodos:
+SELECT * FROM producto ORDER BY nombre ASC;
+
+listarPendientes:
+SELECT * FROM producto WHERE pendiente = 1 ORDER BY id ASC;
+
+insertar:
+INSERT OR REPLACE INTO producto(id, nombre, precio, stock, activo, pendiente)
+VALUES (?, ?, ?, ?, ?, ?);
+
+borrarSincronizados:
+DELETE FROM producto WHERE pendiente = 0;
+
+siguienteIdLocal:
+SELECT COALESCE(MIN(id), 0) FROM producto;
+
+borrarPorId:
+DELETE FROM producto WHERE id = ?;
+
+guardarUltimaSincronizacion:
+INSERT OR REPLACE INTO sincronizacion_metadata(id, ultima_correcta)
+VALUES (1, ?);
+
+obtenerUltimaSincronizacion:
+SELECT ultima_correcta FROM sincronizacion_metadata WHERE id = 1;
