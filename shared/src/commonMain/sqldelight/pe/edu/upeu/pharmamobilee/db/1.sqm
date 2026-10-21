@@ -1,0 +1,4 @@
+CREATE TABLE sincronizacion_metadata (
+    id INTEGER NOT NULL PRIMARY KEY CHECK (id = 1),
+    ultima_correcta INTEGER
+);
