@@ -11,7 +11,8 @@ data class Producto(
     val categoria: String = "Sin categoría",
     val categoriaId: Long? = null,
     val stockDisponible: Boolean = true,
-    val origen: OrigenProducto = OrigenProducto.LOCAL
+    val origen: OrigenProducto = OrigenProducto.LOCAL,
+    val pendienteSincronizacion: Boolean = false
 ) {
     companion object {
         const val STOCK_MINIMO = 5

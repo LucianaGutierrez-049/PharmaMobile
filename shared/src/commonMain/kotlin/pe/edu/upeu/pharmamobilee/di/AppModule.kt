@@ -9,9 +9,12 @@ import org.koin.dsl.module
 import pe.edu.upeu.pharmamobilee.data.remote.ProductoApi
 import pe.edu.upeu.pharmamobilee.data.remote.crearHttpClient
 import pe.edu.upeu.pharmamobilee.data.local.AlmacenSeguro
+import pe.edu.upeu.pharmamobilee.data.local.CreadorDeDriver
+import pe.edu.upeu.pharmamobilee.data.local.ProductoLocal
 import pe.edu.upeu.pharmamobilee.data.repository.AuthRepositorioRest
 import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositorioEnMemoria
 import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositoryImpl
+import pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositorioOffline
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
 import pe.edu.upeu.pharmamobilee.domain.repository.AuthRepository
 import pe.edu.upeu.pharmamobilee.domain.usecase.ActualizarProductoUseCase
@@ -33,10 +36,17 @@ val dataModule = module {
     }
     single { ProductoApi(get()) }
     single { ProductoRepositorioEnMemoria() }
-    single<ProductoRepository> {
+    single<ProductoRepository>(named("repositorioRemoto")) {
         ProductoRepositoryImpl(
             api = get(),
             categoriaPorDefecto = 1L
+        )
+    }
+    single { ProductoLocal(get<CreadorDeDriver>().crear()) }
+    single<ProductoRepository> {
+        ProductoRepositorioOffline(
+            local = get(),
+            remoto = get(named("repositorioRemoto"))
         )
     }
     single<AuthRepository> { AuthRepositorioRest(get(), get()) }
@@ -68,7 +78,8 @@ val presentationModule = module {
             eliminarProductoUseCase = get(),
             compartidor = get(),
             authRepository = get(),
-            gestorSesion = get()
+            gestorSesion = get(),
+            productoRepository = get()
         )
     }
 }

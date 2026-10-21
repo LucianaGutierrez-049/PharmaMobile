@@ -45,6 +45,11 @@ import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.DisposableEffect
+import androidx.lifecycle.ViewModelStore
+import androidx.lifecycle.ViewModelStoreOwner
+import androidx.lifecycle.viewmodel.compose.LocalViewModelStoreOwner
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -57,7 +62,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import pe.edu.upeu.pharmamobilee.domain.model.OrigenProducto
 import pe.edu.upeu.pharmamobilee.domain.model.Sesion
 import pe.edu.upeu.pharmamobilee.navigation.Screen
 import pe.edu.upeu.pharmamobilee.presentacion.cliente.ClienteScreen
@@ -142,7 +146,18 @@ fun App() {
                     else -> TipoNavegacion.Expanded
                 }
 
-                PharmaMobilLayout(
+                // Cada sesión tiene sus propios ViewModels. Al salir se cancelan
+                // las peticiones y se descartan formularios y datos anteriores.
+                val propietario = remember(sesion.token) {
+                    object : ViewModelStoreOwner {
+                        override val viewModelStore = ViewModelStore()
+                    }
+                }
+                DisposableEffect(propietario) {
+                    onDispose { propietario.viewModelStore.clear() }
+                }
+                CompositionLocalProvider(LocalViewModelStoreOwner provides propietario) {
+                  PharmaMobilLayout(
                     pantallaActual = pantallaActual,
                     onSeleccionarPantalla = {
                         pantallaActual = it
@@ -154,7 +169,8 @@ fun App() {
                     tipoNavegacion = tipoNavegacion,
                     sesion = sesion,
                     onCerrarSesion = sesionViewModel::cerrarSesion
-                )
+                  )
+                }
             }
     }
 }
@@ -312,9 +328,7 @@ private fun PharmaMobilScaffold(
 ) {
     val productoViewModel = koinViewModel<ProductoViewModel>()
     val productoUiState by productoViewModel.uiState.collectAsState()
-    val productosLocales = productoUiState.productos.filter {
-        it.origen == OrigenProducto.LOCAL
-    }
+    val resumenInventario = productoUiState.resumenInventario
 
     Scaffold(
         modifier = modifier,
@@ -369,9 +383,12 @@ private fun PharmaMobilScaffold(
             when (pantallaActual) {
                 Screen.Inicio -> {
                     InicioScreen(
-                        totalProductos = productosLocales.size,
-                        productosActivos = productosLocales.count { it.activo },
-                        productosBajoStock = productosLocales.count { it.requiereReposicion },
+                        totalProductos = resumenInventario.total,
+                        productosActivos = resumenInventario.activos,
+                        productosInactivos = resumenInventario.inactivos,
+                        productosBajoStock = resumenInventario.bajoStock,
+                        faseInventario = productoUiState.fase,
+                        onReintentarInventario = productoViewModel::cargarProductos,
                         onProductosClick = { onSeleccionarPantalla(Screen.Productos) },
                         onClientesClick = { onSeleccionarPantalla(Screen.Clientes) },
                         onPedidosClick = { onSeleccionarPantalla(Screen.Pedidos) },
