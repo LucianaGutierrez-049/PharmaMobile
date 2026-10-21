@@ -21,6 +21,7 @@ import androidx.compose.material.icons.automirrored.filled.TrendingUp
 import androidx.compose.material.icons.automirrored.filled.ArrowForward
 import androidx.compose.material.icons.filled.Groups
 import androidx.compose.material.icons.filled.Inventory2
+import androidx.compose.material.icons.filled.Block
 import androidx.compose.material.icons.filled.LocalPharmacy
 import androidx.compose.material.icons.filled.WarningAmber
 import androidx.compose.material.icons.filled.ShoppingCartCheckout
@@ -30,22 +31,31 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.resources.painterResource
 import pharmamobilee.shared.generated.resources.Res
 import pharmamobilee.shared.generated.resources.pharmamobil_logo
+import pe.edu.upeu.pharmamobilee.presentation.producto.ProductoFase
+import pe.edu.upeu.pharmamobilee.presentacion.components.LoadingState
+import pe.edu.upeu.pharmamobilee.presentacion.components.ErrorState
 
 @Composable
 fun InicioScreen(
     totalProductos: Int,
     productosActivos: Int,
+    productosInactivos: Int,
     productosBajoStock: Int,
+    faseInventario: ProductoFase,
+    onReintentarInventario: () -> Unit,
     onProductosClick: () -> Unit,
     onClientesClick: () -> Unit,
     onPedidosClick: () -> Unit,
@@ -60,12 +70,21 @@ fun InicioScreen(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         InicioHeader()
-        ResumenInventario(
+        when (faseInventario) {
+          ProductoFase.Cargando -> LoadingState(title = "Cargando inventario...")
+          is ProductoFase.Error -> ErrorState(
+              message = faseInventario.mensaje,
+              onRetry = onReintentarInventario
+          )
+          ProductoFase.ConProductos, ProductoFase.SinProductos -> ResumenInventario(
             totalProductos = totalProductos,
             productosActivos = productosActivos,
+            productosInactivos = productosInactivos,
             productosBajoStock = productosBajoStock,
+            onActualizar = onReintentarInventario,
             onClick = onProductosClick
         )
+        }
         ModulosResumen(
             onProductosClick = onProductosClick,
             onClientesClick = onClientesClick,
@@ -73,7 +92,9 @@ fun InicioScreen(
             mostrarClientes = mostrarClientes,
             mostrarPedidos = mostrarPedidos
         )
-        EstadoOperacion(onProductosClick = onProductosClick)
+        if (faseInventario == ProductoFase.ConProductos || faseInventario == ProductoFase.SinProductos) {
+            EstadoOperacion(onProductosClick = onProductosClick)
+        }
     }
 }
 
@@ -81,11 +102,14 @@ fun InicioScreen(
 private fun ResumenInventario(
     totalProductos: Int,
     productosActivos: Int,
+    productosInactivos: Int,
     productosBajoStock: Int,
+    onActualizar: () -> Unit,
     onClick: () -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
         Text(text = "Resumen del inventario", style = MaterialTheme.typography.titleLarge)
+        TextButton(onClick = onActualizar) { Text("Actualizar inventario") }
         Row(
             modifier = Modifier.fillMaxWidth(),
             horizontalArrangement = Arrangement.spacedBy(10.dp)
@@ -101,6 +125,18 @@ private fun ResumenInventario(
                 valor = productosActivos.toString(),
                 etiqueta = "Activos",
                 icono = Icons.Default.LocalPharmacy,
+                onClick = onClick,
+                modifier = Modifier.weight(1f)
+            )
+        }
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(10.dp)
+        ) {
+            ResumenCard(
+                valor = productosInactivos.toString(),
+                etiqueta = "Inactivos",
+                icono = Icons.Default.Block,
                 onClick = onClick,
                 modifier = Modifier.weight(1f)
             )
@@ -126,7 +162,9 @@ private fun ResumenCard(
     esAlerta: Boolean = false
 ) {
     Surface(
-        modifier = modifier.clickable(onClick = onClick),
+        modifier = modifier.clickable(onClick = onClick).semantics(mergeDescendants = true) {
+            contentDescription = "$etiqueta: $valor"
+        },
         shape = MaterialTheme.shapes.large,
         color = if (esAlerta) MaterialTheme.colorScheme.errorContainer
         else MaterialTheme.colorScheme.surfaceContainer
