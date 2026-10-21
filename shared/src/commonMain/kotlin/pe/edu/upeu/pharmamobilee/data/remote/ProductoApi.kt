@@ -22,6 +22,8 @@ class ProductoApi(
         client.get("productos") {
             parameter("pagina", pagina)
             parameter("tamanio", tamanio)
+            parameter("ordenarPor", "id")
+            parameter("direccion", "asc")
         }.body()
 
     suspend fun obtener(id: Long): ProductoResponseDto =

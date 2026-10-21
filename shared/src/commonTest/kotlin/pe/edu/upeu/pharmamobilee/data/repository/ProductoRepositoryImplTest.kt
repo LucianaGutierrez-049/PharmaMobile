@@ -17,6 +17,57 @@ import kotlin.test.assertEquals
 import kotlin.test.assertTrue
 
 class ProductoRepositoryImplTest {
+    @Test
+    fun listarRecorreTodasLasPaginasParaNoTruncarLosContadores() = runTest {
+        val paginasSolicitadas = mutableListOf<Int>()
+        val cliente = crearHttpClient(MockEngine { request ->
+            val pagina = request.url.parameters["pagina"]!!.toInt()
+            paginasSolicitadas.add(pagina)
+            assertEquals("id", request.url.parameters["ordenarPor"])
+            assertEquals("asc", request.url.parameters["direccion"])
+            val ids = if (pagina == 0) 1..20 else 21..22
+            val contenido = ids.joinToString { id ->
+                """{"id":$id,"nombre":"Producto $id","precio":1.0,"stock":10,"estado":${id <= 20}}"""
+            }
+            respond("""{"contenido":[$contenido],"pagina":$pagina,"tamanio":20,
+                "totalElementos":22,"totalPaginas":2,"ultima":${pagina == 1}}""",
+                HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+        }, "http://localhost/api/v1/")
+        try {
+            val productos = ProductoRepositoryImpl(ProductoApi(cliente), 1L).listar().getOrThrow()
+            assertEquals(listOf(0, 1), paginasSolicitadas)
+            assertEquals(22, productos.size)
+            assertEquals(20, productos.count { it.activo })
+            assertEquals(2, productos.count { !it.activo })
+        } finally { cliente.close() }
+    }
+
+    @Test
+    fun falloEnSegundaPaginaNoDevuelveInventarioParcialComoSiFueraCompleto() = runTest {
+        val cliente = crearHttpClient(MockEngine { request ->
+            if (request.url.parameters["pagina"] == "0") {
+                respond("""{"contenido":[{"id":1,"nombre":"Producto","precio":1,"stock":10}],
+                    "pagina":0,"tamanio":20,"totalElementos":2,"totalPaginas":2,"ultima":false}""",
+                    HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+            } else respondError(HttpStatusCode.InternalServerError)
+        }, "http://localhost/api/v1/")
+        try {
+            assertTrue(ProductoRepositoryImpl(ProductoApi(cliente), 1L).listar().isFailure)
+        } finally { cliente.close() }
+    }
+
+    @Test
+    fun paginacionIncoherenteSeEntregaComoErrorSinBucleInfinito() = runTest {
+        val cliente = crearHttpClient(MockEngine {
+            respond("""{"contenido":[],"pagina":0,"tamanio":20,
+                "totalElementos":22,"totalPaginas":2,"ultima":false}""",
+                HttpStatusCode.OK, headersOf(HttpHeaders.ContentType, "application/json"))
+        }, "http://localhost/api/v1/")
+        try {
+            assertTrue(ProductoRepositoryImpl(ProductoApi(cliente), 1L).listar().isFailure)
+        } finally { cliente.close() }
+    }
+
 
     @Test
     fun get200DeserializaObjetoPaginadoYListaSoloProductosDelBackend() = runTest {
