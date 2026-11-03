@@ -59,6 +59,7 @@ fun ProductoScreen(
 ) {
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
+    var confirmarReenvio by remember { mutableStateOf<Producto?>(null) }
     var formularioExpandido by remember { mutableStateOf(true) }
 
     LaunchedEffect(uiState.mensajeExito) {
@@ -76,6 +77,17 @@ fun ProductoScreen(
         if (uiState.productoEnEdicionId != null) formularioExpandido = true
     }
 
+    confirmarReenvio?.let { producto ->
+        androidx.compose.material3.AlertDialog(
+            onDismissRequest = { confirmarReenvio = null },
+            title = { Text("Confirmar reenvío") },
+            text = { Text("Comprueba que ${producto.nombre} no se haya creado en el servidor. Reenviarlo podría duplicarlo. ¿Deseas continuar?") },
+            confirmButton = { androidx.compose.material3.TextButton(onClick = {
+                viewModel.reintentar(producto.id); confirmarReenvio = null
+            }) { Text("Reenviar") } },
+            dismissButton = { androidx.compose.material3.TextButton(onClick = { confirmarReenvio = null }) { Text("Cancelar") } }
+        )
+    }
     Box(modifier = modifier.fillMaxSize()) {
       Column(
         modifier = Modifier
@@ -109,6 +121,23 @@ fun ProductoScreen(
             style = MaterialTheme.typography.bodySmall,
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
+
+        Text("${uiState.pendientes} cambios por enviar · ${uiState.fallidas} requieren revisión")
+        uiState.avisoRed?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        uiState.productos.filter { it.producto.pendienteSincronizacion &&
+            (it.producto.requiereRevision || it.producto.intentos >= 5) }.forEach { fila ->
+            ElevatedCard(Modifier.fillMaxWidth()) {
+                Column(Modifier.padding(16.dp)) {
+                    Text(fila.nombre, style = MaterialTheme.typography.titleMedium)
+                    Text("Intentos: ${fila.producto.intentos} / 5")
+                    Text(fila.producto.ultimoError ?: "Envío pendiente de revisión")
+                    if (puedeEscribir) {
+                        OutlinedButton(onClick = { viewModel.editarProducto(fila.producto) }, enabled = !uiState.sincronizando) { Text("Revisar datos") }
+                        OutlinedButton(onClick = { confirmarReenvio = fila.producto }, enabled = !uiState.sincronizando) { Text("Reenviar con confirmación") }
+                    }
+                }
+            }
+        }
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val formulario: @Composable () -> Unit = {

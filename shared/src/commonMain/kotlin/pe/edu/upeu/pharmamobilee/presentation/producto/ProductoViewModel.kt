@@ -43,6 +43,8 @@ class ProductoViewModel(
                     _uiState.update {
                         it.copy(
                             productos = productos.map(Producto::toUi),
+                            pendientes = productos.count { p -> p.pendienteSincronizacion && !p.requiereRevision && p.intentos < 5 },
+                            fallidas = productos.count { p -> p.pendienteSincronizacion && (p.requiereRevision || p.intentos >= 5) },
                             fase = if (productos.isEmpty()) ProductoFase.SinProductos else ProductoFase.ConProductos
                         )
                     }
@@ -118,7 +120,7 @@ class ProductoViewModel(
 
             limpiarFormulario()
             if (productoRepository != null) {
-                _uiState.update { it.copy(operacion = ProductoOperacion.Inactiva, mensajeExito = if (editando) "Producto \"${producto.nombre}\" actualizado correctamente" else "Producto \"${producto.nombre}\" registrado correctamente") }
+                _uiState.update { it.copy(operacion = ProductoOperacion.Inactiva, mensajeExito = if (producto.pendienteSincronizacion) "Guardado en el dispositivo. Revisa el estado de sincronización." else if (editando) "Producto \"${producto.nombre}\" actualizado correctamente" else "Producto \"${producto.nombre}\" registrado correctamente") }
             } else recargarTrasOperacion(
                 if (editando) {
                     "Producto \"${producto.nombre}\" actualizado correctamente"
@@ -190,17 +192,35 @@ class ProductoViewModel(
         }
     }
 
+    fun reintentar(id: Long) {
+        val repositorio = productoRepository ?: return
+        if (_uiState.value.sincronizando) return
+        viewModelScope.launch {
+            _uiState.update { it.copy(sincronizando = true) }
+            try {
+                val resultado = repositorio.reintentar(id)
+                resultado.exceptionOrNull()?.let(::manejarErrorSesion)
+                _uiState.update { it.copy(avisoRed = resultado.exceptionOrNull()?.let { error ->
+                    if (error is IllegalStateException) error.message else mensajeDe(error)
+                }) }
+            } finally { _uiState.update { it.copy(sincronizando = false) } }
+        }
+    }
+
     fun sincronizar() = sincronizarOffline()
 
     private fun sincronizarOffline() {
         val repositorio = productoRepository ?: return
+        if (_uiState.value.sincronizando) return
         viewModelScope.launch {
             _uiState.update { it.copy(sincronizando = true) }
-            val resultado = repositorio.sincronizar()
+            val resultado = try { repositorio.sincronizar() }
+                finally { _uiState.update { it.copy(sincronizando = false) } }
+            resultado.exceptionOrNull()?.let(::manejarErrorSesion)
             _uiState.update {
                 it.copy(
                     sincronizando = false,
-                    avisoRed = resultado.exceptionOrNull()?.let { "Sin conexión: mostrando datos guardados" }
+                    avisoRed = resultado.exceptionOrNull()?.let { error -> mensajeDe(error) }
                 )
             }
         }
