@@ -20,7 +20,13 @@ actual val platformModule: Module = module {
         get<pe.edu.upeu.pharmamobilee.data.permiso.GestorPermisosAndroid>()
     }
     single<HttpClientEngine> { OkHttp.create() }
-    single(named("urlBase")) { "http://10.0.2.2:8080/api/v1/" }
+    single(named("urlBase")) {
+        val contexto = androidContext()
+        val depuracion = contexto.applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
+        val usarTunel = depuracion && contexto.getSharedPreferences("desarrollo", android.content.Context.MODE_PRIVATE)
+            .getBoolean("usar_tunel_adb", false)
+        if (usarTunel) "http://localhost:8080/api/v1/" else "http://10.0.2.2:8080/api/v1/"
+    }
     single(named("esDepuracion")) {
         androidContext().applicationInfo.flags and ApplicationInfo.FLAG_DEBUGGABLE != 0
     }
