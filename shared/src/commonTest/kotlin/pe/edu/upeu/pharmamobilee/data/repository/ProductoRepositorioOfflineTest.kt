@@ -24,6 +24,34 @@ import kotlin.test.assertTrue
 
 class ProductoRepositorioOfflineTest {
     @Test
+    fun migracionConservaFilasExistentesYAgregaEstadoDeEnvio() = runTest {
+        val driver = JdbcSqliteDriver(JdbcSqliteDriver.IN_MEMORY)
+        driver.execute(null, "CREATE TABLE producto (id INTEGER NOT NULL PRIMARY KEY, nombre TEXT NOT NULL, precio REAL NOT NULL, stock INTEGER NOT NULL, activo INTEGER NOT NULL DEFAULT 1, pendiente INTEGER NOT NULL DEFAULT 0)", 0)
+        driver.execute(null, "CREATE TABLE sincronizacion_metadata (id INTEGER NOT NULL PRIMARY KEY, ultima_correcta INTEGER)", 0)
+        driver.execute(null, "INSERT INTO producto VALUES(-1, 'Antes de migrar', 4.5, 20, 1, 1)", 0)
+        PharmaDb.Schema.migrate(driver, 2, 3)
+        val fila = ProductoLocal(driver).pendientes().single()
+        assertEquals("Antes de migrar", fila.nombre)
+        assertEquals(0, fila.intentos)
+        assertFalse(fila.requiereRevision)
+        assertEquals(null, fila.ultimoError)
+        driver.close()
+    }
+
+    @Test
+    fun interrupcionAntesDeConfirmarNoAutorizaReenvioAutomatico() = runTest {
+        val driver = baseEnMemoria()
+        val local = ProductoLocal(driver)
+        val fila = local.guardarPendiente(producto(0, "Enviado"))
+        local.prepararEnvio(fila.id)
+        val reabierto = ProductoLocal(driver)
+        val recuperado = reabierto.pendientes().single()
+        assertTrue(recuperado.requiereRevision)
+        assertFalse(pe.edu.upeu.pharmamobilee.domain.model.PoliticaSincronizacion.puedeEnviar(recuperado, Long.MAX_VALUE))
+        driver.close()
+    }
+
+    @Test
     fun sincronizacionConRedGuardaServidorYEmiteListaCompleta() = runTest {
         val local = ProductoLocal(baseEnMemoria())
         val servidor = ServidorMock(listOf(producto(10, "Paracetamol"), producto(20, "Ibuprofeno")))
@@ -57,11 +85,13 @@ class ProductoRepositorioOfflineTest {
     fun envioAlReconectarQuitaMarcaPendiente() = runTest {
         val local = ProductoLocal(baseEnMemoria())
         val servidor = ServidorMock(disponible = false)
-        val repo = ProductoRepositorioOffline(local, servidor.repositorio())
+        var ahora = 0L
+        val repo = ProductoRepositorioOffline(local, servidor.repositorio()) { ahora }
         repo.registrar(producto(0, "Pendiente")).getOrThrow()
 
         servidor.disponible = true
-        repo.sincronizar().getOrThrow()
+        ahora = 1_000L
+        repo.reintentar(local.pendientes().single().id).getOrThrow()
 
         val sincronizado = repo.observar().first().single()
         assertTrue(sincronizado.id > 0)
@@ -69,6 +99,81 @@ class ProductoRepositorioOfflineTest {
         assertTrue(local.pendientes().isEmpty())
         assertEquals("Pendiente", servidor.productos.single().nombre)
         servidor.close()
+    }
+
+    @Test
+    fun falloTransitorioRecuerdaIntentoYNoRepiteCreacionAmbigua() = runTest {
+        val local = ProductoLocal(baseEnMemoria())
+        val servidor = ServidorMock(disponible = false)
+        val repo = ProductoRepositorioOffline(local, servidor.repositorio()) { 0L }
+        repo.registrar(producto(0, "Pendiente")).getOrThrow()
+
+        val fila = local.pendientes().single()
+        assertEquals(1, fila.intentos)
+        assertEquals(1_000L, fila.proximoIntentoMillis)
+        assertTrue(fila.requiereRevision)
+        assertTrue(fila.ultimoError!!.contains("antes de reenviar"))
+        servidor.disponible = true
+        repo.sincronizar().getOrThrow()
+        assertTrue(servidor.productos.isEmpty())
+        assertEquals(1, local.pendientes().single().intentos)
+        servidor.close()
+    }
+
+    @Test
+    fun reenvioManualRespetaEsperaYCadaFalloIncrementaIntentos() = runTest {
+        val local = ProductoLocal(baseEnMemoria())
+        val servidor = ServidorMock(disponible = false)
+        var ahora = 0L
+        val repo = ProductoRepositorioOffline(local, servidor.repositorio()) { ahora }
+        repo.registrar(producto(0, "Pendiente")).getOrThrow()
+        val id = local.pendientes().single().id
+        assertTrue(repo.reintentar(id).isFailure)
+        assertEquals(1, local.pendientes().single().intentos)
+        ahora = 1_000L
+        repo.reintentar(id)
+        val fila = local.pendientes().single()
+        assertEquals(2, fila.intentos)
+        assertEquals(3_000L, fila.proximoIntentoMillis)
+        servidor.close()
+    }
+
+    @Test
+    fun editarUnaCreacionAmbiguaNoBorraSuHistorialNiAutorizaReenvio() = runTest {
+        val local = ProductoLocal(baseEnMemoria())
+        val fila = local.guardarPendiente(producto(0, "Pendiente"))
+        local.registrarFallo(fila.id, "Conflicto", true, 1_000L)
+        local.actualizarPendiente(fila.copy(nombre = "Corregido"))
+        val actualizado = local.pendientes().single()
+        assertEquals("Corregido", actualizado.nombre)
+        assertEquals(1, actualizado.intentos)
+        assertTrue(actualizado.requiereRevision)
+        assertEquals("Conflicto", actualizado.ultimoError)
+    }
+
+    @Test
+    fun falloPermanenteNoSeReintentaYNoImpideEnviarOtrasFilas() = runTest {
+        val local = ProductoLocal(baseEnMemoria())
+        val fila = local.guardarPendiente(producto(0, "Inválido"))
+        val otra = local.guardarPendiente(producto(0, "Válido"))
+        val servidor = object : pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository {
+            override suspend fun listar() = Result.success(listOf(producto(10, "Válido")))
+            override suspend fun obtener(id: Long) = Result.success(producto(id, "Válido"))
+            override suspend fun registrar(producto: Producto): Result<Producto> = if (producto.id == fila.id)
+                Result.failure(pe.edu.upeu.pharmamobilee.domain.error.ErrorApiException(
+                    pe.edu.upeu.pharmamobilee.domain.error.ErrorApi.Validacion(mapOf("nombre" to "Inválido"))))
+                else Result.success(producto.copy(id = 10, pendienteSincronizacion = false))
+            override suspend fun actualizar(producto: Producto) = Result.success(producto)
+            override suspend fun eliminar(id: Long) = Result.failure<Unit>(IllegalStateException("Rechazado"))
+        }
+        val repo = ProductoRepositorioOffline(local, servidor) { 0L }
+        assertTrue(repo.sincronizar().isFailure)
+        assertEquals(fila.id, local.pendientes().single().id)
+        assertTrue(local.pendientes().single().requiereRevision)
+        assertTrue(local.observar().first().any { it.id == 10L })
+        assertFalse(local.observar().first().any { it.id == otra.id })
+        assertTrue(repo.eliminar(10L).isFailure)
+        assertTrue(local.observar().first().any { it.id == 10L })
     }
 
     @Test
