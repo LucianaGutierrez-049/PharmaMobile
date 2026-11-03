@@ -15,6 +15,10 @@ import pe.edu.upeu.pharmamobilee.data.local.CreadorDeDriverAndroid
 import pe.edu.upeu.pharmamobilee.platform.CompartidorAndroid
 
 actual val platformModule: Module = module {
+    single { pe.edu.upeu.pharmamobilee.data.permiso.GestorPermisosAndroid(androidContext()) }
+    single<pe.edu.upeu.pharmamobilee.domain.permiso.GestorPermisos> {
+        get<pe.edu.upeu.pharmamobilee.data.permiso.GestorPermisosAndroid>()
+    }
     single<HttpClientEngine> { OkHttp.create() }
     single(named("urlBase")) { "http://10.0.2.2:8080/api/v1/" }
     single(named("esDepuracion")) {

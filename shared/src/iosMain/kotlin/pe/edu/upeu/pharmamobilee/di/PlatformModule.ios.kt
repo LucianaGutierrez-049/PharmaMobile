@@ -15,6 +15,9 @@ import pe.edu.upeu.pharmamobilee.data.local.CreadorDeDriverIos
 import pe.edu.upeu.pharmamobilee.platform.CompartidorIos
 
 actual val platformModule: Module = module {
+    single<pe.edu.upeu.pharmamobilee.domain.permiso.GestorPermisos> {
+        pe.edu.upeu.pharmamobilee.data.permiso.GestorPermisosIos()
+    }
     single<HttpClientEngine> { Darwin.create() }
     single(named("urlBase")) { "http://localhost:8080/api/v1/" }
     single(named("esDepuracion")) { esDepuracionIos() }

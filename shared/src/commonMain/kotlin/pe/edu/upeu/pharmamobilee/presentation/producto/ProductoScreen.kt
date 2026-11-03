@@ -138,6 +138,7 @@ fun ProductoScreen(
                 }
             }
         }
+        pe.edu.upeu.pharmamobilee.presentation.permiso.PermisoNotificacionesCard()
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val formulario: @Composable () -> Unit = {
