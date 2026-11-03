@@ -1,0 +1,8 @@
+{
+  "inicio": "E06_inicio.png",
+  "pendientes": "E04_offline.png",
+  "fallidas": "E05_fallida.png",
+  "concedido": "E07_concedido.png",
+  "denegado": "E08_denegado.png",
+  "definitivo": "E09_definitivo.png"
+}

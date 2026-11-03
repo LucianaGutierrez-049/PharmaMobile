@@ -1,0 +1,26 @@
+{
+  "version": 3,
+  "productos": 1,
+  "pendientes": 1,
+  "columnas": [
+    "id",
+    "nombre",
+    "precio",
+    "stock",
+    "activo",
+    "pendiente",
+    "intentos",
+    "ultimoError",
+    "requiereRevision",
+    "proximoIntento"
+  ],
+  "filas_de_prueba": [
+    [
+      -1,
+      "S13_EVIDENCIA_20261103",
+      1,
+      "No se encontró el producto solicitado.",
+      1
+    ]
+  ]
+}
