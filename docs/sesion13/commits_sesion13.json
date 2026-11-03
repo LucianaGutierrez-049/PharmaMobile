@@ -1,0 +1,37 @@
+[
+  {
+    "paso": 1,
+    "hash": "d18805de8e6fa03663a52a1b1e649eed63f4c644",
+    "mensaje": "docs: registra brechas y alcance del integrador 13"
+  },
+  {
+    "paso": 2,
+    "hash": "268e93d5ed4846c7cd955aa8887842d08034d0a4",
+    "mensaje": "feat: persiste intentos y revision de envios locales"
+  },
+  {
+    "paso": 3,
+    "hash": "034e4663afba57c8b68bcdf015161f29be8af9ec",
+    "mensaje": "feat: refina sincronizacion con limites y reenvios confirmados"
+  },
+  {
+    "paso": 4,
+    "hash": "7ef1489eb2a970d44ecd565f9185e8cd4e703651",
+    "mensaje": "feat: muestra pendientes fallos y antiguedad del inventario"
+  },
+  {
+    "paso": 5,
+    "hash": "759a6b4cd5ac9da247bca3078d891ca0f6ef28c2",
+    "mensaje": "feat: integra permiso nativo de notificaciones por plataforma"
+  },
+  {
+    "paso": 6,
+    "hash": "fdc28ba6fa75a5cd4128057b1fe790adb243a891",
+    "mensaje": "feat: integra Crashlytics mediante contrato de telemetria"
+  },
+  {
+    "paso": 7,
+    "hash": "93f91cd0e37c19651dda0df2176032efe38146cb",
+    "mensaje": "test: documenta pruebas y evidencias reales del integrador 13"
+  }
+]
