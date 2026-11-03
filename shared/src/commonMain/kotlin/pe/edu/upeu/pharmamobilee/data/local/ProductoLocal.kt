@@ -26,6 +26,20 @@ class ProductoLocal(driver: SqlDriver) {
         .executeAsList()
         .map { it.aDominio() }
 
+    fun registrarFallo(id: Long, mensaje: String, revision: Boolean, proximo: Long) {
+        consultas.registrarFallo(mensaje, if (revision) 1L else 0L, proximo, id)
+    }
+
+    fun prepararEnvio(id: Long) = consultas.prepararEnvio(id)
+    fun reintentar(id: Long) = consultas.reintentar(id)
+
+    fun confirmarEnvio(idLocal: Long, producto: Producto) {
+        consultas.transaction {
+            guardarSincronizado(producto)
+            consultas.confirmarEnvio(idLocal)
+        }
+    }
+
     fun guardarPendiente(producto: Producto): Producto {
         val menor = consultas.siguienteIdLocal().executeAsOne()
         val local = producto.copy(
@@ -47,7 +61,7 @@ class ProductoLocal(driver: SqlDriver) {
 
     fun actualizarPendiente(producto: Producto): Producto {
         val pendiente = producto.copy(pendienteSincronizacion = true)
-        consultas.insertar(pendiente.id, pendiente.nombre, pendiente.precio, pendiente.stock.toLong(), if (pendiente.activo) 1L else 0L, 1L)
+        consultas.actualizarDatosPendientes(pendiente.nombre, pendiente.precio, pendiente.stock.toLong(), if (pendiente.activo) 1L else 0L, pendiente.id)
         return pendiente
     }
 
@@ -74,5 +88,9 @@ private fun pe.edu.upeu.pharmamobilee.db.Producto.aDominio() = Producto(
     precio = precio,
     stock = stock.toInt(),
     activo = activo != 0L,
-    pendienteSincronizacion = pendiente != 0L
+    pendienteSincronizacion = pendiente != 0L,
+    intentos = intentos.toInt(),
+    ultimoError = ultimoError,
+    requiereRevision = requiereRevision != 0L,
+    proximoIntentoMillis = proximoIntento
 )
