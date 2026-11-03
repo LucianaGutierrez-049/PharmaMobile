@@ -13,6 +13,8 @@ data class ProductoUiState(
     val categoriaEnEdicionId: Long? = null,
     val productos: List<ProductoUi> = emptyList(),
     val fase: ProductoFase = ProductoFase.Cargando,
+    val pendientes: Int = 0,
+    val fallidas: Int = 0,
     val sincronizando: Boolean = false,
     val avisoRed: String? = null,
     val ultimaSincronizacionMillis: Long? = null,

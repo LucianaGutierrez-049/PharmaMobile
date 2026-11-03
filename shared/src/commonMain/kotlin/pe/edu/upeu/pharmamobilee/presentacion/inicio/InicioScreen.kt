@@ -60,7 +60,12 @@ fun InicioScreen(
     onClientesClick: () -> Unit,
     onPedidosClick: () -> Unit,
     mostrarClientes: Boolean = true,
-    mostrarPedidos: Boolean = true
+    mostrarPedidos: Boolean = true,
+    pendientes: Int = 0,
+    fallidas: Int = 0,
+    ultimaSincronizacionMillis: Long? = null,
+    sincronizando: Boolean = false,
+    avisoSincronizacion: String? = null
 ) {
     Column(
         modifier = Modifier
@@ -70,6 +75,18 @@ fun InicioScreen(
         verticalArrangement = Arrangement.spacedBy(24.dp)
     ) {
         InicioHeader()
+        ElevatedCard(Modifier.fillMaxWidth()) {
+            Column(Modifier.padding(16.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(if (sincronizando) "Sincronizando inventario…" else "Estado de sincronización",
+                    style = MaterialTheme.typography.titleMedium)
+                Text("$pendientes cambios por enviar · $fallidas requieren revisión")
+                Text(pe.edu.upeu.pharmamobilee.presentation.producto.textoAntiguedadSincronizacion(
+                    ultimaSincronizacionMillis, kotlin.time.Clock.System.now().toEpochMilliseconds()))
+                avisoSincronizacion?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+                if (fallidas > 0) TextButton(onClick = onProductosClick) { Text("Revisar envíos") }
+                TextButton(onClick = onReintentarInventario, enabled = !sincronizando) { Text("Sincronizar ahora") }
+            }
+        }
         when (faseInventario) {
           ProductoFase.Cargando -> LoadingState(title = "Cargando inventario...")
           is ProductoFase.Error -> ErrorState(
