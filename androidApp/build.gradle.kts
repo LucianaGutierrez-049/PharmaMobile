@@ -5,6 +5,12 @@ plugins {
     alias(libs.plugins.composeCompiler)
 }
 
+// Sin configuración real la app funciona localmente y la telemetría queda inactiva.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
+    apply(plugin = "com.google.firebase.crashlytics")
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = JvmTarget.JVM_11

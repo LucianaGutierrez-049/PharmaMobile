@@ -12,11 +12,14 @@ import pe.edu.upeu.pharmamobilee.domain.error.ErrorApiException
 import pe.edu.upeu.pharmamobilee.domain.error.mensajeUsuario
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
 import pe.edu.upeu.pharmamobilee.domain.model.PoliticaSincronizacion
+import pe.edu.upeu.pharmamobilee.domain.port.Telemetria
+import pe.edu.upeu.pharmamobilee.domain.port.TelemetriaDesactivada
 import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
 
 class ProductoRepositorioOffline(
     private val local: ProductoLocal,
     private val remoto: ProductoRepository,
+    private val telemetria: Telemetria = TelemetriaDesactivada,
     private val ahoraMillis: () -> Long = { kotlin.time.Clock.System.now().toEpochMilliseconds() }
 ) : ProductoRepository {
     private val mutex = Mutex()
@@ -56,6 +59,7 @@ class ProductoRepositorioOffline(
                 }
                 local.registrarFallo(pendiente.id, mensaje, true,
                     ahoraMillis() + PoliticaSincronizacion.esperaMillis(pendiente.intentos))
+                telemetria.registrarError(error, mapOf("operacion" to "crear_producto", "tipo" to if (transitorio) "transitorio" else "permanente"))
                 if (primerError == null) primerError = error
             }
         }
@@ -66,6 +70,7 @@ class ProductoRepositorioOffline(
             local.guardarUltimaSincronizacion(ahoraMillis())
         }
         (primerError ?: descarga.exceptionOrNull())?.let { throw it }
+        telemetria.registrarEvento("sincronizacion_completada")
     }
 
     private suspend fun descargarConReintentos(): Result<List<Producto>> {

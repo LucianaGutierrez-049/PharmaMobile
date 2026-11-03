@@ -26,6 +26,9 @@ import pe.edu.upeu.pharmamobilee.presentation.sesion.GestorSesion
 import pe.edu.upeu.pharmamobilee.presentation.sesion.SesionViewModel
 
 val dataModule = module {
+    single<pe.edu.upeu.pharmamobilee.domain.port.Telemetria> {
+        pe.edu.upeu.pharmamobilee.data.firebase.TelemetriaFirebase()
+    }
     single {
         crearHttpClient(
             engine = get(),
@@ -46,7 +49,8 @@ val dataModule = module {
     single<ProductoRepository> {
         ProductoRepositorioOffline(
             local = get(),
-            remoto = get(named("repositorioRemoto"))
+            remoto = get(named("repositorioRemoto")),
+            telemetria = get()
         )
     }
     single<AuthRepository> { AuthRepositorioRest(get(), get()) }
