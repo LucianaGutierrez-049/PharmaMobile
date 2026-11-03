@@ -4,7 +4,11 @@ CREATE TABLE producto (
     precio REAL NOT NULL,
     stock INTEGER NOT NULL,
     activo INTEGER NOT NULL DEFAULT 1,
-    pendiente INTEGER NOT NULL DEFAULT 0
+    pendiente INTEGER NOT NULL DEFAULT 0,
+    intentos INTEGER NOT NULL DEFAULT 0,
+    ultimoError TEXT,
+    requiereRevision INTEGER NOT NULL DEFAULT 0,
+    proximoIntento INTEGER NOT NULL DEFAULT 0
 );
 
 CREATE TABLE sincronizacion_metadata (
@@ -37,3 +41,19 @@ VALUES (1, ?);
 
 obtenerUltimaSincronizacion:
 SELECT ultima_correcta FROM sincronizacion_metadata WHERE id = 1;
+
+registrarFallo:
+UPDATE producto SET intentos = intentos + 1, ultimoError = :mensaje,
+requiereRevision = :revision, proximoIntento = :proximo WHERE id = :id;
+
+prepararEnvio:
+UPDATE producto SET requiereRevision = 1, ultimoError = 'Envío interrumpido: verifica el servidor antes de reenviar.' WHERE id = :id;
+
+reintentar:
+UPDATE producto SET requiereRevision = 0, intentos = CASE WHEN intentos >= 5 THEN 0 ELSE intentos END, ultimoError = NULL, proximoIntento = 0 WHERE id = :id AND pendiente = 1;
+
+actualizarDatosPendientes:
+UPDATE producto SET nombre = :nombre, precio = :precio, stock = :stock, activo = :activo WHERE id = :id AND pendiente = 1;
+
+confirmarEnvio:
+DELETE FROM producto WHERE id = :id AND pendiente = 1;
