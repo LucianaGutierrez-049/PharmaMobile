@@ -7,6 +7,7 @@ import pe.edu.upeu.pharmamobilee.domain.model.Producto
 interface ProductoRepository {
     fun observar(): Flow<List<Producto>> = flowOf(emptyList())
     fun observarUltimaSincronizacion(): Flow<Long?> = flowOf(null)
+    suspend fun reintentar(id: Long): Result<Unit> = Result.success(Unit)
     suspend fun sincronizar(): Result<Unit> = listar().map { Unit }
     suspend fun listar(): Result<List<Producto>>
     suspend fun obtener(id: Long): Result<Producto>
