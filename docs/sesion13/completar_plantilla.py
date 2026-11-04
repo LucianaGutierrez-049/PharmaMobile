@@ -134,6 +134,8 @@ ps[135].add_run('\nFigura 2. Captura histórica del primer intento de acceso: me
 ps[135].paragraph_format.keep_together=True
 from evidencias_word import aplicar
 aplicar(d,ps,ROOT)
+from firebase_word import aplicar as aplicar_firebase
+aplicar_firebase(d,ps,ROOT)
 
 # Mantener geometría, estilos y elementos de la plantilla. Evitar cortes de filas.
 for table in d.tables:
