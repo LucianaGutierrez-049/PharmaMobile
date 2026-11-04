@@ -1,0 +1,29 @@
+{
+  "tests": 82,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "fecha": "2026-11-04",
+  "suites": 21,
+  "compilacion": "BUILD SUCCESSFUL",
+  "target": "Android host JVM",
+  "ios": "No ejecutado en Windows",
+  "integracion_rest": "Aprobada: alta, edición, categoría en SQLite y baja lógica contra PharmaSoft local",
+  "recepcion_crashlytics": "Pendiente de comprobar en consola",
+  "suites_nuevas": [
+    {
+      "nombre": "pe.edu.upeu.pharmamobilee.data.firebase.TelemetriaFirebaseTest",
+      "pruebas": 3
+    },
+    {
+      "nombre": "pe.edu.upeu.pharmamobilee.data.repository.FormularioOfflineTest",
+      "pruebas": 2
+    },
+    {
+      "nombre": "pe.edu.upeu.pharmamobilee.data.repository.IntegradorCorreccionesTest",
+      "pruebas": 10
+    }
+  ],
+  "apk_sha256": "dbca0c0216b6e08e5d867385ca4b232bd505b72a6037140a6fb56554619d7b36",
+  "migracion_nativa": "Verificada versión 4; pendiente anterior conservado sin reenvío"
+}
