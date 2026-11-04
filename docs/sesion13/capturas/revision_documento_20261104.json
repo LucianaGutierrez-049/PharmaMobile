@@ -1,10 +1,10 @@
 {
   "fecha": "2026-11-04",
-  "paginas": 30,
-  "figuras": 20,
+  "paginas": 31,
+  "figuras": 22,
   "tablas": 16,
   "referencia_intacta": true,
   "partes_preservadas_sin_diferencias": true,
-  "revision_visual": "30 páginas inspeccionadas; referencias largas corregidas y páginas afectadas revisadas",
-  "sha256_docx": "34dc939616cf98239a4d9cf921505a465cb339013e51aadc97ff623101887729"
+  "revision_visual": "31 páginas verificadas: 19 idénticas por comparación de píxeles a páginas ya revisadas; 12 páginas modificadas o nuevas inspeccionadas individualmente, sin recortes ni solapamientos.",
+  "sha256_docx": "1915d007bb6e040a02db65a5b15b6a7afe7daf424d5ea9d20ba17252dfeef7fb"
 }

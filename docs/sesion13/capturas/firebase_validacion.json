@@ -5,12 +5,13 @@
   "archivo_presente": true,
   "paquete_coincide": true,
   "compilacion": "BUILD SUCCESSFUL con Google Services y Crashlytics aplicados",
-  "recepcion_crashlytics": "Pendiente de comprobar en consola",
+  "recepcion_crashlytics": "Confirmada en consola el 4 de noviembre de 2026; operacion=prueba_sesion13",
   "origen_captura": "Captura aportada por la estudiante, recortada al panel del proyecto",
   "fecha_verificacion": "2026-11-03T17:13:16-05:00",
   "tareas_verificadas": [
     "processDebugGoogleServices",
     "injectCrashlyticsMappingFileIdDebug",
     "assembleDebug"
-  ]
+  ],
+  "evidencia_recepcion": "firebase_recepcion_20261104.json"
 }

@@ -1,0 +1,30 @@
+{
+  "fecha_verificacion": "2026-11-04",
+  "fecha_evento_mostrada": "4 nov 2026, 8:37:04 a. m.",
+  "proyecto": "pharmamobile-33661",
+  "paquete": "pe.edu.upeu.pharmamobilee",
+  "version_app": "1.0 (1)",
+  "plataforma": "Android",
+  "emulador": "Sdk_gphone16k_x86_64",
+  "estado": "Recepción no fatal confirmada en consola Firebase Crashlytics",
+  "origen": "Capturas aportadas por la estudiante de la consola Firebase",
+  "excepcion": "java.lang.IllegalStateException",
+  "mensaje": "Fallo tecnico: inesperado",
+  "emisor": "TelemetriaFirebase.registrarError, TelemetriaFirebase.kt:49",
+  "llamada_prueba": "TelemetriaPruebaCard.kt:19",
+  "claves": {
+    "codigo": "inesperado",
+    "operacion": "prueba_sesion13",
+    "pantalla": "productos",
+    "tipo": "prueba"
+  },
+  "capturas": [
+    "E17_crashlytics_evento_20261104.png",
+    "E18_crashlytics_claves_20261104.png"
+  ],
+  "sha256_capturas": {
+    "E17_crashlytics_evento_20261104.png": "080024e36b484c9894fe1529955c92288fef04dd2b06007f8222c1215df935e6",
+    "E18_crashlytics_claves_20261104.png": "d0bec08fce32c64b72829b90de77ce50ca81675df03089635e9421dcd94a43b0"
+  },
+  "alcance": "Acredita la recepción de la prueba controlada no fatal Android; no acredita iOS ni mensajería push."
+}

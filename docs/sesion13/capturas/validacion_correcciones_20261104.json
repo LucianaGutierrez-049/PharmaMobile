@@ -9,7 +9,7 @@
   "target": "Android host JVM",
   "ios": "No ejecutado en Windows",
   "integracion_rest": "Aprobada: alta, edición, categoría en SQLite y baja lógica contra PharmaSoft local",
-  "recepcion_crashlytics": "Pendiente de comprobar en consola",
+  "recepcion_crashlytics": "Confirmada en consola el 4 de noviembre de 2026; operacion=prueba_sesion13",
   "suites_nuevas": [
     {
       "nombre": "pe.edu.upeu.pharmamobilee.data.firebase.TelemetriaFirebaseTest",
@@ -25,5 +25,6 @@
     }
   ],
   "apk_sha256": "dbca0c0216b6e08e5d867385ca4b232bd505b72a6037140a6fb56554619d7b36",
-  "migracion_nativa": "Verificada versión 4; pendiente anterior conservado sin reenvío"
+  "migracion_nativa": "Verificada versión 4; pendiente anterior conservado sin reenvío",
+  "evidencia_recepcion": "firebase_recepcion_20261104.json"
 }
