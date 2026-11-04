@@ -24,6 +24,9 @@ dependencies {
 
     implementation(libs.compose.uiToolingPreview)
     debugImplementation(libs.compose.uiTooling)
+    androidTestImplementation(libs.kotlinx.coroutines.core)
+    androidTestImplementation(libs.ktor.client.core)
+    androidTestImplementation(libs.ktor.client.auth)
 }
 
 android {
@@ -36,6 +39,7 @@ android {
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
         versionName = "1.0"
+        testInstrumentationRunner = "pe.edu.upeu.pharmamobilee.Integrador13Instrumentation"
     }
     packaging {
         resources {

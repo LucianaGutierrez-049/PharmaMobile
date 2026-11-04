@@ -29,12 +29,14 @@ class ProductoRepositorioOfflineTest {
         driver.execute(null, "CREATE TABLE producto (id INTEGER NOT NULL PRIMARY KEY, nombre TEXT NOT NULL, precio REAL NOT NULL, stock INTEGER NOT NULL, activo INTEGER NOT NULL DEFAULT 1, pendiente INTEGER NOT NULL DEFAULT 0)", 0)
         driver.execute(null, "CREATE TABLE sincronizacion_metadata (id INTEGER NOT NULL PRIMARY KEY, ultima_correcta INTEGER)", 0)
         driver.execute(null, "INSERT INTO producto VALUES(-1, 'Antes de migrar', 4.5, 20, 1, 1)", 0)
-        PharmaDb.Schema.migrate(driver, 2, 3)
-        val fila = ProductoLocal(driver).pendientes().single()
+        PharmaDb.Schema.migrate(driver, 2, 4)
+        val fila = ProductoLocal(driver, "__legado_sin_asignar__").pendientes().single()
         assertEquals("Antes de migrar", fila.nombre)
         assertEquals(0, fila.intentos)
         assertFalse(fila.requiereRevision)
         assertEquals(null, fila.ultimoError)
+        assertTrue(ProductoLocal(driver, "cuenta_nueva").pendientes().isEmpty())
+        assertEquals(1L, ProductoLocal(driver).observarPendientesAnteriores().first())
         driver.close()
     }
 

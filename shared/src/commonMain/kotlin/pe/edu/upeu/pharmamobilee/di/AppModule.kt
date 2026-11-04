@@ -42,15 +42,16 @@ val dataModule = module {
     single<ProductoRepository>(named("repositorioRemoto")) {
         ProductoRepositoryImpl(
             api = get(),
-            categoriaPorDefecto = 1L
+            categoriaPorDefecto = null
         )
     }
     single { ProductoLocal(get<CreadorDeDriver>().crear()) }
     single<ProductoRepository> {
-        ProductoRepositorioOffline(
+        pe.edu.upeu.pharmamobilee.data.repository.ProductoRepositorioPorUsuario(
             local = get(),
             remoto = get(named("repositorioRemoto")),
-            telemetria = get()
+            telemetria = get(),
+            usuarioActual = { get<GestorSesion>().estado.value.sesion?.usuario }
         )
     }
     single<AuthRepository> { AuthRepositorioRest(get(), get()) }

@@ -3,8 +3,13 @@ package pe.edu.upeu.pharmamobilee.domain.repository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flowOf
 import pe.edu.upeu.pharmamobilee.domain.model.Producto
+import pe.edu.upeu.pharmamobilee.domain.model.Categoria
 
 interface ProductoRepository {
+    fun observarCategorias(): Flow<List<Categoria>> = flowOf(emptyList())
+    fun observarPendientesAnteriores(): Flow<Long> = flowOf(0L)
+    suspend fun recuperarPendientesAnteriores(): Result<Unit> = Result.success(Unit)
+    suspend fun listarCategorias(): Result<List<Categoria>> = Result.success(emptyList())
     fun observar(): Flow<List<Producto>> = flowOf(emptyList())
     fun observarUltimaSincronizacion(): Flow<Long?> = flowOf(null)
     suspend fun reintentar(id: Long): Result<Unit> = Result.success(Unit)

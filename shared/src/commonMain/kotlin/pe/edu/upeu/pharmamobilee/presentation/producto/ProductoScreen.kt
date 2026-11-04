@@ -61,6 +61,17 @@ fun ProductoScreen(
     val snackbarHostState = remember { SnackbarHostState() }
     var confirmarReenvio by remember { mutableStateOf<Producto?>(null) }
     var formularioExpandido by remember { mutableStateOf(true) }
+    var confirmarRecuperacion by remember { mutableStateOf(false) }
+
+    if (confirmarRecuperacion) androidx.compose.material3.AlertDialog(
+        onDismissRequest = { confirmarRecuperacion = false },
+        title = { Text("Recuperar pendientes anteriores") },
+        text = { Text("Confirma que todos estos pendientes son de tu cuenta. Se conservarán sus intentos y errores. Deberás revisar la categoría y confirmar cada reenvío; no se enviarán ahora.") },
+        confirmButton = { androidx.compose.material3.TextButton(onClick = {
+            viewModel.recuperarPendientesAnteriores(); confirmarRecuperacion = false
+        }) { Text("Son de mi cuenta") } },
+        dismissButton = { androidx.compose.material3.TextButton(onClick = { confirmarRecuperacion = false }) { Text("Cancelar") } }
+    )
 
     LaunchedEffect(uiState.mensajeExito) {
         uiState.mensajeExito?.let { snackbarHostState.showSnackbar(it) }
@@ -124,6 +135,13 @@ fun ProductoScreen(
 
         Text("${uiState.pendientes} cambios por enviar · ${uiState.fallidas} requieren revisión")
         uiState.avisoRed?.let { Text(it, color = MaterialTheme.colorScheme.error) }
+        if (uiState.pendientesAnteriores > 0) Text(
+            "Hay ${uiState.pendientesAnteriores} pendientes anteriores sin cuenta identificada. Se conservan y no se enviarán desde esta sesión.",
+            color = MaterialTheme.colorScheme.error)
+        if (puedeEscribir && uiState.pendientesAnteriores > 0) OutlinedButton(
+            onClick = { confirmarRecuperacion = true }, enabled = !uiState.sincronizando
+        ) { Text("Recuperar pendientes anteriores") }
+        pe.edu.upeu.pharmamobilee.presentation.permiso.TelemetriaPruebaCard()
         uiState.productos.filter { it.producto.pendienteSincronizacion &&
             (it.producto.requiereRevision || it.producto.intentos >= 5) }.forEach { fila ->
             ElevatedCard(Modifier.fillMaxWidth()) {
@@ -145,6 +163,7 @@ fun ProductoScreen(
                 ProductoFormulario(
                     uiState = uiState,
                     onNombreChange = viewModel::actualizarNombre,
+                    onCategoriaChange = viewModel::seleccionarCategoria,
                     onPrecioChange = viewModel::actualizarPrecio,
                     onStockChange = viewModel::actualizarStock,
                     onActivoChange = viewModel::actualizarActivo,
@@ -231,6 +250,7 @@ private fun ProductoContenido(
 private fun ProductoFormulario(
     uiState: ProductoUiState,
     onNombreChange: (String) -> Unit,
+    onCategoriaChange: (Long) -> Unit,
     onPrecioChange: (String) -> Unit,
     onStockChange: (String) -> Unit,
     onActivoChange: (Boolean) -> Unit,
@@ -293,6 +313,23 @@ private fun ProductoFormulario(
                 },
                 modifier = Modifier.fillMaxWidth()
             )
+
+            var categoriasAbiertas by remember { mutableStateOf(false) }
+            Box {
+                OutlinedButton(onClick = { categoriasAbiertas = true }, enabled = !guardando) {
+                    Text(uiState.categorias.firstOrNull { it.id == uiState.categoriaSeleccionadaId }?.nombre
+                        ?: uiState.categoriaSeleccionadaId?.let { "Categoría $it" } ?: "Seleccionar categoría")
+                }
+                androidx.compose.material3.DropdownMenu(expanded = categoriasAbiertas, onDismissRequest = { categoriasAbiertas = false }) {
+                    uiState.categorias.forEach { categoria ->
+                        androidx.compose.material3.DropdownMenuItem(text = { Text(categoria.nombre) }, onClick = {
+                            onCategoriaChange(categoria.id); categoriasAbiertas = false
+                        })
+                    }
+                }
+            }
+            if (uiState.categorias.isEmpty()) Text("Conéctate y sincroniza para descargar las categorías.", style = MaterialTheme.typography.bodySmall)
+            uiState.categoriaError?.let { Text(it, color = MaterialTheme.colorScheme.error) }
 
             ValidatedTextField(
                 value = uiState.precio,

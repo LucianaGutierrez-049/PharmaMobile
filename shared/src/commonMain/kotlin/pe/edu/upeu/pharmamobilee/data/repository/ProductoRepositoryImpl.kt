@@ -13,8 +13,11 @@ import pe.edu.upeu.pharmamobilee.domain.repository.ProductoRepository
 
 class ProductoRepositoryImpl(
     private val api: ProductoApi,
-    private val categoriaPorDefecto: Long
+    private val categoriaPorDefecto: Long?
 ) : ProductoRepository {
+    override suspend fun listarCategorias() = ejecutarLlamada {
+        api.categorias().map { pe.edu.upeu.pharmamobilee.domain.model.Categoria(it.id, it.nombre) }
+    }
 
     override fun observar(): Flow<List<Producto>> = flow {
         emit(listar().getOrDefault(emptyList()))

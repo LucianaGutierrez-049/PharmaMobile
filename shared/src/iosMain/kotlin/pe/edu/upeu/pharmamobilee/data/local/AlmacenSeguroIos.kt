@@ -11,6 +11,9 @@ import kotlinx.cinterop.readBytes
 import kotlinx.cinterop.reinterpret
 import kotlinx.cinterop.usePinned
 import kotlinx.cinterop.value
+import kotlinx.serialization.encodeToString
+import kotlinx.serialization.json.Json
+import pe.edu.upeu.pharmamobilee.domain.model.Sesion
 import platform.CoreFoundation.CFDataCreate
 import platform.CoreFoundation.CFDataRef
 import platform.CoreFoundation.CFDataGetBytePtr
@@ -41,8 +44,18 @@ import platform.Security.kSecValueData
 class AlmacenSeguroIos : AlmacenSeguro {
     override fun guardarToken(token: String) {
         borrarToken()
-        val consulta = consultaBase()
-        val bytes = token.encodeToByteArray()
+        guardarValor(CUENTA, token)
+    }
+
+    override fun guardarSesion(sesion: Sesion) = guardarValor(CUENTA_PERFIL, Json.encodeToString(sesion))
+    override fun leerSesion(): Sesion? = leerValor(CUENTA_PERFIL)?.let {
+        runCatching { Json.decodeFromString<Sesion>(it) }.getOrNull()
+    }
+
+    private fun guardarValor(cuenta: String, valor: String) {
+        borrarValor(cuenta)
+        val consulta = consultaBase(cuenta)
+        val bytes = valor.encodeToByteArray()
         val datos = bytes.usePinned { pinned ->
             CFDataCreate(
                 kCFAllocatorDefault,
@@ -57,8 +70,10 @@ class AlmacenSeguroIos : AlmacenSeguro {
         check(estado == errSecSuccess) { "Keychain no pudo guardar la sesión ($estado)" }
     }
 
-    override fun leerToken(): String? {
-        val consulta = consultaBase()
+    override fun leerToken(): String? = leerValor(CUENTA)
+
+    private fun leerValor(cuenta: String): String? {
+        val consulta = consultaBase(cuenta)
         CFDictionarySetValue(consulta, kSecReturnData, kCFBooleanTrue)
         CFDictionarySetValue(consulta, kSecMatchLimit, kSecMatchLimitOne)
         return memScoped {
@@ -76,7 +91,12 @@ class AlmacenSeguroIos : AlmacenSeguro {
     }
 
     override fun borrarToken() {
-        val consulta = consultaBase()
+        borrarValor(CUENTA)
+        borrarValor(CUENTA_PERFIL)
+    }
+
+    private fun borrarValor(cuenta: String) {
+        val consulta = consultaBase(cuenta)
         val estado = SecItemDelete(consulta)
         CFRelease(consulta)
         check(estado == errSecSuccess || estado == errSecItemNotFound) {
@@ -84,7 +104,7 @@ class AlmacenSeguroIos : AlmacenSeguro {
         }
     }
 
-    private fun consultaBase() = CFDictionaryCreateMutable(
+    private fun consultaBase(nombreCuenta: String) = CFDictionaryCreateMutable(
         kCFAllocatorDefault,
         0,
         kCFTypeDictionaryKeyCallBacks.ptr,
@@ -97,7 +117,7 @@ class AlmacenSeguroIos : AlmacenSeguro {
         )!!
         val cuenta = CFStringCreateWithCString(
             kCFAllocatorDefault,
-            CUENTA,
+            nombreCuenta,
             kCFStringEncodingUTF8
         )!!
         CFDictionarySetValue(consulta, kSecClass, kSecClassGenericPassword)
@@ -110,5 +130,6 @@ class AlmacenSeguroIos : AlmacenSeguro {
     private companion object {
         const val SERVICIO = "pe.edu.upeu.pharmamobilee"
         const val CUENTA = "jwt"
+        const val CUENTA_PERFIL = "perfil"
     }
 }

@@ -6,6 +6,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.CancellationException
 import pe.edu.upeu.pharmamobilee.domain.error.ErrorSesionException
 import pe.edu.upeu.pharmamobilee.domain.error.mensajeUsuario
 import pe.edu.upeu.pharmamobilee.domain.model.Credenciales
@@ -51,6 +52,7 @@ class SesionViewModel(
                 _uiState.value = SesionUiState()
                 gestorSesion.iniciar(sesion)
             }.onFailure { error ->
+                if (error is CancellationException) throw error
                 _uiState.update {
                     it.copy(
                         cargando = false,
@@ -65,6 +67,7 @@ class SesionViewModel(
     fun cerrarSesion() {
         viewModelScope.launch {
             repositorio.cerrarSesion()
+            _uiState.value = SesionUiState()
             gestorSesion.sinSesion("Sesión cerrada correctamente.")
         }
     }
@@ -77,6 +80,7 @@ class SesionViewModel(
                     else gestorSesion.iniciar(sesion)
                 }
                 .onFailure {
+                    if (it is CancellationException) throw it
                     gestorSesion.sinSesion("No se pudo recuperar la sesión guardada.")
                 }
         }

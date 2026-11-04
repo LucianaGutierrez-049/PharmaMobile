@@ -17,11 +17,12 @@ fun ProductoResponseDto.toDomain(): Producto = Producto(
     origen = OrigenProducto.REMOTO
 )
 
-fun Producto.toRequest(categoriaPorDefecto: Long): ProductoRequestDto =
+fun Producto.toRequest(categoriaPorDefecto: Long?): ProductoRequestDto =
     ProductoRequestDto(
         nombre = nombre,
         precio = precio,
         stock = stock,
         estado = activo,
-        categoriaId = categoriaId ?: categoriaPorDefecto
+        categoriaId = categoriaId ?: categoriaPorDefecto ?: throw pe.edu.upeu.pharmamobilee.domain.error.ErrorApiException(
+            pe.edu.upeu.pharmamobilee.domain.error.ErrorApi.Validacion(mapOf("categoriaId" to "Selecciona una categoría válida.")))
     )

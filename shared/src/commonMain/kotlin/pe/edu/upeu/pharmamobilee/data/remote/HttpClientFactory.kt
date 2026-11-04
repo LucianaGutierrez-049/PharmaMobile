@@ -54,7 +54,7 @@ fun crearHttpClient(
     install(Logging) {
         logger = Logger.SIMPLE
         level = if (esDepuracion) LogLevel.HEADERS else LogLevel.NONE
-        sanitizeHeader { nombre ->
+        sanitizeHeader(placeholder = "Bearer ***") { nombre ->
             nombre.equals(HttpHeaders.Authorization, ignoreCase = true)
         }
     }
