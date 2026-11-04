@@ -1,6 +1,10 @@
 package pe.edu.upeu.pharmamobilee.presentation.producto
 
 data class ProductoUiState(
+    val categorias: List<pe.edu.upeu.pharmamobilee.domain.model.Categoria> = emptyList(),
+    val categoriaSeleccionadaId: Long? = null,
+    val categoriaError: String? = null,
+    val pendientesAnteriores: Long = 0L,
     val nombre: String = "",
     val precio: String = "",
     val stock: String = "",

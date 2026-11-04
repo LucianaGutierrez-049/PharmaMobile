@@ -32,16 +32,19 @@ class AuthRepositorioRest(
         val dto: LoginResponseDto = cliente.post("auth/login") {
             setBody(LoginRequestDto(credenciales.usuario, credenciales.clave))
         }.body()
+        val sesion = dto.toDomain()
         almacen.guardarToken(dto.token)
+        almacen.guardarSesion(sesion)
         limpiarCacheBearer()
-        dto.toDomain()
+        sesion
     }
 
     override suspend fun sesionGuardada(): Sesion? {
         val token = almacen.leerToken() ?: return null
+        val sesionLocal = almacen.leerSesion()
         return try {
             val usuario: UsuarioActualDto = cliente.get("auth/me").body()
-            usuario.toDomain(token)
+            usuario.toDomain(token).also(almacen::guardarSesion)
         } catch (error: ClientRequestException) {
             if (error.response.status.value == 401) {
                 cerrarSesion()
@@ -52,7 +55,9 @@ class AuthRepositorioRest(
         } catch (cancelacion: CancellationException) {
             throw cancelacion
         } catch (error: Throwable) {
-            throw traducir(error)
+            val traducido = traducir(error)
+            if (traducido.error == ErrorSesion.SinConexion && sesionLocal != null) sesionLocal
+            else throw traducido
         }
     }
 

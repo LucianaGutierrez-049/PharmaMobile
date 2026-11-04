@@ -15,6 +15,9 @@ import pe.edu.upeu.pharmamobilee.data.remote.dto.ProductoResponseDto
 class ProductoApi(
     private val client: HttpClient
 ) {
+    suspend fun categorias(): List<pe.edu.upeu.pharmamobilee.data.remote.dto.CategoriaResponseDto> =
+        client.get("categorias").body()
+
     suspend fun listar(
         pagina: Int = 0,
         tamanio: Int = 20

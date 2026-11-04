@@ -55,7 +55,27 @@ class ProductoViewModel(
                     _uiState.update { it.copy(ultimaSincronizacionMillis = instante) }
                 }
             }
+            viewModelScope.launch {
+                productoRepository.observarCategorias().collect { categorias ->
+                    _uiState.update { it.copy(categorias = categorias) }
+                }
+            }
+            viewModelScope.launch {
+                productoRepository.observarPendientesAnteriores().collect { cantidad ->
+                    _uiState.update { it.copy(pendientesAnteriores = cantidad) }
+                }
+            }
             sincronizarOffline()
+        }
+    }
+
+    fun seleccionarCategoria(id: Long) {
+        _uiState.update { it.copy(categoriaSeleccionadaId = id, categoriaEnEdicionId = id, categoriaError = null) }
+    }
+
+    fun recuperarPendientesAnteriores() {
+        viewModelScope.launch {
+            productoRepository?.recuperarPendientesAnteriores()?.exceptionOrNull()?.let(::manejarFalloOperacion)
         }
     }
 
@@ -104,13 +124,14 @@ class ProductoViewModel(
                     precio = estado.precio,
                     stock = estado.stock,
                     activo = estado.activo,
-                    categoriaId = estado.categoriaEnEdicionId
+                    categoriaId = estado.categoriaSeleccionadaId ?: estado.categoriaEnEdicionId
                 )
             } ?: registrarProductoUseCase(
                 nombre = estado.nombre,
                 precio = estado.precio,
                 stock = estado.stock,
-                activo = estado.activo
+                activo = estado.activo,
+                categoriaId = estado.categoriaSeleccionadaId
             )
 
             val producto = resultado.getOrElse { error ->
@@ -172,7 +193,8 @@ class ProductoViewModel(
                 mensajeExito = null,
                 operacion = ProductoOperacion.Inactiva,
                 productoEnEdicionId = producto.id,
-                categoriaEnEdicionId = producto.categoriaId
+                categoriaEnEdicionId = producto.categoriaId,
+                categoriaSeleccionadaId = producto.categoriaId
             )
         }
     }
@@ -217,6 +239,12 @@ class ProductoViewModel(
             val resultado = try { repositorio.sincronizar() }
                 finally { _uiState.update { it.copy(sincronizando = false) } }
             resultado.exceptionOrNull()?.let(::manejarErrorSesion)
+            if ((resultado.exceptionOrNull() as? ErrorApiException)?.error != ErrorApi.SesionExpirada) {
+                repositorio.listarCategorias().exceptionOrNull()?.let { error ->
+                    manejarErrorSesion(error)
+                    _uiState.update { it.copy(categoriaError = "No se pudieron actualizar las categorías. Se conservan las descargadas.") }
+                }
+            }
             _uiState.update {
                 it.copy(
                     sincronizando = false,
@@ -281,7 +309,13 @@ class ProductoViewModel(
         )
     }
 
-    private fun manejarFalloOperacion(fallo: Throwable) {
+    private fun manejarFalloOperacion(errorRecibido: Throwable) {
+        val guardado = errorRecibido as? pe.edu.upeu.pharmamobilee.domain.error.ProductoPendienteException
+        val fallo = guardado?.fallo ?: errorRecibido
+        if (guardado != null) {
+            _uiState.update { it.copy(productoEnEdicionId = guardado.producto.id,
+                mensajeExito = null, avisoRed = "Guardado en el dispositivo; revisa los datos y confirma el reenvío.") }
+        }
         manejarErrorSesion(fallo)
         when (fallo) {
             is ProductoRegistroException -> _uiState.update {
@@ -299,7 +333,8 @@ class ProductoViewModel(
                         operacion = ProductoOperacion.Inactiva,
                         nombreError = error.porCampo["nombre"],
                         precioError = error.porCampo["precio"],
-                        stockError = error.porCampo["stock"]
+                        stockError = error.porCampo["stock"],
+                        categoriaError = error.porCampo["categoriaId"]
                     )
                 }
 
@@ -355,7 +390,9 @@ class ProductoViewModel(
                 precioError = null,
                 stockError = null,
                 productoEnEdicionId = null,
-                categoriaEnEdicionId = null
+                categoriaEnEdicionId = null,
+                categoriaSeleccionadaId = null,
+                categoriaError = null
             )
         }
     }

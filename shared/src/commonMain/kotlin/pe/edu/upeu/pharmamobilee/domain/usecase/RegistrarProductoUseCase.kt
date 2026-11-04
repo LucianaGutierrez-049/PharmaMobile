@@ -10,7 +10,8 @@ class RegistrarProductoUseCase(
         nombre: String,
         precio: String,
         stock: String,
-        activo: Boolean
+        activo: Boolean,
+        categoriaId: Long? = null
     ): Result<Producto> {
         val errores = validarDatosProducto(nombre, precio, stock)
 
@@ -23,7 +24,8 @@ class RegistrarProductoUseCase(
             nombre = nombre.trim(),
             precio = precio.toDouble(),
             stock = stock.toInt(),
-            activo = activo
+            activo = activo,
+            categoriaId = categoriaId
         )
 
         return productoRepository.registrar(producto)

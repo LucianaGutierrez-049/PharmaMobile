@@ -33,6 +33,8 @@ suspend fun <T> ejecutarLlamada(
     Result.failure(ErrorApiException(ErrorApi.Servidor, error))
 } catch (error: ResponseException) {
     Result.failure(ErrorApiException(ErrorApi.Servidor, error))
+} catch (error: ErrorApiException) {
+    Result.failure(error)
 }
 
 private suspend fun traducirErrorCliente(

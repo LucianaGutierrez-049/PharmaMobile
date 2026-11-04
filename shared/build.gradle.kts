@@ -46,7 +46,7 @@ kotlin {
     sourceSets {
         androidMain.dependencies {
             implementation(libs.androidx.activity.compose)
-            implementation("androidx.core:core-ktx:1.17.0")
+            implementation(libs.androidx.core.ktx)
             implementation(libs.compose.uiToolingPreview)
             implementation(libs.compose.uiTooling)
             implementation(libs.koin.android)
@@ -84,11 +84,13 @@ kotlin {
             implementation(libs.ktor.serialization.kotlinx.json)
             implementation(compose.materialIconsExtended)
         }
+        getByName("androidHostTest").dependencies {
+            implementation(libs.sqldelight.jvm)
+        }
         commonTest.dependencies {
             implementation(libs.kotlin.test)
             implementation(libs.kotlinx.coroutines.test)
             implementation(libs.ktor.client.mock)
-            implementation(libs.sqldelight.jvm)
         }
     }
 }
