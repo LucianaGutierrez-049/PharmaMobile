@@ -1,5 +1,7 @@
 # Sesión 13: integración en PharmaMobil
 
+**Estado vigente al 4 de noviembre de 2026:** consultar [correcciones y verificación actual](cierre_20261104.md). Se aprobaron 82 pruebas y la integración REST real. Las secciones siguientes conservan el registro del 3 de noviembre; sus pendientes se actualizan en el cierre enlazado.
+
 ## Cambios implementados
 
 - SQLDelight: migración `2.sqm` (versión 2 a 3), intentos por producto, último error, revisión necesaria y próxima fecha de envío.

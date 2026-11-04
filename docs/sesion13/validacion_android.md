@@ -1,5 +1,7 @@
 # Validación Android de sesión 13
 
+Registro histórico del 3 de noviembre de 2026. La verificación del 4 de noviembre está en [cierre_20261104.md](cierre_20261104.md): 82 pruebas aprobadas, migración nativa versión 4 y flujo REST real comprobado. La recepción en Crashlytics sigue pendiente.
+
 Se recuperó la sesión y GET productos respondió 200 mediante túnel ADB. Se capturaron denegación, bloqueo definitivo y permiso concedido desde Ajustes.
 
 El registro S13_EVIDENCIA_20261103 (precio 2.50, stock 10) recibió 404 en el POST. Se conservó con intentos 1/5, motivo y confirmación de reenvío. Ese POST aprovechó una conexión persistente todavía abierta al retirar el túnel: NO se atribuye el 404 a ausencia de red.

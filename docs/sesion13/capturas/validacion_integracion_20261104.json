@@ -1,0 +1,17 @@
+{
+  "fecha": "2026-11-04T13:33:39.897233Z",
+  "pendientes_anteriores_conservados": 1,
+  "perfil_actualizado_sin_perder_token": true,
+  "categorias_disponibles": 1,
+  "categoria_1_existe": true,
+  "categoria_prueba": 1,
+  "alta_remota_confirmada": true,
+  "id_producto_prueba": 1,
+  "categoria_conservada_sqlite": true,
+  "edicion_remota_confirmada": true,
+  "categoria_inexistente_devuelve_404": true,
+  "baja_logica_confirmada": true,
+  "prueba_crashlytics_solicitada": true,
+  "recepcion_consola_crashlytics": "pendiente",
+  "aprobado": true
+}

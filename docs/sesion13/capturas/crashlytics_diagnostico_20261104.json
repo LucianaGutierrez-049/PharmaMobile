@@ -1,0 +1,13 @@
+{
+  "fecha": "2026-11-04",
+  "lineas_crashlytics": 62,
+  "carga_confirmada_en_log": false,
+  "sin_reportes": false,
+  "error_configuracion": false,
+  "error_red": true,
+  "recepcion_consola": "Pendiente de comprobar",
+  "dns_resuelve": true,
+  "ping_correcto": true,
+  "timeout_observado": true,
+  "archivo_acceso_temporal_eliminado": true
+}

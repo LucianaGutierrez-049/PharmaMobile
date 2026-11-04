@@ -10,7 +10,7 @@ import re
 
 ROOT=Path(__file__).resolve().parents[2]
 SRC=Path(r'C:\Users\lucia\Downloads\Estructura_Informe_Guia_Practica_13_PharmaMobil.docx')
-OUT=ROOT/'output/docx/Informe_Guia_Practica_13_Luciana_Gutierrez.docx'
+OUT=ROOT/'output/docx/Informe_Guia_Practica_13_Luciana_Gutierrez_Actualizado.docx'
 TMP=ROOT/'tmp/s13_plantilla'; TMP.mkdir(exist_ok=True)
 d=Document(SRC); ps=list(d.paragraphs)
 def text(i,value): ps[i].text=value
@@ -136,6 +136,8 @@ from evidencias_word import aplicar
 aplicar(d,ps,ROOT)
 from firebase_word import aplicar as aplicar_firebase
 aplicar_firebase(d,ps,ROOT)
+from correcciones_word import aplicar as aplicar_correcciones
+aplicar_correcciones(d,ps,ROOT)
 
 # Mantener geometría, estilos y elementos de la plantilla. Evitar cortes de filas.
 for table in d.tables:
