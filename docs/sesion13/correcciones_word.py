@@ -121,7 +121,7 @@ def aplicar(d, ps, root):
                     'Las credenciales temporales se eliminan antes de las solicitudes y no se exportan en los resultados. '
                     'Cuando se completa, crea un producto identificado y le aplica baja lógica; conserva los pendientes anteriores.')
     for name, caption in [('E13_pruebas_20261104.png', 'Reporte original Gradle del 4 de noviembre con 82 pruebas aprobadas.'),
-                          ('E14_correcciones_20261104.png', 'Reporte local de instrumentación real y consulta de SQLite versión 4.'),
+                          ('E14_correcciones_20261104.png', 'Reporte local de instrumentación real y consulta de SQLite versión 4, generado antes de la confirmación posterior de recepción en consola.'),
                           ('E15_productos_20261104.png', 'Pantalla real Android de la versión corregida.'),
                           ('E16_categorias_20261104.png', 'Selector de categoría en el formulario de la aplicación.')]:
         path = caps / name
@@ -153,3 +153,5 @@ def aplicar(d, ps, root):
                     'elegir una categoría válida y comprobar el servidor antes de reenviar. No se asignan ni eliminan automáticamente.')
     d.add_paragraph('Commit local de correcciones verificadas: 9ae4ab9. La documentación y sus capturas '
                     'se conservan en un commit editorial posterior, sin publicación en GitHub.')
+    from firebase_cierre_word import aplicar as cerrar_firebase
+    cerrar_firebase(d, ps, root)

@@ -1,6 +1,6 @@
 # PharmaMobile
 
-Verificación del 4 de noviembre de 2026: repositorio offline por cuenta, categorías conservadas, 82 pruebas Android host e integración real de productos comprobadas. El estado vigente, evidencias y límites están en [el cierre de la sesión 13](docs/sesion13/cierre_20261104.md).
+Verificación del 4 de noviembre de 2026: repositorio offline por cuenta, categorías conservadas, 82 pruebas Android host, integración real de productos y recepción no fatal Android en Firebase Crashlytics comprobadas. El estado vigente, evidencias y límites están en [el cierre de la sesión 13](docs/sesion13/cierre_20261104.md).
 
 Aplicación académica multiplataforma de gestión farmacéutica construida con
 Kotlin Multiplatform y Compose Multiplatform.
