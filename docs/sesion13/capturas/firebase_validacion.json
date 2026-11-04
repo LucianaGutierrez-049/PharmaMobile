@@ -1,0 +1,16 @@
+{
+  "proyecto": "pharmamobile-33661",
+  "paquete": "pe.edu.upeu.pharmamobilee",
+  "archivo": "androidApp/google-services.json",
+  "archivo_presente": true,
+  "paquete_coincide": true,
+  "compilacion": "BUILD SUCCESSFUL con Google Services y Crashlytics aplicados",
+  "recepcion_crashlytics": "Pendiente de comprobar en consola",
+  "origen_captura": "Captura aportada por la estudiante, recortada al panel del proyecto",
+  "fecha_verificacion": "2026-11-03T17:13:16-05:00",
+  "tareas_verificadas": [
+    "processDebugGoogleServices",
+    "injectCrashlyticsMappingFileIdDebug",
+    "assembleDebug"
+  ]
+}

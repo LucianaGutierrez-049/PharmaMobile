@@ -20,7 +20,7 @@
 3. Volver a sincronizar Gradle: Google Services y Crashlytics se aplican cuando existe ese archivo.
 4. Habilitar Crashlytics en la consola y comprobar allí un error no fatal tras ejecutar una sincronización fallida y reiniciar la app.
 
-La aplicación puede compilar sin configuración Firebase; en ese caso no envía telemetría. El archivo está excluido de Git. No se creó un proyecto remoto ni se validó recepción en consola. No se implementó mensajería push: la capacidad nativa demostrada es una notificación local y el módulo Firebase integrado es Crashlytics.
+La aplicación puede compilar sin configuración Firebase; en ese caso no envía telemetría. Actualmente se verificó el archivo real de la estudiante para el proyecto `pharmamobile-33661`, con el paquete Android correcto. La compilación con Google Services y Crashlytics terminó con BUILD SUCCESSFUL. El archivo está excluido de Git y sus valores no se incorporan al informe. La recepción de errores en consola sigue pendiente. La capacidad nativa demostrada es una notificación local; el módulo Firebase integrado es Crashlytics.
 
 ## iOS
 
@@ -38,13 +38,15 @@ Esta tabla es una revisión de código; no sustituye el recorrido en un disposit
 | No se conservaban intentos ni causa del error | Alta | Resuelto con migración y campos observables. |
 | Un fallo detenía el resto de la cola | Media | Resuelto: los siguientes registros siguen procesándose. |
 | Borrado local antes de confirmar el remoto | Alta | Resuelto: no se elimina localmente si falla el servidor. |
-| No existía gestión de permisos | Media | Implementada para notificaciones Android/iOS; faltan evidencias manuales por plataforma. |
-| Falta configuración de Firebase real | Media | Integración preparada; completar con configuración de la cuenta y comprobar recepción. |
+| No existía gestión de permisos | Media | Implementada para notificaciones Android/iOS; tres estados y notificación local capturados en Android. Falta validar iOS. |
+| Falta configuración de Firebase real | Media | Configuración Android real incorporada y compilación verificada. Falta comprobar recepción en Crashlytics y configurar iOS. |
 | Formularios se descartan cuando cambia la sesión | Media | Sesión 14: diseñar borrador asociado al usuario; no almacenar datos del formulario en telemetría. |
 | Caché local no está particionada por usuario | Alta | Sesión 14: separar bases o filas por usuario y definir conservación de pendientes. No limpiar pendientes silenciosamente ni probar cuentas distintas en el mismo dispositivo hasta resolverlo. |
 | No hay cola offline de modificaciones y eliminaciones remotas | Media | Sesión 14: definir operaciones locales PUT/DELETE y conflictos. Las creaciones existentes sí funcionan offline. |
 
-## Verificación manual y evidencias pendientes
+## Procedimiento de verificación manual
+
+Los resultados obtenidos y las pruebas pendientes se distinguen en `validacion_android.md` y en el informe Word. La lista siguiente describe el procedimiento y no declara que todos los casos estén aprobados.
 
 1. Instalar una versión previa con datos y actualizar a esta compilación: verificar la migración sin reinstalar.
 2. Iniciar sesión, crear un producto sin red y comprobar que conserva sus datos y muestra el error e intentos.
@@ -71,7 +73,7 @@ Los tests `commonTest` existentes usan SQLite JDBC, por lo que su ejecución val
 - Incluye 12 pruebas del repositorio offline, 2 de permisos y 2 de la política de sincronización.
 - `git diff --check`: sin errores de espacios.
 - Para evitar que Java agote la memoria de este equipo, la ejecución utiliza `--no-daemon --max-workers=1`, `-Dorg.gradle.jvmargs=-Xmx1536m -XX:ActiveProcessorCount=2 -Dfile.encoding=UTF-8` y `-Pkotlin.compiler.execution.strategy=in-process`.
-- Pendientes de verificación externa: instalación y capturas Android reales, recepción en Firebase e iOS con macOS/Xcode.
+- La instalación y las capturas Android se completaron posteriormente. Siguen pendientes la recepción en Crashlytics, la conciliación de un alta remota y la validación iOS con macOS/Xcode.
 
 Referencias de implementación: [GitLive SDK](https://github.com/GitLiveApp/firebase-kotlin-sdk), [Crashlytics Android](https://firebase.google.com/docs/crashlytics/android/get-started).
 
@@ -81,6 +83,12 @@ Se obtuvieron capturas reales del estado sincronizado, registro conservado sin s
 
 La rama `feature/integrador-13` contiene siete commits por paso y el ajuste adicional `72acc38` para habilitar opcionalmente el túnel ADB en depuración. Los hashes por paso están en `commits_sesion13.json`. No se hizo push.
 
-El POST de prueba respondió 404; el producto se conservó localmente. No se acredita un alta remota exitosa. Firebase real e iOS siguen pendientes. La suite de 67 pruebas fue previa al ajuste de URL; el ajuste posterior compiló y se verificó con REST real.
+El POST de prueba respondió 404; el producto se conservó localmente. No se acredita un alta remota exitosa. La configuración Firebase Android real ya está incorporada; su recepción en consola e iOS siguen pendientes. La suite de 67 pruebas fue previa al ajuste de URL; el ajuste posterior compiló y se verificó con REST real.
 
 El informe completado desde la plantilla de Luciana está en `output/docx/Informe_Guia_Practica_13_Luciana_Gutierrez.docx`. Los extractos de código y Git se capturaron desde un visor local real; no se presentan como capturas de Android Studio o de terminal.
+
+## Actualización de Firebase en el informe
+
+El Word contiene 24 páginas y 16 figuras. La nueva evidencia `E10_configuracion_android.png` procede de la captura de Android Studio aportada por la estudiante y muestra únicamente el panel del proyecto; se excluyó el editor con los valores del archivo. `firebase_validacion.json` registra el proyecto, la coincidencia del paquete y la compilación satisfactoria, sin claves ni credenciales. Se verificaron las tareas `processDebugGoogleServices`, `injectCrashlyticsMappingFileIdDebug`, `injectCrashlyticsVersionControlInfoDebug` y `assembleDebug`.
+
+Esta compilación posterior no constituye una nueva ejecución de las 67 pruebas ni demuestra la recepción de errores en Crashlytics. El informe conserva expresamente esas diferencias y las limitaciones de la prueba REST.
