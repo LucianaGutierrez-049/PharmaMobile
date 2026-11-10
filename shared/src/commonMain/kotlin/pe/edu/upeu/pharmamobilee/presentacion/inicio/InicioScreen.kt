@@ -301,14 +301,14 @@ private fun ModulosResumen(
             ) }
                 if (mostrarClientes) add { cardModifier -> DashboardCard(
                     titulo = "Clientes",
-                    detalle = "Datos de contacto",
+                    detalle = "Registro y datos de contacto",
                     icono = Icons.Default.Groups,
                     onClick = onClientesClick,
                     modifier = cardModifier
                 ) }
                 if (mostrarPedidos) add { cardModifier -> DashboardCard(
-                    titulo = "Pedidos",
-                    detalle = "Venta y detalle",
+                    titulo = "Ventas",
+                    detalle = "Registrar e historial",
                     icono = Icons.Default.ShoppingCartCheckout,
                     onClick = onPedidosClick,
                     modifier = cardModifier

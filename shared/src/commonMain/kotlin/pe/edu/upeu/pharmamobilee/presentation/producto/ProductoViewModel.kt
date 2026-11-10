@@ -103,6 +103,12 @@ class ProductoViewModel(
 
     fun guardarProducto() {
         if (_uiState.value.operacion is ProductoOperacion.EnCurso) return
+        // D-06: PharmaSoft exige categoría; se valida en el formulario en vez de encolar un borrador inválido.
+        val inicial = _uiState.value
+        if (inicial.productoEnEdicionId == null && inicial.categoriaSeleccionadaId == null) {
+            _uiState.update { it.copy(categoriaError = "Selecciona una categoría.") }
+            return
+        }
 
         viewModelScope.launch {
             limpiarMensajes()

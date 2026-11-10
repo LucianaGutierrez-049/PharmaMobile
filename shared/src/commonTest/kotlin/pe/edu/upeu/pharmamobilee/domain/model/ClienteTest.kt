@@ -10,8 +10,8 @@ class ClienteTest {
 
         val cliente = Cliente(
             id = 1L,
-            nombre = "Farmacia Nueva Vida",
-            correo = "ventas@central.pe",
+            nombres = "Farmacia Nueva Vida",
+            email = "ventas@central.pe",
             telefono = "989789123"
         )
         val resultado = cliente.obtenerTelefono()
@@ -27,8 +27,8 @@ class ClienteTest {
 
         val cliente = Cliente(
             id = 1L,
-            nombre = "Farmacia Nueva Vida",
-            correo = "ventas@central.pe",
+            nombres = "Farmacia Nueva Vida",
+            email = "ventas@central.pe",
             telefono = null
         )
         val resultado = cliente.obtenerTelefono()

@@ -134,7 +134,8 @@ fun EmptyState(
 fun ErrorState(
     message: String,
     onRetry: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    titulo: String = "No pudimos cargar el inventario"
 ) {
     ElevatedCard(modifier = modifier.fillMaxWidth()) {
         Column(
@@ -149,7 +150,7 @@ fun ErrorState(
                 modifier = Modifier.size(44.dp)
             )
             Text(
-                text = "No pudimos cargar el inventario",
+                text = titulo,
                 style = MaterialTheme.typography.titleMedium,
                 fontWeight = FontWeight.Bold
             )

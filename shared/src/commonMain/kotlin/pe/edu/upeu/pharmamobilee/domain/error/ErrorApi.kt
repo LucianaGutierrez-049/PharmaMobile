@@ -18,7 +18,7 @@ class ErrorApiException(
 
 fun ErrorApi?.mensajeUsuario(): String = when (this) {
     is ErrorApi.Validacion -> "Revisa los datos ingresados."
-    ErrorApi.NoEncontrado -> "No se encontró el producto solicitado."
+    ErrorApi.NoEncontrado -> "No se encontró el registro solicitado."
     is ErrorApi.Conflicto -> mensaje
     ErrorApi.SesionExpirada -> "Tu sesión expiró. Inicia sesión nuevamente."
     ErrorApi.SinPermiso -> "No tienes permisos para realizar esta operación."

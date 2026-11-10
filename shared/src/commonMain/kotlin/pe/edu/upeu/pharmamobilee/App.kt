@@ -91,7 +91,7 @@ private val opcionesNavegacion = listOf(
     OpcionNavegacion(Screen.Inicio, "Inicio", Icons.Default.Home),
     OpcionNavegacion(Screen.Productos, "Productos", Icons.Default.Medication),
     OpcionNavegacion(Screen.Clientes, "Clientes", Icons.Default.Person),
-    OpcionNavegacion(Screen.Pedidos, "Pedidos", Icons.Default.ShoppingCart),
+    OpcionNavegacion(Screen.Pedidos, "Ventas", Icons.Default.ShoppingCart),
     OpcionNavegacion(Screen.AcercaDe, "Acerca de", Icons.Default.Info)
 )
 
@@ -410,11 +410,17 @@ private fun PharmaMobilScaffold(
                 }
 
                 Screen.Clientes -> {
-                    ClienteScreen()
+                    ClienteScreen(
+                        viewModel = koinViewModel(),
+                        puedeEscribir = sesion.puede("CLIENTES_ESCRIBIR")
+                    )
                 }
 
                 Screen.Pedidos -> {
-                    PedidoScreen()
+                    PedidoScreen(
+                        viewModel = koinViewModel(),
+                        puedeRegistrar = sesion.puede("VENTAS_REGISTRAR")
+                    )
                 }
 
                 Screen.AcercaDe -> {
@@ -564,7 +570,7 @@ private fun tituloPantalla(
         Screen.Inicio -> "Inicio"
         Screen.Productos -> "Productos"
         Screen.Clientes -> "Clientes"
-        Screen.Pedidos -> "Pedidos"
+        Screen.Pedidos -> "Ventas"
         Screen.AcercaDe -> "Acerca de"
     }
 }

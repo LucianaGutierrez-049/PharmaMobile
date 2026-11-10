@@ -34,7 +34,7 @@ class ProductoViewModelFlujoTest {
             assertEquals(ResumenInventarioUi(0, 0, 0, 0), viewModel.uiState.value.resumenInventario)
             viewModel.actualizarNombre("Producto de prueba")
             viewModel.actualizarPrecio("1.50")
-            viewModel.actualizarStock("2")
+            viewModel.actualizarStock("2"); viewModel.seleccionarCategoria(1L)
             viewModel.guardarProducto()
             advanceUntilIdle()
             assertEquals(ResumenInventarioUi(1, 1, 0, 1), viewModel.uiState.value.resumenInventario)
@@ -120,7 +120,7 @@ class ProductoViewModelFlujoTest {
 
             viewModel.actualizarNombre("Vitamina C")
             viewModel.actualizarPrecio("0")
-            viewModel.actualizarStock("12")
+            viewModel.actualizarStock("12"); viewModel.seleccionarCategoria(1L)
             viewModel.guardarProducto()
             advanceUntilIdle()
 
@@ -173,7 +173,7 @@ class ProductoViewModelFlujoTest {
 
             viewModel.actualizarNombre("AB")
             viewModel.actualizarPrecio("3.50")
-            viewModel.actualizarStock("10")
+            viewModel.actualizarStock("10"); viewModel.seleccionarCategoria(1L)
             viewModel.guardarProducto()
             advanceUntilIdle()
 

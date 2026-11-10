@@ -55,6 +55,13 @@ val dataModule = module {
         )
     }
     single<AuthRepository> { AuthRepositorioRest(get(), get()) }
+    single { pe.edu.upeu.pharmamobilee.data.remote.ComercialApi(get()) }
+    single<pe.edu.upeu.pharmamobilee.domain.repository.ClienteRepository> {
+        pe.edu.upeu.pharmamobilee.data.repository.ClienteRepositorioRest(get())
+    }
+    single<pe.edu.upeu.pharmamobilee.domain.repository.VentaRepository> {
+        pe.edu.upeu.pharmamobilee.data.repository.VentaRepositorioRest(get())
+    }
 }
 
 val domainModule = module {
@@ -75,6 +82,13 @@ val domainModule = module {
 val presentationModule = module {
     single { GestorSesion() }
     viewModel { SesionViewModel(get(), get()) }
+    viewModel { pe.edu.upeu.pharmamobilee.presentacion.cliente.ClienteViewModel(get(), get(), get()) }
+    viewModel {
+        pe.edu.upeu.pharmamobilee.presentacion.pedido.VentaViewModel(
+            ventas = get(), clientes = get(), productos = get<ProductoRepository>(),
+            authRepository = get(), gestorSesion = get()
+        )
+    }
     viewModel {
         ProductoViewModel(
             listarProductosUseCase = get(),
