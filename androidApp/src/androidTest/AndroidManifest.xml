@@ -2,4 +2,6 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
     <instrumentation android:name="pe.edu.upeu.pharmamobilee.Integrador13Instrumentation"
         android:targetPackage="pe.edu.upeu.pharmamobilee" android:functionalTest="true" />
+    <instrumentation android:name="pe.edu.upeu.pharmamobilee.Evidencias13Instrumentation"
+        android:targetPackage="pe.edu.upeu.pharmamobilee" android:functionalTest="true" />
 </manifest>

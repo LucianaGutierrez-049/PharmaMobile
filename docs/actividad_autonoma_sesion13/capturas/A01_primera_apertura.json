@@ -1,0 +1,16 @@
+{
+  "id": "fa840a2ff9254659b238f527ff861362",
+  "fecha": "2026-11-06T17:21:19.163121Z",
+  "token_guardado": false,
+  "perfil_guardado": false,
+  "sesion_ui": false,
+  "roles": [],
+  "permisos": [],
+  "cuenta_consultada": "almacen",
+  "filas_cuenta": 0,
+  "pendientes": 0,
+  "productos": [],
+  "filas_totales_sqlite": 0,
+  "http": [],
+  "aprobado": true
+}

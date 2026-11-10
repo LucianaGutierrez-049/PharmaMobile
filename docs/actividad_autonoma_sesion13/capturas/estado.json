@@ -1,0 +1,36 @@
+{
+  "id": "bd573ae50194487b917f3812613a9fba",
+  "fecha": "2026-11-10T19:36:40.559984Z",
+  "token_guardado": false,
+  "perfil_guardado": false,
+  "sesion_ui": false,
+  "roles": [],
+  "permisos": [],
+  "cuenta_consultada": "almacen",
+  "filas_cuenta": 2,
+  "pendientes": 0,
+  "ultima_sincronizacion": 1793987379572,
+  "productos": [
+    {
+      "id": 21,
+      "nombre": "AA13_",
+      "pendiente": false,
+      "revision": false,
+      "intentos": 0,
+      "categoria": 1,
+      "activo": true
+    },
+    {
+      "id": 1,
+      "nombre": "S13_VERIFICACION_1793799221344",
+      "pendiente": false,
+      "revision": false,
+      "intentos": 0,
+      "categoria": 1,
+      "activo": false
+    }
+  ],
+  "filas_totales_sqlite": 2,
+  "http": [],
+  "aprobado": true
+}

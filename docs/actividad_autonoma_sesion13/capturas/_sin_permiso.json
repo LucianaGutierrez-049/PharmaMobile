@@ -1,0 +1,115 @@
+{
+  "id": "d272305607954dfc8b8b5663382594f3",
+  "fecha": "2026-11-10T19:41:54.163584Z",
+  "operacion_rechazada_403": true,
+  "token_guardado": true,
+  "perfil_guardado": true,
+  "sesion_ui": true,
+  "roles": [
+    "VENDEDOR"
+  ],
+  "permisos": [
+    "CATALOGO_LEER",
+    "CLIENTES_ESCRIBIR",
+    "CLIENTES_LEER",
+    "VENTAS_LEER",
+    "VENTAS_REGISTRAR"
+  ],
+  "cuenta_consultada": "vendedor",
+  "filas_cuenta": 3,
+  "pendientes": 0,
+  "ultima_sincronizacion": 1794339695455,
+  "productos": [
+    {
+      "id": 21,
+      "nombre": "AA13_",
+      "pendiente": false,
+      "revision": false,
+      "intentos": 0,
+      "categoria": 1,
+      "activo": true
+    },
+    {
+      "id": 1,
+      "nombre": "S13_VERIFICACION_1793799221344",
+      "pendiente": false,
+      "revision": false,
+      "intentos": 0,
+      "categoria": 1,
+      "activo": false
+    },
+    {
+      "id": 41,
+      "nombre": "aa13offline",
+      "pendiente": false,
+      "revision": false,
+      "intentos": 0,
+      "categoria": 1,
+      "activo": true
+    }
+  ],
+  "filas_totales_sqlite": 7,
+  "http": [
+    {
+      "metodo": "POST",
+      "ruta": "/api/v1/auth/login",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/productos",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/categorias",
+      "http": 200
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/api/v1/productos",
+      "http": 201
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/productos",
+      "http": 200
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/api/v1/productos",
+      "http": 400
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/productos",
+      "http": 200
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/api/v1/auth/login",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/productos",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/categorias",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/categorias",
+      "http": 200
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/api/v1/productos",
+      "http": 403
+    }
+  ],
+  "aprobado": true
+}

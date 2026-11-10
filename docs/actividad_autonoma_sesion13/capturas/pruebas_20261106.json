@@ -1,0 +1,11 @@
+{
+  "fecha": "2026-11-06",
+  "ejecucion_forzada": true,
+  "suites": 21,
+  "pruebas": 82,
+  "fallos": 0,
+  "errores": 0,
+  "omitidas": 0,
+  "target": "Android host JVM",
+  "ios": "Deshabilitado en windows-x86_64; simulador requiere macOS"
+}

@@ -1,0 +1,76 @@
+{
+  "id": "229500e5c68f41e19140af6fefdee783",
+  "fecha": "2026-11-10T19:40:32.780740Z",
+  "token_guardado": true,
+  "perfil_guardado": true,
+  "sesion_ui": true,
+  "roles": [
+    "ALMACENERO"
+  ],
+  "permisos": [
+    "CATALOGO_ESCRIBIR",
+    "CATALOGO_LEER"
+  ],
+  "cuenta_consultada": "almacen",
+  "filas_cuenta": 3,
+  "pendientes": 0,
+  "ultima_sincronizacion": 1794339626689,
+  "productos": [
+    {
+      "id": 21,
+      "nombre": "AA13_",
+      "pendiente": false,
+      "revision": false,
+      "intentos": 0,
+      "categoria": 1,
+      "activo": true
+    },
+    {
+      "id": 1,
+      "nombre": "S13_VERIFICACION_1793799221344",
+      "pendiente": false,
+      "revision": false,
+      "intentos": 0,
+      "categoria": 1,
+      "activo": false
+    },
+    {
+      "id": 41,
+      "nombre": "aa13offline",
+      "pendiente": false,
+      "revision": false,
+      "intentos": 0,
+      "categoria": 1,
+      "activo": true
+    }
+  ],
+  "filas_totales_sqlite": 3,
+  "http": [
+    {
+      "metodo": "POST",
+      "ruta": "/api/v1/auth/login",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/productos",
+      "http": 200
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/categorias",
+      "http": 200
+    },
+    {
+      "metodo": "POST",
+      "ruta": "/api/v1/productos",
+      "http": 201
+    },
+    {
+      "metodo": "GET",
+      "ruta": "/api/v1/productos",
+      "http": 200
+    }
+  ],
+  "aprobado": true
+}

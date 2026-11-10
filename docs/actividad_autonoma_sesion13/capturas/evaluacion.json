@@ -1,0 +1,19 @@
+{
+  "fecha_pasos_1_4": "2026-11-06",
+  "fecha_pasos_5_10": "2026-11-10",
+  "id_con_red": 21,
+  "id_local": -1,
+  "id_sin_red": 41,
+  "http_observado": {
+    "paso5": "sin peticion: modo avion activo y tunel ADB retirado",
+    "paso6": "POST productos 201, GET productos 200",
+    "paso7": "POST productos 400 (validationErrors.nombre)",
+    "paso8": "POST productos 403 con la cuenta VENDEDOR",
+    "paso9": "GET productos 401 con la fixture expirada",
+    "paso10": "POST auth/login 200; cierre sin peticion"
+  },
+  "reinstalacion_texto": "No se reinstaló la aplicación durante el recorrido: el comportamiento del token tras reinstalar queda sin verificar. Por diseño, la clave AES vive en Android Keystore y se elimina al desinstalar; si un respaldo restaurara las preferencias cifradas, la app no podría descifrarlas y borra la sesión.",
+  "limpieza_texto": "Los registros de prueba AA13_ (ID 21) y aa13offline (ID 41) quedan en el PharmaSoft local. El borrador 'ab' rechazado con 400 permanece en SQLite como pendiente en revisión de la cuenta almacen. No se borraron datos del perfil principal del emulador.",
+  "conectividad_texto": "El 10 de noviembre el emulador no alcanzaba 10.0.2.2:8080 (timeout), por lo que se usó el túnel de depuración que la app ya admite: adb reverse tcp:8080 y la preferencia usar_tunel_adb del perfil Evidencias13. En el paso 5 se activó el modo avión y se retiró el túnel.",
+  "commit_evaluado": "7519ef36bd94c92f4f49f1dcf2dd4aa7c5c3e200"
+}
