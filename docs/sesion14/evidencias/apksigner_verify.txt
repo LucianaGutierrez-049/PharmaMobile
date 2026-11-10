@@ -1,0 +1,18 @@
+$ apksigner verify --verbose --print-certs androidApp-release.apk
+Verifies
+Verified using v1 scheme (JAR signing): false
+Verified using v2 scheme (APK Signature Scheme v2): true
+Verified using v3 scheme (APK Signature Scheme v3): false
+Verified using v3.1 scheme (APK Signature Scheme v3.1): false
+Verified using v4 scheme (APK Signature Scheme v4): false
+Verified for SourceStamp: false
+Number of signers: 1
+Signer #1 certificate DN: CN=Luciana Cristina Gutierrez Quispe, OU=Ingenieria de Sistemas, O=Universidad Peruana Union, L=Lima, ST=Lima, C=PE
+Signer #1 certificate SHA-256 digest: f3d811cf7a9803b91e1c27894473f956d79e9febcaeb9dccc233e4a4a6a91ef7
+Signer #1 certificate SHA-1 digest: d1b82c82178fc5b1fb5a6ba659ca0f0169cab7dc
+Signer #1 certificate MD5 digest: ea064ad04a6513ea09bc3bb8718d39bd
+Signer #1 key algorithm: RSA
+Signer #1 key size (bits): 2048
+Signer #1 public key SHA-256 digest: 235a896a15f018ea0c83684856adcbe50333cd8b5839be5a18e395efcb89dbaa
+Signer #1 public key SHA-1 digest: d4b60b609d6637f5cacc522680fb1922bfba43a3
+Signer #1 public key MD5 digest: fd28bc6d6a77c9e608af668d6ad3cf68

@@ -1,0 +1,6 @@
+$ jarsigner -verify -verbose -certs androidApp-release.aab
+      X.509, CN=Luciana Cristina Gutierrez Quispe, OU=Ingenieria de Sistemas, O=Universidad Peruana Union, L=Lima, ST=Lima, C=PE
+      Signature algorithm: SHA384withRSA, 2048-bit key
+- Signed by "CN=Luciana Cristina Gutierrez Quispe, OU=Ingenieria de Sistemas, O=Universidad Peruana Union, L=Lima, ST=Lima, C=PE"
+    Signature algorithm: SHA256withRSA, 2048-bit key
+jar verified.
