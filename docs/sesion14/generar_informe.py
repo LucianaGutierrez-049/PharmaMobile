@@ -258,6 +258,23 @@ table(['ID', 'Dispositivo', 'Pasos', 'Esperado', 'Obtenido', 'Sev.', 'Estado'], 
      'Se guarda local como #-1 pendiente y en revisión (categoriaId)', 'Media', 'Pendiente: validar categoría en el formulario (tras congelar)'],
 ], [.45, 1.0, 1.3, .9, 1.2, .45, 1.3])
 
+h('7.2 Rediseño visual aprobado después del congelamiento', 2)
+p('A pedido de la estudiante, después de congelar el alcance se modernizó y ordenó la interfaz. El cambio es solo '
+  'visual: no toca repositorios, modelos, red ni esquema. Para no invalidar las pruebas, se volvieron a ejecutar las 82 '
+  'pruebas host (0 fallos), se recompilaron y verificaron los artefactos firmados y se recorrieron de nuevo login, '
+  'inicio y productos en el emulador.')
+table(['Antes', 'Después'], [
+    ['Botón de sincronizar suelto y tres líneas de estado', 'Tarjeta "Estado de sincronización" con contadores en chips y botón principal'],
+    ['Envíos en revisión como tarjetas planas', 'Tarjeta resaltada en color de error con acciones agrupadas'],
+    ['Formulario siempre abierto antes del inventario', 'Formulario plegado; se abre al tocar la cabecera o al editar'],
+    ['Permiso y diagnóstico en medio de la pantalla', 'Sección "Dispositivo" al final'],
+    ['Tarjeta de login gris', 'Tarjeta blanca elevada con esquinas amplias'],
+    ['Paleta y formas básicas', 'Paleta esmeralda con superficies tonales, ámbar para avisos y esquinas de 18–32 dp'],
+], [3.2, 3.6])
+pair('D00_login.png', 'D01_inicio.png', 'Rediseño. Inicio de sesión.', 'Rediseño. Inicio con resumen y accesos.')
+pair('D02_productos.png', 'D03_productos_lista.png', 'Rediseño. Productos: estado, revisión y formulario plegado.',
+     'Rediseño. Inventario y sección Dispositivo al final.')
+
 h('8. Versionado y nomenclatura')
 table(['Dato', 'Valor'], [['versionCode', '1'], ['versionName', '1.0.0'],
                           ['applicationId', 'pe.edu.upeu.pharmamobilee'],
