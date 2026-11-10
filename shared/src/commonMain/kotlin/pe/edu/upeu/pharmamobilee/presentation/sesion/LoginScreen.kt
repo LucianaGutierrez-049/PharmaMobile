@@ -41,7 +41,14 @@ fun LoginScreen(
         modifier = modifier.fillMaxSize().padding(24.dp),
         contentAlignment = Alignment.Center
     ) {
-        Card(modifier = Modifier.fillMaxWidth().widthIn(max = 480.dp)) {
+        Card(
+            modifier = Modifier.fillMaxWidth().widthIn(max = 480.dp),
+            shape = androidx.compose.material3.MaterialTheme.shapes.extraLarge,
+            colors = androidx.compose.material3.CardDefaults.cardColors(
+                containerColor = androidx.compose.material3.MaterialTheme.colorScheme.surfaceContainerLowest
+            ),
+            elevation = androidx.compose.material3.CardDefaults.cardElevation(defaultElevation = 6.dp)
+        ) {
             Column(
                 modifier = Modifier.padding(28.dp),
                 verticalArrangement = Arrangement.spacedBy(18.dp),

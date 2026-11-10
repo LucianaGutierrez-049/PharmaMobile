@@ -356,7 +356,7 @@ fun ProductCard(
 private fun EstadoProductoBadge(activo: Boolean) {
     Surface(
         shape = RoundedCornerShape(50),
-        color = if (activo) MaterialTheme.colorScheme.tertiaryContainer
+        color = if (activo) MaterialTheme.colorScheme.primaryContainer
         else MaterialTheme.colorScheme.surfaceVariant
     ) {
         Row(

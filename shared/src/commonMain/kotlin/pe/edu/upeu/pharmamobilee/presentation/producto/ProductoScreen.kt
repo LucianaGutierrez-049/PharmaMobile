@@ -1,6 +1,20 @@
 package pe.edu.upeu.pharmamobilee.presentation.producto
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.material.icons.filled.CloudDone
+import androidx.compose.material.icons.filled.CloudOff
+import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.WarningAmber
+import androidx.compose.material3.AssistChip
+import androidx.compose.material3.AssistChipDefaults
+import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.FilledTonalButton
+import androidx.compose.material3.TextButton
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -60,7 +74,8 @@ fun ProductoScreen(
     val uiState by viewModel.uiState.collectAsState()
     val snackbarHostState = remember { SnackbarHostState() }
     var confirmarReenvio by remember { mutableStateOf<Producto?>(null) }
-    var formularioExpandido by remember { mutableStateOf(true) }
+    // Plegado por defecto: el inventario queda visible sin desplazarse; se abre al editar.
+    var formularioExpandido by remember { mutableStateOf(false) }
     var confirmarRecuperacion by remember { mutableStateOf(false) }
 
     if (confirmarRecuperacion) androidx.compose.material3.AlertDialog(
@@ -113,50 +128,25 @@ fun ProductoScreen(
             icon = Icons.Default.Medication
         )
 
-        OutlinedButton(
-            onClick = viewModel::sincronizar,
-            enabled = !uiState.sincronizando
-        ) {
-            if (uiState.sincronizando) {
-                CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-            } else {
-                Text("Sincronizar inventario")
-            }
-        }
-
-        Text(
-            text = textoAntiguedadSincronizacion(
-                ultimaMillis = uiState.ultimaSincronizacionMillis,
-                ahoraMillis = kotlin.time.Clock.System.now().toEpochMilliseconds()
-            ),
-            style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.onSurfaceVariant
+        EstadoSincronizacionCard(
+            uiState = uiState,
+            puedeEscribir = puedeEscribir,
+            onSincronizar = viewModel::sincronizar,
+            onRecuperarAnteriores = { confirmarRecuperacion = true }
         )
 
-        Text("${uiState.pendientes} cambios por enviar · ${uiState.fallidas} requieren revisión")
-        uiState.avisoRed?.let { Text(it, color = MaterialTheme.colorScheme.error) }
-        if (uiState.pendientesAnteriores > 0) Text(
-            "Hay ${uiState.pendientesAnteriores} pendientes anteriores sin cuenta identificada. Se conservan y no se enviarán desde esta sesión.",
-            color = MaterialTheme.colorScheme.error)
-        if (puedeEscribir && uiState.pendientesAnteriores > 0) OutlinedButton(
-            onClick = { confirmarRecuperacion = true }, enabled = !uiState.sincronizando
-        ) { Text("Recuperar pendientes anteriores") }
-        pe.edu.upeu.pharmamobilee.presentation.permiso.TelemetriaPruebaCard()
         uiState.productos.filter { it.producto.pendienteSincronizacion &&
             (it.producto.requiereRevision || it.producto.intentos >= 5) }.forEach { fila ->
-            ElevatedCard(Modifier.fillMaxWidth()) {
-                Column(Modifier.padding(16.dp)) {
-                    Text(fila.nombre, style = MaterialTheme.typography.titleMedium)
-                    Text("Intentos: ${fila.producto.intentos} / 5")
-                    Text(fila.producto.ultimoError ?: "Envío pendiente de revisión")
-                    if (puedeEscribir) {
-                        OutlinedButton(onClick = { viewModel.editarProducto(fila.producto) }, enabled = !uiState.sincronizando) { Text("Revisar datos") }
-                        OutlinedButton(onClick = { confirmarReenvio = fila.producto }, enabled = !uiState.sincronizando) { Text("Reenviar con confirmación") }
-                    }
-                }
-            }
+            RevisionPendienteCard(
+                nombre = fila.nombre,
+                intentos = fila.producto.intentos,
+                detalle = fila.producto.ultimoError ?: "Envío pendiente de revisión",
+                puedeEscribir = puedeEscribir,
+                habilitado = !uiState.sincronizando,
+                onRevisar = { viewModel.editarProducto(fila.producto) },
+                onReenviar = { confirmarReenvio = fila.producto }
+            )
         }
-        pe.edu.upeu.pharmamobilee.presentation.permiso.PermisoNotificacionesCard()
 
         BoxWithConstraints(modifier = Modifier.fillMaxWidth()) {
             val formulario: @Composable () -> Unit = {
@@ -200,6 +190,15 @@ fun ProductoScreen(
                 }
             }
         }
+
+        // Herramientas del dispositivo: al final, para no interrumpir el trabajo con el inventario.
+        Text(
+            "Dispositivo",
+            style = MaterialTheme.typography.titleMedium,
+            color = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+        pe.edu.upeu.pharmamobilee.presentation.permiso.PermisoNotificacionesCard()
+        pe.edu.upeu.pharmamobilee.presentation.permiso.TelemetriaPruebaCard()
       }
       SnackbarHost(
           hostState = snackbarHostState,
@@ -263,13 +262,20 @@ private fun ProductoFormulario(
     val guardando = operacionEnCurso?.tipo == ProductoOperacion.Tipo.Crear ||
         operacionEnCurso?.tipo == ProductoOperacion.Tipo.Actualizar
 
-    ElevatedCard(modifier = Modifier.fillMaxWidth()) {
+    androidx.compose.material3.Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = androidx.compose.material3.CardDefaults.cardColors(
+            containerColor = MaterialTheme.colorScheme.surfaceContainerLow
+        )
+    ) {
         Column(
             modifier = Modifier.padding(20.dp),
             verticalArrangement = Arrangement.spacedBy(14.dp)
         ) {
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier.fillMaxWidth()
+                    .clickable { onExpandidoChange(!expandido) },
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -410,6 +416,119 @@ private fun ProductoFormulario(
                 }
             }
               }
+            }
+        }
+    }
+}
+
+/** Estado de sincronización agrupado: antigüedad, contadores y acción en una sola tarjeta. */
+@OptIn(androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
+@Composable
+private fun EstadoSincronizacionCard(
+    uiState: ProductoUiState,
+    puedeEscribir: Boolean,
+    onSincronizar: () -> Unit,
+    onRecuperarAnteriores: () -> Unit
+) {
+    val sinRed = uiState.avisoRed != null
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.primaryContainer)
+    ) {
+        Column(Modifier.padding(20.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(
+                    imageVector = if (sinRed) Icons.Default.CloudOff else Icons.Default.CloudDone,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+                Spacer(Modifier.width(12.dp))
+                Column(Modifier.weight(1f)) {
+                    Text(
+                        "Estado de sincronización",
+                        style = MaterialTheme.typography.titleMedium,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                    Text(
+                        text = textoAntiguedadSincronizacion(
+                            ultimaMillis = uiState.ultimaSincronizacionMillis,
+                            ahoraMillis = kotlin.time.Clock.System.now().toEpochMilliseconds()
+                        ),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.onPrimaryContainer
+                    )
+                }
+            }
+            FlowRow(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                AssistChip(onClick = {}, label = { Text("${uiState.pendientes} cambios por enviar") },
+                    leadingIcon = { Icon(Icons.Default.Sync, null, Modifier.size(AssistChipDefaults.IconSize)) })
+                AssistChip(onClick = {}, label = { Text("${uiState.fallidas} requieren revisión") },
+                    leadingIcon = { Icon(Icons.Default.WarningAmber, null, Modifier.size(AssistChipDefaults.IconSize)) })
+            }
+            uiState.avisoRed?.let {
+                Text(it, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.error)
+            }
+            if (uiState.pendientesAnteriores > 0) {
+                Text(
+                    "Hay ${uiState.pendientesAnteriores} pendientes anteriores sin cuenta identificada. Se conservan y no se enviarán desde esta sesión.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.error
+                )
+                if (puedeEscribir) OutlinedButton(onClick = onRecuperarAnteriores, enabled = !uiState.sincronizando) {
+                    Text("Recuperar pendientes anteriores")
+                }
+            }
+            Button(
+                onClick = onSincronizar,
+                enabled = !uiState.sincronizando,
+                modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp)
+            ) {
+                if (uiState.sincronizando) {
+                    CircularProgressIndicator(
+                        modifier = Modifier.size(18.dp),
+                        strokeWidth = 2.dp,
+                        color = MaterialTheme.colorScheme.onPrimary
+                    )
+                } else {
+                    Icon(Icons.Default.Sync, contentDescription = null, modifier = Modifier.size(18.dp))
+                    Spacer(Modifier.width(8.dp))
+                    Text("Sincronizar inventario")
+                }
+            }
+        }
+    }
+}
+
+/** Envío que necesita la decisión del usuario: se resalta y agrupa sus acciones. */
+@Composable
+private fun RevisionPendienteCard(
+    nombre: String,
+    intentos: Int,
+    detalle: String,
+    puedeEscribir: Boolean,
+    habilitado: Boolean,
+    onRevisar: () -> Unit,
+    onReenviar: () -> Unit
+) {
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        shape = MaterialTheme.shapes.large,
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+    ) {
+        Column(Modifier.padding(18.dp), verticalArrangement = Arrangement.spacedBy(6.dp)) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Icon(Icons.Default.WarningAmber, null, tint = MaterialTheme.colorScheme.onErrorContainer)
+                Spacer(Modifier.width(10.dp))
+                Text(nombre, style = MaterialTheme.typography.titleMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer, modifier = Modifier.weight(1f))
+                Text("Intentos: $intentos / 5", style = MaterialTheme.typography.labelMedium,
+                    color = MaterialTheme.colorScheme.onErrorContainer)
+            }
+            Text(detalle, style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onErrorContainer)
+            if (puedeEscribir) Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                TextButton(onClick = onRevisar, enabled = habilitado) { Text("Revisar datos") }
+                FilledTonalButton(onClick = onReenviar, enabled = habilitado) { Text("Reenviar con confirmación") }
             }
         }
     }

@@ -39,17 +39,17 @@ fun SectionHeader(
         verticalAlignment = Alignment.CenterVertically
     ) {
         Surface(
-            shape = CircleShape,
-            color = MaterialTheme.colorScheme.primaryContainer
+            shape = MaterialTheme.shapes.medium,
+            color = MaterialTheme.colorScheme.primary
         ) {
             Box(
-                modifier = Modifier.size(48.dp),
+                modifier = Modifier.size(52.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = icon,
                     contentDescription = null,
-                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                    tint = MaterialTheme.colorScheme.onPrimary
                 )
             }
         }
