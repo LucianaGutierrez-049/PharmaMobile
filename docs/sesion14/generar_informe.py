@@ -170,7 +170,7 @@ p('El equipo de trabajo es Windows. El iPhone de la estudiante se conectó por U
   'macOS: no es posible configurar Signing & Capabilities, archivar ni exportar el .ipa. Gradle confirma el límite:')
 pic(terminal('ios_gradle.txt', 'F03_ios_gradle.png', 6), 6.6,
     'Figura 3. Gradle omite las tareas iOS en windows-x86_64: el simulador y el enlace requieren macOS.')
-p('Plan: abrir iosApp.xcodeproj en una Mac con Xcode, seleccionar el equipo (cuenta gratuita), destino Any iOS Device, '
+p('Decisión del equipo: iOS queda fuera de esta entrega y se declara como limitación. Plan de referencia: abrir iosApp.xcodeproj en una Mac con Xcode, seleccionar el equipo (cuenta gratuita), destino Any iOS Device, '
   'Product > Archive e instalar en el iPhone propio; con cuenta gratuita el perfil caduca a los siete días y no hay '
   'exportación de .ipa, por lo que el entregable sería el archivo de Xcode, la captura del organizador y una foto de la '
   'app corriendo.')
@@ -183,7 +183,7 @@ p(f'Se probó en tres equipos: el emulador {disp} (perfil Medium Phone) con el r
   'La red del campus aísla a los dispositivos; el teléfono alcanzó PharmaSoft a través de la zona con cobertura de la '
   'laptop. La matriz siguiente corresponde al emulador; los teléfonos se documentan en la sección 7.1.')
 table(['N.º', 'Paso', 'Resultado observado', 'Cumple'], [
-    ['1', 'Instalación desde el archivo firmado', 'Instala limpio; versión 1.0.0; nombre PharmaMobil. Ícono genérico (D-02).', 'Parcial'],
+    ['1', 'Instalación desde el archivo firmado', 'Instala limpio; versión 1.0.0; nombre PharmaMobil e ícono propio (D-01 y D-02 corregidos).', 'Sí'],
     ['2', 'Login correcto e incorrecto', '"Usuario o contraseña incorrectos" vs "No se pudo conectar con PharmaSoft"; login correcto descarga 3 productos.', 'Sí'],
     ['3', 'CRUD con rechazo de validación', 'Alta #42, edición stock 10→3, baja lógica a Inactivos; "ab" → 400 bajo Nombre.', 'Sí'],
     ['4', 'Operación sin privilegio', 'Vendedor ve el catálogo sin formulario ni editar/eliminar; la sesión sigue abierta.', 'Sí'],
@@ -193,7 +193,8 @@ table(['N.º', 'Paso', 'Resultado observado', 'Cumple'], [
     ['8', 'Cerrar sesión y reabrir', '"Sesión cerrada correctamente"; tras forzar cierre y reabrir vuelve al login.', 'Sí'],
 ], [.4, 1.6, 3.9, .7])
 pair('R01_instalada_login.png', 'R01b_lanzador.png', 'Paso 1. Primera apertura del APK firmado.',
-     'Paso 1. Lanzador: nombre PharmaMobil con ícono genérico.')
+     'Paso 1. Antes de D-02: ícono genérico de Android.')
+pic(CAP / 'R01c_icono_nuevo_detalle.png', 5.5, 'Paso 1. Después de D-02: ícono adaptativo con la cruz del logo de PharmaMobil.')
 pair('R02_login_incorrecto.png', 'R03_login_sin_red.png', 'Paso 2. Credencial inválida.',
      'Paso 2. Sin conexión: mensaje distinto.')
 pair('R04_login_correcto.png', 'R05b_listado_id42.png', 'Paso 2. Login correcto con R8 activo.',
@@ -246,7 +247,7 @@ table(['ID', 'Dispositivo', 'Pasos', 'Esperado', 'Obtenido', 'Sev.', 'Estado'], 
     ['D-01', disp, '1. Instalar APK. 2. Ver nombre en el lanzador.', 'Nombre del producto', 'Mostraba PHARMAMOBILEE',
      'Baja', 'Corregido (app_name = PharmaMobil) antes del build final'],
     ['D-02', disp, '1. Instalar APK. 2. Ver ícono.', 'Ícono propio', 'Ícono genérico de Android', 'Baja',
-     'Pendiente: cambio de recursos tras congelar'],
+     'Corregido: ícono adaptativo con el logo y versión monocroma'],
     ['D-03', 'Compilación', '1. ./gradlew bundleRelease.', 'Sin avisos', 'R8 avisa metadatos de Kotlin 2.4.10', 'Baja',
      'Pendiente: sin efecto observado; actualizar AGP'],
     ['D-04', 'OPPO A5 5G, Samsung S26 Ultra', '1. Activar depuración USB.', 'ADB disponible', 'Depuración USB desactivada',
