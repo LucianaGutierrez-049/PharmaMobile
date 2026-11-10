@@ -1,0 +1,2 @@
+Apple iPhone reconocido por Windows por USB-C (Get-PnpDevice: "Apple iPhone", "Apple Mobile Device USB Composite Device", estado OK) el 10/11/2026.
+xcodebuild disponible: no. Xcode solo existe en macOS: no es posible compilar, firmar, archivar ni instalar la app iOS desde este equipo.

@@ -1,0 +1,1 @@
+sdk_gphone16k_x86_64 | Android 17 | API 37
