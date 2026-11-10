@@ -14,6 +14,7 @@ OUT = ROOT / 'output/docx/Gutierrez_Luciana_Guia14_Builds_Firmados.docx'
 
 
 def terminal(txt_name, png_name, max_lines=24):
+    if (CAP / png_name).exists(): return CAP / png_name
     lines = (EV / txt_name).read_text(encoding='utf8').splitlines()[:max_lines]
     font = ImageFont.truetype('C:/Windows/Fonts/consola.ttf', 22)
     w = max(font.getlength(l) for l in lines) + 40
@@ -110,7 +111,7 @@ table(['Entregable', 'Estado'], [
     ['AAB firmado e instalable de revisión', 'Sí: entrega/Gutierrez_ProyectoFinal_Android.aab y .apk'],
     ['Captura de la verificación de la firma', 'Sí: apksigner con titular y huella'],
     ['Archivo de iOS', 'No generado: límite documentado (Windows sin Xcode)'],
-    ['Matriz de pruebas', 'Recorrido completo en 1 dispositivo Android (emulador); sin dispositivo Android físico'],
+    ['Matriz de pruebas', 'Emulador (recorrido completo) + OPPO A5 5G y Samsung S26 Ultra físicos'],
 ], [3.2, 3.6])
 
 h('2. Paso 1. Ficha de integración cerrada y alcance congelado')
@@ -175,9 +176,12 @@ p('Plan: abrir iosApp.xcodeproj en una Mac con Xcode, seleccionar el equipo (cue
   'app corriendo.')
 
 h('7. Paso 7. Matriz de pruebas y defectos')
-p(f'Dispositivo 1: emulador {disp} (perfil Medium Phone), instalación limpia del APK firmado sin el entorno de '
-  'depuración conectado a la app. No hubo un segundo dispositivo Android ni un teléfono Android físico disponible: el '
-  'criterio de dos dispositivos reales queda como limitación declarada.')
+p(f'Se probó en tres equipos: el emulador {disp} (perfil Medium Phone) con el recorrido completo, y dos teléfonos '
+  'físicos de marcas distintas, un OPPO A5 5G y un Samsung S26 Ultra. En ambos teléfonos la depuración USB estaba '
+  'desactivada, así que el APK firmado (variante con -Ppharma.apiUrl=http://192.168.137.1:8080/api/v1/) se copió por '
+  'transferencia de archivos y se instaló desde el administrador de archivos, sin el entorno de desarrollo conectado. '
+  'La red del campus aísla a los dispositivos; el teléfono alcanzó PharmaSoft a través de la zona con cobertura de la '
+  'laptop. La matriz siguiente corresponde al emulador; los teléfonos se documentan en la sección 7.1.')
 table(['N.º', 'Paso', 'Resultado observado', 'Cumple'], [
     ['1', 'Instalación desde el archivo firmado', 'Instala limpio; versión 1.0.0; nombre PharmaMobil. Ícono genérico (D-02).', 'Parcial'],
     ['2', 'Login correcto e incorrecto', '"Usuario o contraseña incorrectos" vs "No se pudo conectar con PharmaSoft"; login correcto descarga 3 productos.', 'Sí'],
@@ -208,6 +212,35 @@ pair('R12e_activar.png', 'R12g_notificacion.png', 'Paso 7. Activado en Ajustes.'
      'Paso 7. Notificación de prueba recibida.')
 pair('R13a_logout.png', 'R13_reabrir.png', 'Paso 8. Sesión cerrada.', 'Paso 8. Reapertura: vuelve al login.')
 
+h('7.1 Dispositivos reales', 2)
+table(['Paso', 'OPPO A5 5G', 'Samsung S26 Ultra'], [
+    ['1 Instalación desde el archivo', 'Sí: instalado desde Descargas; nombre PharmaMobil', 'Sí: instalado desde Descargas'],
+    ['2 Login', 'Correcto como ALMACENERO (Jorge Mendoza Huaman)', 'Muestra "No se pudo conectar con PharmaSoft" (sin acceso a la red de la laptop)'],
+    ['3 CRUD / lectura', 'Descarga los productos reales #21, #41 y #43 de PharmaSoft', 'No ejecutado'],
+    ['5 Alta con rechazo', 'Paracetamol sin categoría: queda #-1 pendiente y en revisión (D-06)', 'No ejecutado'],
+    ['7 Permiso', 'Concedido desde la tarjeta; queda "Permiso concedido"', 'No ejecutado'],
+    ['8 Cerrar sesión', '"Sesión cerrada correctamente"', 'No ejecutado'],
+], [1.6, 2.7, 2.5])
+TEL = CAP / 'telefono'
+def pair_t(a, b, ca, cb, w=2.2):
+    t = d.add_table(rows=2, cols=2)
+    for i, (img, cap) in enumerate(((a, ca), (b, cb))):
+        t.cell(0, i).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
+        t.cell(0, i).paragraphs[0].add_run().add_picture(str(TEL / img), width=Inches(w))
+        t.cell(1, i).text = cap
+        for run in t.cell(1, i).paragraphs[0].runs: run.font.size = Pt(9)
+    p()
+pair_t('T01_oppo_inicio.png', 'T03_oppo_menu_almacenero.png', 'OPPO A5 5G. Inicio con datos sincronizados de PharmaSoft.',
+       'OPPO A5 5G. Sesión ALMACENERO con el APK firmado.')
+pair_t('T05_oppo_listado.png', 'T02_oppo_formulario.png', 'OPPO A5 5G. Productos reales #43, #41 y #21.',
+       'OPPO A5 5G. Formulario de alta en tema oscuro.')
+pair_t('T04_oppo_pendiente.png', 'T07_oppo_guardado_local.png', 'OPPO A5 5G. Paracetamol sin categoría queda #-1 pendiente.',
+       'OPPO A5 5G. Guardado en el dispositivo y en revisión (D-06).')
+pair_t('T08_oppo_permiso_concedido.png', 'T09_oppo_sesion_cerrada.png', 'OPPO A5 5G. Permiso de notificaciones concedido.',
+       'OPPO A5 5G. Sesión cerrada correctamente.')
+pair_t('T00_samsung_login_sin_red.png', 'T06_oppo_revision_categoria.png', 'Samsung S26 Ultra. APK instalado; sin acceso al servicio.',
+       'OPPO A5 5G. Mensaje de revisión: categoriaId.')
+
 h('Registro de defectos', 2)
 table(['ID', 'Dispositivo', 'Pasos', 'Esperado', 'Obtenido', 'Sev.', 'Estado'], [
     ['D-01', disp, '1. Instalar APK. 2. Ver nombre en el lanzador.', 'Nombre del producto', 'Mostraba PHARMAMOBILEE',
@@ -216,10 +249,12 @@ table(['ID', 'Dispositivo', 'Pasos', 'Esperado', 'Obtenido', 'Sev.', 'Estado'], 
      'Pendiente: cambio de recursos tras congelar'],
     ['D-03', 'Compilación', '1. ./gradlew bundleRelease.', 'Sin avisos', 'R8 avisa metadatos de Kotlin 2.4.10', 'Baja',
      'Pendiente: sin efecto observado; actualizar AGP'],
-    ['D-04', 'Entorno', '1. Instalar en Android físico.', 'Dos equipos reales', 'Solo emulador disponible', 'Media',
-     'Pendiente: actividad autónoma'],
+    ['D-04', 'OPPO A5 5G, Samsung S26 Ultra', '1. Activar depuración USB.', 'ADB disponible', 'Depuración USB desactivada',
+     'Baja', 'Descartado: se instaló por transferencia de archivos'],
     ['D-05', 'Dispositivo físico', '1. Usar la app en un teléfono real.', 'Acceso al servicio',
-     'La URL release apunta a 10.0.2.2 (solo emulador)', 'Alta', 'Pendiente: requiere URL de red local y regla de cleartext'],
+     'La URL release apunta a 10.0.2.2 (solo emulador)', 'Alta', 'Corregido (35ba115): -Ppharma.apiUrl y cleartext para 192.168.137.1'],
+    ['D-06', 'OPPO A5 5G', '1. Productos. 2. Nuevo producto sin elegir categoría. 3. Registrar.', 'Error en el formulario antes de guardar',
+     'Se guarda local como #-1 pendiente y en revisión (categoriaId)', 'Media', 'Pendiente: validar categoría en el formulario (tras congelar)'],
 ], [.45, 1.0, 1.3, .9, 1.2, .45, 1.3])
 
 h('8. Versionado y nomenclatura')
@@ -238,12 +273,12 @@ table(['N.º', 'Criterio', 'Cumple'], [
     ['3', 'Almacén y contraseñas fuera del repositorio', 'Sí'],
     ['4', 'Compila sin el archivo de propiedades', 'Sí (configuración condicional)'],
     ['5', 'AAB firmado generado', 'Sí'],
-    ['6', 'APK de entrega instalado en dispositivo real', 'No: emulador'],
+    ['6', 'APK de entrega instalado en dispositivo real', 'Sí: OPPO A5 5G y Samsung S26 Ultra'],
     ['7', 'Verificación con titular y huella', 'Sí'],
     ['8', 'Versión de entrega recorrida; serialización e inyección', 'Sí'],
     ['9', 'Decisión sobre minificación', 'Minificación activa'],
     ['10', 'iOS firmado o límite documentado', 'Límite documentado'],
-    ['11', 'Dos dispositivos reales', 'No: limitación declarada'],
+    ['11', 'Dos dispositivos reales', 'Sí: OPPO (recorrido) y Samsung (instalación, sin red)'],
     ['12', 'Defectos con ID, pasos, severidad y estado', 'Sí'],
     ['13', 'Versión e identificador declarados y coinciden', 'Sí'],
     ['14', 'Commits por paso', 'Sí'],
