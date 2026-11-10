@@ -175,6 +175,9 @@ private fun ClienteFormularioCard(estado: ClienteUiState, vm: ClienteViewModel) 
                 }
                 Switch(checked = f.activo, onCheckedChange = { v -> vm.cambiar { it.copy(activo = v) } })
             }
+            estado.errorFormulario?.let {
+                Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodyMedium)
+            }
             Button(onClick = vm::guardar, enabled = !estado.guardando, modifier = Modifier.fillMaxWidth().heightIn(min = 52.dp)) {
                 if (estado.guardando) CircularProgressIndicator(Modifier.size(22.dp), strokeWidth = 2.dp)
                 else Text(if (estado.editandoId == null) "Registrar cliente" else "Guardar cambios")

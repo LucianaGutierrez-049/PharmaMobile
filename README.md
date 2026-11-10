@@ -7,8 +7,9 @@ Kotlin Multiplatform y Compose Multiplatform.
 
 ## Alcance actual
 
-- Modelos de dominio para productos, clientes y pedidos.
-- CRUD remoto de productos con validaciones locales y del backend.
+- CRUD remoto de productos con validaciones locales y del backend; la categoría es obligatoria.
+- Clientes reales de PharmaSoft: listado, búsqueda, alta, edición y baja lógica (ADMIN, VENDEDOR).
+- Ventas reales: carrito con control de stock, registro e historial con detalle (ADMIN, VENDEDOR).
 - Inventario con pestañas de activos, inactivos y bajo stock (`stock <= 5`).
 - Navegación adaptable para teléfono, tableta y pantallas amplias.
 - Clean Architecture, MVVM y Koin compartidos entre Android e iOS.

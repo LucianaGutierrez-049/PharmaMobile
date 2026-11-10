@@ -34,6 +34,7 @@ data class ClienteUiState(
     val editandoId: Long? = null,
     val formularioVisible: Boolean = false,
     val guardando: Boolean = false,
+    val errorFormulario: String? = null,
     val mensaje: String? = null
 ) {
     val filtrados: List<Cliente>
@@ -65,20 +66,20 @@ class ClienteViewModel(
     fun buscar(texto: String) = _uiState.update { it.copy(busqueda = texto) }
 
     fun nuevo() = _uiState.update {
-        it.copy(formulario = ClienteFormulario(), editandoId = null, formularioVisible = true, mensaje = null)
+        it.copy(formulario = ClienteFormulario(), editandoId = null, formularioVisible = true, mensaje = null, errorFormulario = null)
     }
 
     fun editar(c: Cliente) = _uiState.update {
         it.copy(
             formulario = ClienteFormulario(c.dni, c.nombres, c.apellidos, c.email, c.telefono.orEmpty(), c.direccion.orEmpty(), c.activo),
-            editandoId = c.id, formularioVisible = true, mensaje = null
+            editandoId = c.id, formularioVisible = true, mensaje = null, errorFormulario = null
         )
     }
 
     fun cerrarFormulario() = _uiState.update { it.copy(formularioVisible = false, editandoId = null) }
 
     fun cambiar(transformar: (ClienteFormulario) -> ClienteFormulario) =
-        _uiState.update { it.copy(formulario = transformar(it.formulario).copy(errores = emptyMap())) }
+        _uiState.update { it.copy(formulario = transformar(it.formulario).copy(errores = emptyMap()), errorFormulario = null) }
 
     fun limpiarMensaje() = _uiState.update { it.copy(mensaje = null) }
 
@@ -121,7 +122,7 @@ class ClienteViewModel(
                     it.copy(
                         guardando = false,
                         formulario = if (api is ErrorApi.Validacion) it.formulario.copy(errores = api.porCampo) else it.formulario,
-                        mensaje = mensaje(e)
+                        errorFormulario = mensaje(e)
                     )
                 }
             }
