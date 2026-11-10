@@ -3,5 +3,9 @@
     <domain-config cleartextTrafficPermitted="true">
         <domain includeSubdomains="false">10.0.2.2</domain>
         <domain includeSubdomains="false">localhost</domain>
+        <!-- Laptop con PharmaSoft en la red del laboratorio (pruebas en teléfono físico, sesión 14). -->
+        <domain includeSubdomains="false">10.40.29.6</domain>
+        <!-- Zona con cobertura de Windows: la laptop siempre es 192.168.137.1. -->
+        <domain includeSubdomains="false">192.168.137.1</domain>
     </domain-config>
 </network-security-config>

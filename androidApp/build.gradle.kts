@@ -48,6 +48,8 @@ android {
         versionCode = 1
         versionName = "1.0.0"
         testInstrumentationRunner = "pe.edu.upeu.pharmamobilee.Integrador13Instrumentation"
+        // Vacía por defecto: el emulador usa 10.0.2.2. Para un teléfono: -Ppharma.apiUrl=http://localhost:8080/api/v1/
+        resValue("string", "pharma_api_url", providers.gradleProperty("pharma.apiUrl").getOrElse(""))
     }
     signingConfigs {
         if (tieneFirma) {
@@ -81,5 +83,6 @@ android {
     }
     buildFeatures {
         compose = true
+        resValues = true
     }
 }
