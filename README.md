@@ -257,3 +257,31 @@ Las evidencias están documentadas en `docs/evidencias_sesion07/README.md`.
 La preparación de la Actividad Autónoma N.º 07, el catálogo completo, el
 diccionario de DTO y la bitácora pendiente de ejecución están en
 `docs/actividad_autonoma_sesion07/README.md`.
+
+## Firma de la versión de entrega (sesión 14)
+
+La versión `release` se firma con el almacén de claves del equipo, que **nunca** entra al
+repositorio. Las credenciales se leen de `keystore.properties` en la raíz del proyecto, ignorado
+por Git junto con `*.jks` y `*.keystore`:
+
+```properties
+# keystore.properties (raíz del proyecto, NUNCA en Git)
+storeFile=C:/ruta/fuera/del/repo/pharmamobil.jks
+storePassword=********
+keyAlias=pharmamobil
+keyPassword=********
+```
+
+Si el archivo no existe, `androidApp/build.gradle.kts` no crea la configuración de firma: la
+compilación de depuración funciona para cualquiera que clone el proyecto y solo la de entrega
+requiere las credenciales.
+
+```bash
+./gradlew :androidApp:bundleRelease     # AAB firmado (entregable)
+./gradlew :androidApp:assembleRelease   # APK firmado (pruebas y demostración)
+apksigner verify --print-certs androidApp/build/outputs/apk/release/androidApp-release.apk
+```
+
+Versión de entrega: `versionCode 1`, `versionName 1.0.0`, `applicationId pe.edu.upeu.pharmamobilee`.
+La versión de entrega activa R8 (`isMinifyEnabled` y `isShrinkResources`); las reglas mínimas están
+en `androidApp/proguard-rules.pro`.

@@ -1,21 +1,25 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# Reglas R8 de la versión de entrega (sesión 14).
+# Se mantienen solo las clases que se resuelven en tiempo de ejecución.
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# Trazas legibles en Crashlytics.
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# kotlinx.serialization: anotaciones, firmas genéricas y serializadores generados
+# de los DTO de transporte y de la Sesion guardada cifrada.
+-keepattributes *Annotation*,Signature,InnerClasses,EnclosingMethod
+-keep,includedescriptorclasses class pe.edu.upeu.pharmamobilee.**$$serializer { *; }
+-keepclassmembers class pe.edu.upeu.pharmamobilee.** {
+    *** Companion;
+}
+-keepclasseswithmembers class pe.edu.upeu.pharmamobilee.** {
+    kotlinx.serialization.KSerializer serializer(...);
+}
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# Ktor y OkHttp referencian clases opcionales de otras plataformas.
+-dontwarn org.slf4j.**
+-dontwarn java.lang.management.**
+-dontwarn io.ktor.util.debug.**
+-dontwarn org.conscrypt.**
+-dontwarn org.bouncycastle.**
+-dontwarn org.openjsse.**

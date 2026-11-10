@@ -19,3 +19,8 @@ captures
 node_modules/
 androidApp/google-services.json
 iosApp/iosApp/GoogleService-Info.plist
+
+# Firma de entrega (sesion 14): nunca en Git
+keystore.properties
+*.jks
+*.keystore

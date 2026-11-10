@@ -1,4 +1,12 @@
+import java.util.Properties
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+
+// Credenciales de firma fuera de Git (ver README). Sin el archivo, debug sigue compilando.
+val firma = Properties().apply {
+    val f = rootProject.file("keystore.properties")
+    if (f.exists()) f.inputStream().use { load(it) }
+}
+val tieneFirma = firma.getProperty("storeFile") != null
 
 plugins {
     alias(libs.plugins.androidApplication)
@@ -38,8 +46,18 @@ android {
         minSdk = libs.versions.android.minSdk.get().toInt()
         targetSdk = libs.versions.android.targetSdk.get().toInt()
         versionCode = 1
-        versionName = "1.0"
+        versionName = "1.0.0"
         testInstrumentationRunner = "pe.edu.upeu.pharmamobilee.Integrador13Instrumentation"
+    }
+    signingConfigs {
+        if (tieneFirma) {
+            create("release") {
+                storeFile = file(firma.getProperty("storeFile"))
+                storePassword = firma.getProperty("storePassword")
+                keyAlias = firma.getProperty("keyAlias")
+                keyPassword = firma.getProperty("keyPassword")
+            }
+        }
     }
     packaging {
         resources {
@@ -48,7 +66,9 @@ android {
     }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            if (tieneFirma) signingConfig = signingConfigs.getByName("release")
+            isMinifyEnabled = true
+            isShrinkResources = true
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
